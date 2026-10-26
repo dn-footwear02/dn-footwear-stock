@@ -36,8 +36,8 @@
     .size-in { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .size-out { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
 
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
-    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 490px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
@@ -163,9 +163,17 @@
           </div>
         </div>
 
+        <!-- BARCODE SECTION WITH SCAN & AUTO GENERATE BUTTONS -->
         <div class="form-group">
-          <label>Shoe Barcode (Box Sticker Code) *</label>
-          <input type="text" id="fBarcode" required placeholder="CAMP-101" class="form-control">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="margin:0;">Shoe Barcode (Box Sticker Code) *</label>
+            <button type="button" onclick="autoGenerateBarcode()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Generate</button>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="fBarcode" required placeholder="Dabbe ka barcode type karein..." class="form-control" style="font-family:monospace; letter-spacing:1px;">
+            <button type="button" class="btn btn-amber" style="padding:6px 12px; font-size:12px; white-space:nowrap;" onclick="scanBoxForForm()">📷 Box Scan</button>
+          </div>
+          <small style="color:#64748b; font-size:11px;">Dabbe par chapa company barcode camera se scan kar sakte hain ya manual likh sakte hain.</small>
         </div>
 
         <div class="form-group">
@@ -253,7 +261,7 @@
     ];
 
     var scannerObj = null;
-    var currentScanAction = 'check';
+    var currentScanAction = 'check'; // 'check' | 'sale' | 'inward' | 'form_barcode'
     var uploadedPhotoData = '';
     var activePopupItem = null;
 
@@ -313,19 +321,27 @@
       document.getElementById('dLowStock').innerText = lowStock;
     }
 
-    // ADD / EDIT
+    // FORM MODAL
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
       uploadedPhotoData = '';
       document.getElementById('fImgPreview').src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80";
-      document.getElementById('fBarcode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      autoGenerateBarcode();
       document.getElementById('shoeModalTitle').innerText = "Naya Footwear Jodein";
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
     function closeShoeModal() {
       document.getElementById('shoeModal').style.display = 'none';
+    }
+
+    function autoGenerateBarcode() {
+      document.getElementById('fBarcode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+    }
+
+    function scanBoxForForm() {
+      openScannerModal('form_barcode');
     }
 
     function previewUploadImage(input) {
@@ -402,7 +418,6 @@
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
-    // STOCK HATANA (DELETE)
     function deleteShoe(id) {
       var it = items.find(function(x) { return x.id === id; });
       if (!it) return;
@@ -414,7 +429,7 @@
       }
     }
 
-    // QUICK SIZE CHECK POPUP
+    // POPUP SIZE CHECK
     function openCheckPopup(id) {
       var it = items.find(function(x) { return x.id === id; });
       if (!it) return;
@@ -469,9 +484,10 @@
       var titles = {
         'check': '🔍 Dabba Scan Karke Available Sizes Dekhein',
         'sale': '🛒 Bikri Scan: Dabba scan karke stock kam karein',
-        'inward': '📦 Stock Inward: Dabba scan karke +1 stock badhayein'
+        'inward': '📦 Stock Inward: Dabba scan karke +1 stock badhayein',
+        'form_barcode': '📷 Box Barcode Scan Karke Form me Bharein'
       };
-      document.getElementById('scannerTitle').innerText = titles[mode];
+      document.getElementById('scannerTitle').innerText = titles[mode] || 'Camera Scanner';
 
       if (window.Html5Qrcode) {
         if (!scannerObj) scannerObj = new Html5Qrcode("scannerTarget");
@@ -498,6 +514,15 @@
 
     function onScanFound(code) {
       var c = code.trim();
+
+      // Agar form ke liye barcode scan kiya gaya hai:
+      if (currentScanAction === 'form_barcode') {
+        document.getElementById('fBarcode').value = c;
+        closeScannerModal();
+        alert("Box Barcode Scan Ho Gaya: " + c);
+        return;
+      }
+
       var found = items.find(function(x) { return x.barcode.toLowerCase() === c.toLowerCase(); });
       if (!found) {
         alert("Barcode [" + c + "] database me nahi mila!");
@@ -519,9 +544,9 @@
         if (sellSz && found.sizes[sellSz] > 0) {
           found.sizes[sellSz] -= 1;
           saveState();
-          alert("Bikri Safal! Size " + sellSz + " se 1 pair kam ho gaya.");
+          alert("Bikri Safal! Size " + sellSz + " se 1 pair kam hua.");
         } else {
-          alert("Yeh size stock me nahi hai!");
+          alert("Size uplabdh nahi hai!");
         }
       }
     }
