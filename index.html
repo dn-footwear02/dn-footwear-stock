@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear - Stock & POS Manager</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-
+  <title>DN Footwear - Stock & POS</title>
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #1e293b; padding-bottom: 60px; }
-    header { background: #1e1b4b; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 40; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-    .btn { border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 50px; }
+    header { background: #1e1b4b; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; }
+    .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
     .btn:active { transform: scale(0.97); }
     .btn-amber { background: #f59e0b; color: #000; }
     .btn-green { background: #10b981; color: #fff; }
@@ -19,176 +17,132 @@
     .btn-indigo { background: #4f46e5; color: #fff; }
     .btn-red { background: #ef4444; color: #fff; }
     .btn-slate { background: #e2e8f0; color: #334155; }
-    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
     
-    /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .stat-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .stat-label { font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-num { font-size: 24px; font-weight: 800; margin-top: 4px; color: #0f172a; }
+    .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; }
+    .stat-num { font-size: 22px; font-weight: 800; margin-top: 4px; color: #0f172a; }
 
-    /* Filter Bar */
-    .filter-bar { background: white; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .search-box { flex: 1; min-width: 260px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
-    .search-box:focus { border-color: #4f46e5; }
+    .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
-    /* Table */
-    .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-    th { background: #f8fafc; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; }
-    td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; padding: 12px 10px; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #475569; text-align: left; }
+    td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     tr:hover { background: #f8fafc; }
 
-    .shoe-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; background: #f1f5f9; shrink-0; }
-    .size-pill { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: 700; border-radius: 5px; margin: 1px; }
-    .size-yes { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .size-no { background: #f1f5f9; color: #cbd5e1; text-decoration: line-through; }
-    .color-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; background: #f1f5f9; padding: 2px 7px; border-radius: 10px; color: #475569; font-weight: 600; margin-top: 3px; }
+    .shoe-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
+    .size-badge { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: 700; border-radius: 4px; margin: 1px; }
+    .size-in { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .size-out { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
 
-    /* Modals */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
-    .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #334155; }
-    .form-control { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
-    .form-control:focus { border-color: #4f46e5; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
+    .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .size-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .size-grid div { text-align: center; }
-    .size-grid small { font-weight: 700; color: #64748b; display: block; margin-bottom: 3px; }
-    .size-grid input { width: 100%; text-align: center; padding: 6px 0; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 700; font-size: 13px; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { position: absolute; left: 0; top: 0; width: 100%; }
-    }
+    .size-inputs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
+    .size-inputs div { text-align: center; }
+    .size-inputs small { font-weight: 700; color: #64748b; font-size: 11px; }
+    .size-inputs input { width: 100%; text-align: center; padding: 5px 0; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 700; font-size: 12px; }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- TOP HEADER -->
   <header>
     <div>
-      <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
-        DN Footwear & Sports
-        <span style="background:#10b981; font-size:10px; padding:2px 6px; border-radius:10px; text-transform:uppercase;">Stock Pro</span>
-      </h2>
-      <p style="font-size:11px; opacity:0.8;">Footwear Catalog, Stock & Barcode POS</p>
+      <h2 style="font-size:18px; font-weight:800;">DN Footwear & Sports</h2>
+      <span style="font-size:11px; opacity:0.8;">Footwear Stock, Sizes & POS</span>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="btn btn-amber" onclick="openScanner('check')">🔍 Stock Check</button>
-      <button class="btn btn-green" onclick="openScanner('sale')">🛒 Bikri Scan</button>
-      <button class="btn btn-blue" onclick="openScanner('inward')">📦 Stock Inward (+)</button>
-      <button class="btn btn-indigo" onclick="openShoeModal()">+ Naya Footwear Jodein</button>
+      <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Stock Check</button>
+      <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
+      <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
+      <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Footwear Jodein</button>
     </div>
   </header>
 
   <div class="container">
-    <!-- DASHBOARD STATS -->
+    <!-- DASHBOARD -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">Kul Footwear Pairs</div>
-        <div class="stat-num" id="statPairs">0</div>
-        <small style="color:#64748b;" id="statModels">0 Models</small>
+        <small style="color:#64748b; font-weight:700;">KUL FOOTWEAR PAIRS</small>
+        <div class="stat-num" id="dTotalPairs">0</div>
+        <small id="dTotalModels" style="color:#64748b;">0 Models</small>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Stock Kharid Lagat (Cost)</div>
-        <div class="stat-num" id="statCost" style="color:#2563eb;">₹0</div>
-        <small style="color:#10b981;">Investment value</small>
+        <small style="color:#64748b; font-weight:700;">STOCK KHARID LAGAT</small>
+        <div class="stat-num" id="dTotalCost" style="color:#2563eb;">₹0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Bikri MRP Worth</div>
-        <div class="stat-num" id="statWorth" style="color:#10b981;">₹0</div>
-        <small style="color:#64748b;">Retail total</small>
-      </div>
-      <div class="stat-card" style="border-left:4px solid #ef4444;">
-        <div class="stat-label">Kam Stock Warning (&le; 3 pair)</div>
-        <div class="stat-num" id="statLow" style="color:#ef4444;">0</div>
-        <small style="color:#ef4444;">Reorder jald karein</small>
+        <small style="color:#64748b; font-weight:700;">KAM STOCK WARNING (&le; 3)</small>
+        <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
       </div>
     </div>
 
-    <!-- FILTER & SEARCH -->
+    <!-- FILTER BAR -->
     <div class="filter-bar">
-      <input type="text" id="searchInp" oninput="renderTable()" placeholder="Shoe name, Brand, Barcode, ya Color se search karein..." class="search-box">
-      <div style="display:flex; gap:8px;">
-        <select id="catFilter" onchange="renderTable()" class="form-control" style="width:auto;">
-          <option value="ALL">Sabhi Categories</option>
-          <option value="Sports/Running">Sports & Running</option>
-          <option value="Casual/Sneakers">Casual Sneakers</option>
-          <option value="Formal Shoes">Formal Shoes</option>
-          <option value="Slippers/Chappal">Slippers & Chappal</option>
-          <option value="Sandals">Sandals</option>
-        </select>
-        <button class="btn btn-slate" onclick="exportData()">💾 Backup</button>
-      </div>
+      <input type="text" id="searchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, barcode, color..." class="search-box">
+      <button class="btn btn-slate" onclick="backupJSON()">💾 Data Backup</button>
     </div>
 
-    <!-- STOCK TABLE -->
-    <div class="table-card">
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Shoe Photo & Name</th>
-              <th>Brand & Color</th>
-              <th>Available Sizes (5 se 11)</th>
-              <th>Total Stock</th>
-              <th>Kharid Rate</th>
-              <th>Bikri Rate</th>
-              <th style="text-align:right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="stockTbody"></tbody>
-        </table>
-      </div>
+    <!-- INVENTORY TABLE -->
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Photo & Name</th>
+            <th>Brand & Color</th>
+            <th>Sizes (5 to 11) Available</th>
+            <th>Kul Jodi</th>
+            <th>Bikri Rate</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryRows"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- 1. ADD / EDIT FOOTWEAR MODAL -->
+  <!-- 1. ADD / EDIT MODAL -->
   <div id="shoeModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-head">
-        <h3 id="modalTitle" style="font-size:16px; font-weight:800;">Naya Footwear Jodein</h3>
-        <button onclick="closeShoeModal()" class="btn btn-slate" style="padding:4px 8px;">✕</button>
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 id="shoeModalTitle" style="font-size:16px;">Naya Footwear Jodein</h3>
+        <button class="btn btn-slate" onclick="closeShoeModal()">✕</button>
       </div>
+      <form id="shoeForm" onsubmit="submitShoeForm(event)">
+        <input type="hidden" id="fId">
 
-      <form id="shoeForm" onsubmit="saveShoe(event)">
-        <input type="hidden" id="editId">
-
-        <!-- PHOTO UPLOAD & PREVIEW -->
-        <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
-          <label>Shoe Ki Photo (Manual Camera Click ya Gallery Upload):</label>
-          <div style="display:flex; gap:12px; align-items:center;">
-            <img id="formImgPreview" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" style="width:65px; height:65px; object-fit:cover; border-radius:8px; border:1px solid #cbd5e1; background:white;">
-            <div style="flex:1;">
-              <input type="file" accept="image/*" onchange="handleImageFile(this)" class="form-control" style="background:white; margin-bottom:4px;">
-              <small style="color:#64748b; font-size:11px;">Camera se photo khinchein ya gallery se upload karein.</small>
-            </div>
+        <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+          <label>Shoe Photo (Camera Snap ya Gallery):</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <img id="fImgPreview" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80" style="width:55px; height:55px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
+            <input type="file" accept="image/*" onchange="previewUploadImage(this)" class="form-control">
           </div>
         </div>
 
         <div class="row">
           <div class="form-group">
             <label>Shoe / Model Name *</label>
-            <input type="text" id="mName" required placeholder="e.g. Campus Rodeo Pro" class="form-control">
+            <input type="text" id="fName" required placeholder="e.g. Campus Rodeo" class="form-control">
           </div>
           <div class="form-group">
             <label>Brand *</label>
-            <input type="text" id="mBrand" required placeholder="e.g. Campus, Sparx, Bata" class="form-control">
+            <input type="text" id="fBrand" required placeholder="e.g. Campus, Sparx" class="form-control">
           </div>
         </div>
 
         <div class="row">
           <div class="form-group">
             <label>Color (Rang) *</label>
-            <input type="text" id="mColor" required placeholder="e.g. Black / White, Navy Blue" class="form-control">
+            <input type="text" id="fColor" required placeholder="e.g. Black / White" class="form-control">
           </div>
           <div class="form-group">
             <label>Category</label>
-            <select id="mCategory" class="form-control">
+            <select id="fCategory" class="form-control">
               <option value="Sports/Running">Sports & Running</option>
               <option value="Casual/Sneakers">Casual Sneakers</option>
               <option value="Formal Shoes">Formal Shoes</option>
@@ -200,36 +154,394 @@
 
         <div class="row">
           <div class="form-group">
-            <label>Kharid Mulya (Cost ₹) *</label>
-            <input type="number" id="mCost" required min="0" placeholder="550" class="form-control">
+            <label>Kharid Rate (Cost ₹) *</label>
+            <input type="number" id="fCost" required min="0" placeholder="550" class="form-control">
           </div>
           <div class="form-group">
-            <label>Bikri Rate (Selling Price ₹) *</label>
-            <input type="number" id="mPrice" required min="0" placeholder="899" class="form-control" style="font-weight:bold; color:#10b981;">
+            <label>Bikri Rate (₹) *</label>
+            <input type="number" id="fPrice" required min="0" placeholder="899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
         </div>
 
         <div class="form-group">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <label style="margin:0;">Shoe Barcode (Box Sticker Code) *</label>
-            <button type="button" onclick="autoGenBarcode()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:700; cursor:pointer;">Auto Generate</button>
-          </div>
-          <input type="text" id="mBarcode" required placeholder="e.g. CAMP-ROD-01" class="form-control" style="font-family:monospace; letter-spacing:1px;">
+          <label>Shoe Barcode (Box Sticker Code) *</label>
+          <input type="text" id="fBarcode" required placeholder="CAMP-101" class="form-control">
         </div>
 
-        <!-- SIZE BREAKDOWN (5 to 11) -->
         <div class="form-group">
           <label>Size-wise Quantity (Kitne Pairs Stock me hain):</label>
-          <div class="size-grid">
-            <div><small>Sz 5</small><input type="number" min="0" value="0" id="sz_5"></div>
-            <div><small>Sz 6</small><input type="number" min="0" value="0" id="sz_6"></div>
-            <div><small>Sz 7</small><input type="number" min="0" value="0" id="sz_7"></div>
-            <div><small>Sz 8</small><input type="number" min="0" value="0" id="sz_8"></div>
-            <div><small>Sz 9</small><input type="number" min="0" value="0" id="sz_9"></div>
-            <div><small>Sz 10</small><input type="number" min="0" value="0" id="sz_10"></div>
-            <div><small>Sz 11</small><input type="number" min="0" value="0" id="sz_11"></div>
+          <div class="size-inputs">
+            <div><small>5</small><input type="number" min="0" value="0" id="sz_5"></div>
+            <div><small>6</small><input type="number" min="0" value="0" id="sz_6"></div>
+            <div><small>7</small><input type="number" min="0" value="0" id="sz_7"></div>
+            <div><small>8</small><input type="number" min="0" value="0" id="sz_8"></div>
+            <div><small>9</small><input type="number" min="0" value="0" id="sz_9"></div>
+            <div><small>10</small><input type="number" min="0" value="0" id="sz_10"></div>
+            <div><small>11</small><input type="number" min="0" value="0" id="sz_11"></div>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
-          <button type="button" onclick="closeShoeModal()" class="btn
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-slate" onclick="closeShoeModal()">Cancel</button>
+          <button type="submit" class="btn btn-indigo">Stock Save Karein</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. QUICK SIZE CHECK POPUP MODAL -->
+  <div id="checkModal" class="modal">
+    <div class="modal-box" style="text-align:center; max-width:380px;">
+      <img id="chkImg" src="" style="width:130px; height:130px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
+      <h3 id="chkTitle" style="font-size:16px; margin-bottom:2px;">Campus Rodeo</h3>
+      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:6px;">Campus • Color: Black</div>
+      <div id="chkPrice" style="font-size:16px; font-weight:800; color:#10b981; margin-bottom:12px;">₹999</div>
+
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
+        <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:8px;">AVAILABLE SIZES (KITNI JODI HAI):</div>
+        <div id="chkSizesGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;"></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button class="btn btn-green" onclick="sellFromPopup()" style="justify-content:center;">🛒 Bechein</button>
+        <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center;">Band Karein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SCANNER MODAL -->
+  <div id="scannerModal" class="modal">
+    <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 id="scannerTitle" style="margin:0; font-size:14px;">Camera Scanner</h4>
+        <button class="btn btn-red" onclick="closeScannerModal()">✕</button>
+      </div>
+      <div id="scannerTarget" style="width:100%; border-radius:8px; overflow:hidden; background:#000;"></div>
+      <div style="margin-top:10px; display:flex; gap:6px;">
+        <input type="text" id="manualInput" placeholder="Barcode type karein..." class="form-control" style="background:#1e293b; color:white; border-color:#334155;">
+        <button class="btn btn-indigo" onclick="handleManualScan()">Enter</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var items = JSON.parse(localStorage.getItem('DN_APP_STOCK_V1')) || [
+      {
+        id: "1",
+        name: "Campus Rodeo Running",
+        brand: "Campus",
+        color: "Black / Grey",
+        category: "Sports/Running",
+        cost: 650,
+        price: 999,
+        barcode: "CAMP-101",
+        photo: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80",
+        sizes: { 5: 2, 6: 4, 7: 6, 8: 8, 9: 4, 10: 0, 11: 0 }
+      },
+      {
+        id: "2",
+        name: "Sparx SM-676 Casual",
+        brand: "Sparx",
+        color: "White / Navy",
+        category: "Casual/Sneakers",
+        cost: 450,
+        price: 749,
+        barcode: "SPX-676",
+        photo: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=200&q=80",
+        sizes: { 5: 0, 6: 3, 7: 5, 8: 3, 9: 0, 10: 0, 11: 0 }
+      }
+    ];
+
+    var scannerObj = null;
+    var currentScanAction = 'check';
+    var uploadedPhotoData = '';
+    var activePopupItem = null;
+
+    function saveState() {
+      localStorage.setItem('DN_APP_STOCK_V1', JSON.stringify(items));
+      renderApp();
+    }
+
+    function renderApp() {
+      var tbody = document.getElementById('inventoryRows');
+      var search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
+
+      var totalPairs = 0, totalCost = 0, lowStock = 0;
+      var html = '';
+
+      items.forEach(function(it) {
+        var p = Object.values(it.sizes).reduce(function(a, b) { return a + Number(b); }, 0);
+        totalPairs += p;
+        totalCost += (p * it.cost);
+        if (p <= 3) lowStock++;
+
+        var matchSearch = it.name.toLowerCase().includes(search) || 
+                          it.brand.toLowerCase().includes(search) || 
+                          it.barcode.toLowerCase().includes(search) ||
+                          (it.color && it.color.toLowerCase().includes(search));
+
+        if (!matchSearch) return;
+
+        var sizeBadges = [5, 6, 7, 8, 9, 10, 11].map(function(s) {
+          var q = it.sizes[s] || 0;
+          return q > 0 ? '<span class="size-badge size-in">' + s + ':' + q + '</span>' : '<span class="size-badge size-out">' + s + '</span>';
+        }).join('');
+
+        html += '<tr>' +
+          '<td>' +
+            '<div style="display:flex; align-items:center; gap:8px;">' +
+              '<img src="' + (it.photo || 'https://via.placeholder.com/50') + '" class="shoe-img">' +
+              '<div><b>' + it.name + '</b><br><small style="color:#64748b;">' + it.category + '</small></div>' +
+            '</div>' +
+          '</td>' +
+          '<td><b>' + it.brand + '</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ' + (it.color || 'Standard') + '</small><br><small style="font-family:monospace; color:#64748b;">' + it.barcode + '</small></td>' +
+          '<td>' + sizeBadges + '</td>' +
+          '<td><b>' + p + '</b> Pairs</td>' +
+          '<td><b style="color:#10b981;">₹' + it.price + '</b></td>' +
+          '<td style="text-align:right;">' +
+            '<button class="btn btn-amber" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="openCheckPopup(\'' + it.id + '\')">Sizes</button>' +
+            '<button class="btn btn-indigo" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="editShoe(\'' + it.id + '\')">✏️</button>' +
+            '<button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe(\'' + it.id + '\')">🗑️</button>' +
+          '</td>' +
+        '</tr>';
+      });
+
+      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi Footwear Nahi Mila.</td></tr>';
+      document.getElementById('dTotalPairs').innerText = totalPairs;
+      document.getElementById('dTotalModels').innerText = items.length + " Models";
+      document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
+      document.getElementById('dLowStock').innerText = lowStock;
+    }
+
+    // ADD / EDIT
+    function openNewShoeModal() {
+      document.getElementById('shoeForm').reset();
+      document.getElementById('fId').value = '';
+      uploadedPhotoData = '';
+      document.getElementById('fImgPreview').src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80";
+      document.getElementById('fBarcode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('shoeModalTitle').innerText = "Naya Footwear Jodein";
+      document.getElementById('shoeModal').style.display = 'flex';
+    }
+
+    function closeShoeModal() {
+      document.getElementById('shoeModal').style.display = 'none';
+    }
+
+    function previewUploadImage(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedPhotoData = e.target.result;
+          document.getElementById('fImgPreview').src = uploadedPhotoData;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function submitShoeForm(e) {
+      e.preventDefault();
+      var id = document.getElementById('fId').value || String(Date.now());
+      var name = document.getElementById('fName').value.trim();
+      var brand = document.getElementById('fBrand').value.trim();
+      var color = document.getElementById('fColor').value.trim();
+      var category = document.getElementById('fCategory').value;
+      var cost = Number(document.getElementById('fCost').value) || 0;
+      var price = Number(document.getElementById('fPrice').value) || 0;
+      var barcode = document.getElementById('fBarcode').value.trim();
+
+      var sizes = {
+        5: Number(document.getElementById('sz_5').value) || 0,
+        6: Number(document.getElementById('sz_6').value) || 0,
+        7: Number(document.getElementById('sz_7').value) || 0,
+        8: Number(document.getElementById('sz_8').value) || 0,
+        9: Number(document.getElementById('sz_9').value) || 0,
+        10: Number(document.getElementById('sz_10').value) || 0,
+        11: Number(document.getElementById('sz_11').value) || 0
+      };
+
+      var existingIdx = items.findIndex(function(x) { return x.id === id; });
+      var obj = {
+        id: id, name: name, brand: brand, color: color, category: category,
+        cost: cost, price: price, barcode: barcode,
+        photo: uploadedPhotoData || (existingIdx > -1 ? items[existingIdx].photo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80'),
+        sizes: sizes
+      };
+
+      if (existingIdx > -1) {
+        items[existingIdx] = obj;
+      } else {
+        items.unshift(obj);
+      }
+
+      saveState();
+      closeShoeModal();
+      alert("Footwear Stock Me Save Ho Gaya!");
+    }
+
+    function editShoe(id) {
+      var it = items.find(function(x) { return x.id === id; });
+      if (!it) return;
+
+      document.getElementById('fId').value = it.id;
+      document.getElementById('fName').value = it.name;
+      document.getElementById('fBrand').value = it.brand;
+      document.getElementById('fColor').value = it.color || '';
+      document.getElementById('fCategory').value = it.category;
+      document.getElementById('fCost').value = it.cost;
+      document.getElementById('fPrice').value = it.price;
+      document.getElementById('fBarcode').value = it.barcode;
+
+      [5, 6, 7, 8, 9, 10, 11].forEach(function(s) {
+        document.getElementById('sz_' + s).value = it.sizes[s] || 0;
+      });
+
+      uploadedPhotoData = it.photo || '';
+      document.getElementById('fImgPreview').src = it.photo || 'https://via.placeholder.com/50';
+      document.getElementById('shoeModalTitle').innerText = "Footwear Edit Karein";
+      document.getElementById('shoeModal').style.display = 'flex';
+    }
+
+    // STOCK HATANA (DELETE)
+    function deleteShoe(id) {
+      var it = items.find(function(x) { return x.id === id; });
+      if (!it) return;
+
+      if (confirm("Kya aap sach me [" + it.name + "] ko stock se HATANA chahte hain?")) {
+        items = items.filter(function(x) { return x.id !== id; });
+        saveState();
+        alert("Item stock se hata diya gaya hai.");
+      }
+    }
+
+    // QUICK SIZE CHECK POPUP
+    function openCheckPopup(id) {
+      var it = items.find(function(x) { return x.id === id; });
+      if (!it) return;
+      activePopupItem = it;
+
+      document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/120';
+      document.getElementById('chkTitle').innerText = it.name;
+      document.getElementById('chkMeta').innerText = it.brand + ' • Color: ' + (it.color || 'Standard');
+      document.getElementById('chkPrice').innerText = 'Rate: ₹' + it.price;
+
+      var html = '';
+      [5, 6, 7, 8, 9, 10, 11].forEach(function(s) {
+        var q = it.sizes[s] || 0;
+        if (q > 0) {
+          html += '<div style="background:#dcfce7; border:1px solid #86efac; border-radius:6px; padding:6px 2px;">' +
+                  '<b style="font-size:12px; display:block; color:#166534;">Sz ' + s + '</b>' +
+                  '<span style="font-size:11px; font-weight:bold; color:#15803d;">' + q + ' Jodi</span>' +
+                  '</div>';
+        } else {
+          html += '<div style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:6px 2px; opacity:0.5;">' +
+                  '<s style="font-size:12px; color:#94a3b8; display:block;">Sz ' + s + '</s>' +
+                  '<span style="font-size:10px; color:#ef4444; font-weight:bold;">Khatam</span>' +
+                  '</div>';
+        }
+      });
+
+      document.getElementById('chkSizesGrid').innerHTML = html;
+      document.getElementById('checkModal').style.display = 'flex';
+    }
+
+    function closeCheckModal() {
+      document.getElementById('checkModal').style.display = 'none';
+    }
+
+    function sellFromPopup() {
+      if (!activePopupItem) return;
+      var sz = prompt("[" + activePopupItem.name + "] ka kaun sa size bechna hai? (5-11):", "7");
+      if (sz && activePopupItem.sizes[sz] > 0) {
+        activePopupItem.sizes[sz] -= 1;
+        saveState();
+        alert("Bikri Safal! Size " + sz + " se 1 pair kam ho gaya.");
+        openCheckPopup(activePopupItem.id);
+      } else {
+        alert("Yeh size stock me nahi hai!");
+      }
+    }
+
+    // SCANNER
+    function openScannerModal(mode) {
+      currentScanAction = mode;
+      document.getElementById('scannerModal').style.display = 'flex';
+      var titles = {
+        'check': '🔍 Dabba Scan Karke Available Sizes Dekhein',
+        'sale': '🛒 Bikri Scan: Dabba scan karke stock kam karein',
+        'inward': '📦 Stock Inward: Dabba scan karke +1 stock badhayein'
+      };
+      document.getElementById('scannerTitle').innerText = titles[mode];
+
+      if (window.Html5Qrcode) {
+        if (!scannerObj) scannerObj = new Html5Qrcode("scannerTarget");
+        scannerObj.start(
+          { facingMode: "environment" },
+          { fps: 15, qrbox: { width: 250, height: 180 } },
+          onScanFound,
+          function() {}
+        ).catch(function() {
+          alert("Camera chalu nahi hua. Browser me camera allow karein.");
+        });
+      }
+    }
+
+    function closeScannerModal() {
+      if (scannerObj && scannerObj.isScanning) {
+        scannerObj.stop().then(function() {
+          document.getElementById('scannerModal').style.display = 'none';
+        });
+      } else {
+        document.getElementById('scannerModal').style.display = 'none';
+      }
+    }
+
+    function onScanFound(code) {
+      var c = code.trim();
+      var found = items.find(function(x) { return x.barcode.toLowerCase() === c.toLowerCase(); });
+      if (!found) {
+        alert("Barcode [" + c + "] database me nahi mila!");
+        return;
+      }
+
+      if (currentScanAction === 'check') {
+        closeScannerModal();
+        openCheckPopup(found.id);
+      } else if (currentScanAction === 'inward') {
+        var sz = prompt("[" + found.name + "] ka kaun sa size badhana hai? (5-11):", "7");
+        if (sz && found.sizes.hasOwnProperty(sz)) {
+          found.sizes[sz] = (found.sizes[sz] || 0) + 1;
+          saveState();
+          alert("Size " + sz + " me 1 pair badh gaya! Ab kul: " + found.sizes[sz]);
+        }
+      } else if (currentScanAction === 'sale') {
+        var sellSz = prompt("[" + found.name + "] ka kaun sa size bechna hai? (5-11):", "7");
+        if (sellSz && found.sizes[sellSz] > 0) {
+          found.sizes[sellSz] -= 1;
+          saveState();
+          alert("Bikri Safal! Size " + sellSz + " se 1 pair kam ho gaya.");
+        } else {
+          alert("Yeh size stock me nahi hai!");
+        }
+      }
+    }
+
+    function handleManualScan() {
+      var val = document.getElementById('manualInput').value.trim();
+      if (val) onScanFound(val);
+    }
+
+    function backupJSON() {
+      var blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "DN_Footwear_Backup.json";
+      a.click();
+    }
+
+    window.onload = function() {
+      renderApp();
+    };
+  </script>
+</body>
+</html>
