@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear & Sports - Full Inventory, POS & Store</title>
+  <title>DN Footwear & Sports - Color & Size Wise Inventory</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -39,19 +39,11 @@
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
     .slider-wrapper { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #0f172a; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
-    .ratio-16-9 { aspect-ratio: 16 / 9; max-height: 400px; }
     .ratio-21-9 { aspect-ratio: 21 / 9; max-height: 320px; }
-    .ratio-4-3 { aspect-ratio: 4 / 3; max-height: 480px; }
-    .ratio-1-1 { aspect-ratio: 1 / 1; max-height: 450px; }
-    .ratio-3-1 { aspect-ratio: 3 / 1; max-height: 250px; }
-
     .slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; align-items: center; justify-content: center; }
     .slider-slide.active { opacity: 1; }
     .slider-img { width: 100%; height: 100%; object-fit: cover; }
     .slider-caption { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 25px 20px 10px; }
-    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 16px; z-index: 10; display: flex; align-items: center; justify-content: center; }
-    .slider-btn-prev { left: 10px; }
-    .slider-btn-next { right: 10px; }
 
     .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -60,12 +52,7 @@
     .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
     .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 
-    .item-img-container { width: 100%; background: #f1f5f9; overflow: hidden; position: relative; }
-    .item-ratio-1-1 { aspect-ratio: 1 / 1; }
-    .item-ratio-4-3 { aspect-ratio: 4 / 3; }
-    .item-ratio-16-9 { aspect-ratio: 16 / 9; }
-    .item-ratio-3-4 { aspect-ratio: 3 / 4; }
-
+    .item-img-container { width: 100%; background: #f1f5f9; overflow: hidden; position: relative; aspect-ratio: 1 / 1; }
     .main-card-img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .thumb-tray { display: flex; gap: 6px; padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; overflow-x: auto; }
     .thumb-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; }
@@ -89,19 +76,20 @@
     .cat-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: #e0e7ff; color: #3730a3; text-transform: uppercase; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
-    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .size-barcode-row { display: grid; grid-template-columns: 80px 80px 1fr 70px 30px; gap: 6px; align-items: center; margin-bottom: 6px; background: white; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
 
-    .color-section-card { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
-    .color-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #cbd5e1; }
-    .color-photo-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; }
-    .color-photo-item { position: relative; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; height: 75px; }
+    /* Color-wise Stock Box */
+    .color-block-card { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+    .color-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
+    .color-photo-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 6px; margin-bottom: 10px; }
+    .color-photo-item { position: relative; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; height: 70px; }
     .color-photo-item img { width: 100%; height: 100%; object-fit: cover; }
     .color-photo-del { position: absolute; top: 2px; right: 2px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .size-mini-row { display: grid; grid-template-columns: 70px 75px 1fr 65px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 4px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
 
     @media print {
       body * { visibility: hidden; }
@@ -130,12 +118,7 @@
 
       <span id="adminNavGroup" style="display:inline-flex; gap:6px; flex-wrap:wrap;">
         <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
-        <button class="btn btn-red" onclick="openOrdersPanelModal()" style="position:relative;">
-          📦 Online Orders
-          <span id="newOrdersCountBadge" style="display:none; background:white; color:#dc2626; font-size:10px; padding:1px 5px; border-radius:10px; font-weight:900;">0</span>
-        </button>
-        <button class="btn btn-slate" onclick="openSliderManagerModal()">🖼️ Slider</button>
-        <button class="btn btn-slate" onclick="openPinChangeModal()" title="Admin Password Badlein">🔑 PIN</button>
+        <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders</button>
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
         <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
         <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
@@ -161,7 +144,7 @@
       <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">ONLINE ORDERS (PENDING)</small>
         <div class="stat-num" id="dPendingOrders" style="color:#f59e0b;">0</div>
-        <small style="color:#64748b; font-size:11px; cursor:pointer;" onclick="openOrdersPanelModal()">Click karke orders dekhein</small>
+        <small style="color:#64748b; font-size:11px;">Pending orders</small>
       </div>
 
       <div class="stat-card">
@@ -179,22 +162,15 @@
 
     <!-- FILTER BAR -->
     <div class="filter-bar">
-      <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, socks, belt, purse, chasma, brand..." class="search-box">
+      <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, brand, color, barcode..." class="search-box">
       
       <select id="adminCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
-        <option value="ALL">Sabhi Categories (Footwear + Accessories)</option>
-        <option value="Shoes">Footwear (Shoes / Sandals / Chappal)</option>
+        <option value="ALL">Sabhi Categories</option>
+        <option value="Shoes">Footwear (Shoes / Sandals)</option>
         <option value="Socks">Socks (Moje)</option>
         <option value="Chasma">Chasma (Sunglasses)</option>
-        <option value="Belt">Belt (Kamarband)</option>
+        <option value="Belt">Belt (Leather)</option>
         <option value="Purse">Purse / Wallet</option>
-        <option value="Sports">Sports Gear & Accessories</option>
-      </select>
-
-      <select id="adminStockLevelFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
-        <option value="ALL">Sabhi Stock</option>
-        <option value="LOW">⚠️ Kam Stock (≤ 3)</option>
-        <option value="OUT">🚨 Khatam (0 Stock)</option>
       </select>
 
       <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Store Link Copy</button>
@@ -208,9 +184,8 @@
           <tr>
             <th>Photo & Name</th>
             <th>Category & Brand</th>
-            <th>Type / Gender</th>
-            <th>Stock Breakdown</th>
-            <th>Kul Stock</th>
+            <th>Rang (Colors) & Stock Breakdown</th>
+            <th>Kul Jodi</th>
             <th>Tag Rate</th>
             <th style="text-align:right;">Actions</th>
           </tr>
@@ -224,8 +199,6 @@
   <div id="customerViewSection" class="container" style="display:none;">
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
       <div id="sliderSlidesContainer"></div>
-      <button class="slider-btn slider-btn-prev" onclick="prevSlide()">❮</button>
-      <button class="slider-btn slider-btn-next" onclick="nextSlide()">❯</button>
     </div>
 
     <div class="contact-bar">
@@ -241,28 +214,21 @@
     </div>
 
     <div class="filter-bar">
-      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, socks, chasma, belt, purse..." class="search-box">
+      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
       <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto;">
         <option value="ALL">Sabhi Samaan</option>
-        <option value="Shoes">Footwear (Joote / Chappal)</option>
-        <option value="Socks">Socks (Moje)</option>
-        <option value="Chasma">Chasma (Glasses)</option>
-        <option value="Belt">Leather Belts</option>
-        <option value="Purse">Purse & Wallets</option>
-        <option value="Sports">Sports Accessories</option>
-      </select>
-      <select id="catalogPhotoRatioSelect" onchange="changeCatalogPhotoRatio(this.value)" class="form-control" style="width:auto; font-weight:bold; color:#4f46e5;">
-        <option value="item-ratio-1-1">Photo Size: 1:1 (Square)</option>
-        <option value="item-ratio-4-3">Photo Size: 4:3 (Boxy)</option>
-        <option value="item-ratio-16-9">Photo Size: 16:9 (Wide)</option>
-        <option value="item-ratio-3-4">Photo Size: 3:4 (Portrait/Tall)</option>
+        <option value="Shoes">Footwear</option>
+        <option value="Socks">Socks</option>
+        <option value="Chasma">Chasma</option>
+        <option value="Belt">Belt</option>
+        <option value="Purse">Purse</option>
       </select>
     </div>
 
     <div id="customerCatalogGrid" class="catalog-grid"></div>
   </div>
 
-  <!-- ADD / EDIT MODAL -->
+  <!-- ADD / EDIT ITEM MODAL WITH COLOR-WISE STOCK & SIZES -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -288,7 +254,7 @@
 
         <div class="row">
           <div class="form-group">
-            <label>Item / Product Name *</label>
+            <label>Item / Model Name *</label>
             <input type="text" id="fName" required placeholder="e.g. Campus Rodeo" class="form-control">
           </div>
           <div class="form-group">
@@ -300,40 +266,27 @@
         <div class="row">
           <div class="form-group">
             <label>Category *</label>
-            <select id="fCategorySelect" onchange="checkCustomCategory(this.value)" class="form-control">
+            <select id="fCategorySelect" class="form-control">
               <option value="Sports/Running">Footwear: Sports & Running</option>
               <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
               <option value="Formal Shoes">Footwear: Formal Shoes</option>
               <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
               <option value="Sandals">Footwear: Sandals</option>
               <option value="Socks">🧦 Socks (Moje)</option>
-              <option value="Chasma">👓 Chasma (Sunglasses/Eyewear)</option>
-              <option value="Belt">👔 Belt (Leather/Canvas)</option>
+              <option value="Chasma">👓 Chasma (Sunglasses)</option>
+              <option value="Belt">👔 Belt</option>
               <option value="Purse">👛 Purse / Wallet</option>
-              <option value="Sports Accessories">🏸 Sports Gear / Accessories</option>
-              <option value="CUSTOM">+ Nayi Category Manual Daalein</option>
             </select>
-            <input type="text" id="fCustomCategoryInput" placeholder="Nayi category type karein..." class="form-control" style="display:none; margin-top:5px; border-color:#4f46e5;">
           </div>
 
           <div class="form-group" id="footwearGenderGroup">
             <label>Gender / Kiske Liye:</label>
-            <select id="fGenderSelect" class="form-control" onchange="changeSizePreset(this.value)">
-              <option value="Men">Men (Gents)</option>
-              <option value="Ladies">Ladies (Women)</option>
-              <option value="Kids">Kids (Bachhe)</option>
+            <select id="fGenderSelect" class="form-control" onchange="changePresetGender(this.value)">
+              <option value="Men">Men (Sizes: 6, 7, 8, 9, 10, 11)</option>
+              <option value="Ladies">Ladies (Sizes: 3, 4, 5, 6, 7, 8)</option>
+              <option value="Kids">Kids (Sizes: 1, 2, 3, 4, 11, 12, 13)</option>
             </select>
           </div>
-        </div>
-
-        <!-- COLOR-WISE PHOTOS UPLOAD -->
-        <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
-          <label style="font-weight:800; color:#0f172a; margin-bottom:4px;">🎨 Rang (Color) Ke Hisab Se Alag Photos Upload Karein:</label>
-          <div style="display:flex; gap:6px; margin-bottom:10px;">
-            <input type="text" id="manualColorInput" placeholder="Rang ka naam type karein (e.g. Black, White, Navy)..." class="form-control">
-            <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorSection()">+ Rang Jodein</button>
-          </div>
-          <div id="colorPhotoSectionsContainer"></div>
         </div>
 
         <div class="row">
@@ -347,40 +300,37 @@
           </div>
         </div>
 
-        <!-- SIZES BREAKDOWN -->
-        <div id="footwearSizesSection" class="form-group" style="background:#f1f5f9; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <label style="margin:0; font-size:12px; font-weight:800; color:#0f172a;">Size-wise Stock & Barcodes:</label>
-            <div style="display:flex; gap:6px;">
-              <button type="button" onclick="promptCustomSize()" class="btn btn-blue" style="padding:3px 8px; font-size:11px;">+ Custom Size</button>
-              <button type="button" onclick="autoGenerateAllBarcodes()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Barcode</button>
-            </div>
+        <!-- ==================== COLOR-WISE STOCK & SIZES SECTION ==================== -->
+        <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
+              🎨 Rang (Colors) Jodein & Har Rang Ka Stock Daalein:
+            </label>
+          </div>
+          <small style="color:#64748b; font-size:11px; display:block; margin-bottom:10px;">
+            Jaise: "Black" likhkar add karein, fir Black ki photo aur Black ke har size ki jodi bharein. Fir "White" add karein!
+          </small>
+
+          <div style="display:flex; gap:6px; margin-bottom:14px;">
+            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein (e.g. Black, White, Grey)..." class="form-control">
+            <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorBlock()">+ Rang Jodein</button>
           </div>
 
-          <div style="display:grid; grid-template-columns: 80px 80px 1fr 70px 30px; gap:6px; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 6px;">
-            <span>SIZE</span>
-            <span>QTY</span>
-            <span>BOX BARCODE</span>
-            <span style="text-align:center;">SCAN</span>
-            <span></span>
-          </div>
-          <div id="sizeBarcodeInputsContainer"></div>
+          <!-- Color Blocks Container -->
+          <div id="colorBlocksContainer"></div>
         </div>
 
         <!-- GENERAL ITEM STOCK -->
         <div id="generalItemSection" class="form-group" style="display:none; background:#f1f5f9; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
-          <label style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:6px;">General Item Stock & Barcode:</label>
+          <label style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:6px;">General Item Stock (Socks, Belt, Chasma):</label>
           <div class="row">
             <div>
-              <label>Kul Quantity: *</label>
+              <label>Kul Quantity (Kitne Piece Stock Me Hain): *</label>
               <input type="number" id="fGeneralQty" min="0" value="10" class="form-control" style="font-size:16px; font-weight:bold;">
             </div>
             <div>
-              <label>Barcode:</label>
-              <div style="display:flex; gap:6px;">
-                <input type="text" id="fGeneralBarcode" placeholder="Scan ya type karein..." class="form-control">
-                <button type="button" class="btn btn-amber" onclick="scanGeneralItemBarcode()">📷</button>
-              </div>
+              <label>Item Barcode:</label>
+              <input type="text" id="fGeneralBarcode" placeholder="Scan ya type karein..." class="form-control">
             </div>
           </div>
         </div>
@@ -395,47 +345,30 @@
 
   <!-- CHECK MODAL -->
   <div id="checkModal" class="modal">
-    <div class="modal-box" style="max-width:480px; padding:22px;">
+    <div class="modal-box" style="max-width:500px; padding:22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
         <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔍 Stock & Size Details</h3>
         <button class="btn btn-slate" onclick="closeCheckModal()" style="padding:2px 8px;">✕</button>
       </div>
 
       <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px;">
-        <div style="width:140px; flex-shrink:0;">
-          <img id="chkImg" src="" style="width:100%; height:130px; object-fit:cover; border-radius:10px; border:1px solid #cbd5e1;">
-          <div id="chkThumbnailsTray" style="display:flex; gap:4px; margin-top:6px; overflow-x:auto;"></div>
-        </div>
-
+        <img id="chkImg" src="" style="width:130px; height:120px; object-fit:cover; border-radius:10px; border:1px solid #cbd5e1; flex-shrink:0;">
         <div style="flex:1;">
           <h3 id="chkTitle" style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:3px;">Campus Rodeo</h3>
           <div id="chkBrandCat" style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:6px;">Campus • Sports</div>
-          <div id="chkColorsBadge" style="font-size:11px; font-weight:bold; color:#4f46e5; margin-bottom:8px;">🎨 Colors: Black</div>
-
-          <div style="background:#f1f5f9; padding:8px 10px; border-radius:8px; border:1px solid #e2e8f0; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <div>
-              <small style="font-size:10px; font-weight:bold; color:#64748b;">TAG RATE:</small>
-              <b id="chkPrice" style="font-size:15px; color:#10b981; display:block;">₹999</b>
-            </div>
-            <div>
-              <small style="font-size:10px; font-weight:bold; color:#64748b;">PURCHASE COST:</small>
-              <b id="chkCost" style="font-size:14px; color:#2563eb; display:block;">₹550</b>
-            </div>
+          <div style="background:#f1f5f9; padding:8px 10px; border-radius:8px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <div><small style="font-size:10px; color:#64748b;">TAG RATE:</small><b id="chkPrice" style="font-size:15px; color:#10b981; display:block;">₹999</b></div>
+            <div><small style="font-size:10px; color:#64748b;">PURCHASE COST:</small><b id="chkCost" style="font-size:14px; color:#2563eb; display:block;">₹550</b></div>
           </div>
         </div>
       </div>
 
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:11px; font-weight:800; color:#475569;">AVAILABLE SIZES & STOCK HISAB:</span>
-          <span id="chkTotalStockUnitsBadge" style="font-size:11px; font-weight:bold; background:#e0e7ff; color:#3730a3; padding:2px 6px; border-radius:4px;">0 Units</span>
-        </div>
-        <div id="chkSizesGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;"></div>
+      <div id="chkColorWiseStockContainer" style="max-height:45vh; overflow-y:auto;">
+        <!-- Color wise stock tables -->
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button class="btn btn-green" onclick="openSaleCheckoutFromCheck()" style="justify-content:center; padding:10px;">🛒 Bechein</button>
-        <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center; padding:10px;">Band Karein</button>
+      <div style="margin-top:14px; text-align:right;">
+        <button class="btn btn-slate" onclick="closeCheckModal()">Band Karein</button>
       </div>
     </div>
   </div>
@@ -479,24 +412,22 @@
       'Kids': [1, 2, 3, 4, 11, 12, 13]
     };
 
-    let activeFormSizes = [...GENDER_PRESETS['Men']];
+    let activeSizesList = [...GENDER_PRESETS['Men']];
     let items = [];
     let salesHistory = [];
     let onlineOrders = [];
-    let sliderBanners = [];
-    let currentSliderRatio = "ratio-21-9";
-    let currentCatalogPhotoRatio = "item-ratio-1-1";
     let currentAppMode = 'admin';
 
     let scannerObj = null;
     let currentScanAction = 'check';
-    let targetScanSize = null;
-    let formColorPhotosMap = {};
+    let targetScanInputId = null;
 
-    let activePopupItem = null;
-    let activeHighlightedSize = null;
-    let currentSellingItem = null;
-    let currentSellingSize = null;
+    // COLOR DATA STRUCTURE:
+    // colorDataMap = {
+    //   "Black": { photos: [base64], sizes: { "7": 4, "8": 2 }, barcodes: { "7": "B-7", "8": "B-8" } },
+    //   "White": { photos: [base64], sizes: { "7": 1, "9": 5 }, barcodes: { "7": "W-7", "9": "W-9" } }
+    // }
+    let colorDataMap = {};
 
     function initLiveSync() {
       db.ref('footwear_stock').on('value', (snapshot) => {
@@ -514,87 +445,142 @@
         onlineOrders = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
       });
-      db.ref('slider_banners').on('value', (snapshot) => {
-        const data = snapshot.val();
-        sliderBanners = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-      });
     }
 
     function toggleItemTypeForm(type) {
       const isFootwear = (type === 'footwear');
       document.getElementById('footwearGenderGroup').style.display = isFootwear ? 'block' : 'none';
-      document.getElementById('footwearSizesSection').style.display = isFootwear ? 'block' : 'none';
       document.getElementById('generalItemSection').style.display = isFootwear ? 'none' : 'block';
     }
 
-    function checkCustomCategory(val) {
-      document.getElementById('fCustomCategoryInput').style.display = (val === 'CUSTOM') ? 'block' : 'none';
+    function changePresetGender(gender) {
+      activeSizesList = [...(GENDER_PRESETS[gender] || GENDER_PRESETS['Men'])];
+      renderColorBlocks();
     }
 
-    function scanGeneralItemBarcode() {
-      openScannerModal('general_barcode');
-    }
-
-    // COLOR-WISE PHOTOS
-    function addNewColorSection() {
+    // ==================== COLOR-WISE BLOCK BUILDER ====================
+    function addNewColorBlock() {
       const input = document.getElementById('manualColorInput');
       const color = input.value.trim();
-      if (!color) { alert("Rang ka naam likhein!"); return; }
-      if (formColorPhotosMap[color]) { alert("Yeh rang jud chuka hai!"); return; }
-      formColorPhotosMap[color] = [];
+      if (!color) { alert("Pehle rang ka naam likhein!"); return; }
+      if (colorDataMap[color]) { alert("Yeh rang pehle se jud chuka hai!"); return; }
+
+      colorDataMap[color] = {
+        photos: [],
+        sizes: {},
+        barcodes: {}
+      };
+
+      // Set default 0 for sizes
+      activeSizesList.forEach(s => {
+        colorDataMap[color].sizes[s] = 0;
+        colorDataMap[color].barcodes[s] = '';
+      });
+
       input.value = '';
-      renderColorPhotoSections();
+      renderColorBlocks();
     }
 
-    function removeColorSection(c) {
-      delete formColorPhotosMap[c];
-      renderColorPhotoSections();
+    function removeColorBlock(c) {
+      if (confirm(`Kya aap [${c}] rang aur iska poora stock hatana chahte hain?`)) {
+        delete colorDataMap[c];
+        renderColorBlocks();
+      }
     }
 
-    function renderColorPhotoSections() {
-      const container = document.getElementById('colorPhotoSectionsContainer');
-      const colors = Object.keys(formColorPhotosMap);
+    function renderColorBlocks() {
+      const container = document.getElementById('colorBlocksContainer');
+      const colors = Object.keys(colorDataMap);
 
       if (colors.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background:white; border-radius:6px; border:1px dashed #cbd5e1;">Pehle rang ka naam likhkar "+ Rang Jodein" dabayein!</div>';
+        container.innerHTML = '<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background:white; border-radius:6px; border:1px dashed #cbd5e1;">Pehle upar rang ka naam likhkar "+ Rang Jodein" dabayein!</div>';
         return;
       }
 
       let html = '';
       colors.forEach(col => {
-        const pArr = formColorPhotosMap[col] || [];
+        const cData = colorDataMap[col];
+        const pArr = cData.photos || [];
+
         let pListHtml = '';
         pArr.forEach((p, idx) => {
           pListHtml += `
             <div class="color-photo-item">
-              <button type="button" class="color-photo-del" onclick="deleteColorPhoto('${col}', ${idx})">✕</button>
+              <button type="button" class="color-photo-del" onclick="deleteColorBlockPhoto('${col}', ${idx})">✕</button>
               <img src="${p}">
             </div>
           `;
         });
 
+        // Size rows for this specific color
+        let sizeRowsHtml = '';
+        activeSizesList.forEach(s => {
+          const qty = (cData.sizes && cData.sizes[s] !== undefined) ? cData.sizes[s] : 0;
+          const bcode = (cData.barcodes && cData.barcodes[s] !== undefined) ? cData.barcodes[s] : '';
+          const bcodeId = `sz_bcode_${col}_${s}`.replace(/\s+/g, '_');
+
+          sizeRowsHtml += `
+            <div class="size-mini-row">
+              <b style="font-size:12px; color:#1e1b4b; background:#e0e7ff; padding:3px 6px; border-radius:4px; text-align:center;">Size ${s}</b>
+              <input type="number" min="0" value="${qty}" oninput="updateColorSizeQty('${col}', '${s}', this.value)" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
+              <input type="text" value="${bcode}" id="${bcodeId}" placeholder="Barcode..." oninput="updateColorBarcode('${col}', '${s}', this.value)" class="form-control" style="padding:4px 6px; font-family:monospace; font-size:11px;">
+              <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:10px; justify-content:center;" onclick="scanBarcodeForColorInput('${bcodeId}', '${col}', '${s}')">📷 Scan</button>
+            </div>
+          `;
+        });
+
         html += `
-          <div class="color-section-card">
-            <div class="color-section-header">
-              <b style="font-size:13px; color:#1e1b4b;">🎨 Rang: <span style="color:#4f46e5;">${col}</span> (${pArr.length} Photos)</b>
+          <div class="color-block-card">
+            <div class="color-block-header">
+              <b style="font-size:14px; color:#1e1b4b;">🎨 Rang: <span style="color:#4f46e5;">${col}</span></b>
               <div style="display:flex; gap:6px;">
-                <label class="btn btn-blue" style="padding:2px 7px; font-size:11px; cursor:pointer;">
+                <label class="btn btn-blue" style="padding:3px 8px; font-size:11px; cursor:pointer;">
                   + Photo Upload
-                  <input type="file" accept="image/*" multiple onchange="uploadPhotosForColor(this, '${col}')" style="display:none;">
+                  <input type="file" accept="image/*" multiple onchange="uploadPhotosForColorBlock(this, '${col}')" style="display:none;">
                 </label>
-                <button type="button" class="btn btn-red" style="padding:2px 7px; font-size:11px;" onclick="removeColorSection('${col}')">✕</button>
+                <button type="button" class="btn btn-red" style="padding:3px 8px; font-size:11px;" onclick="removeColorBlock('${col}')">✕ Rang Hatao</button>
               </div>
             </div>
+
+            <!-- Photos -->
             <div class="color-photo-slots">
-              ${pListHtml || '<small style="color:#94a3b8; font-size:11px;">Photos upload karein...</small>'}
+              ${pListHtml || '<small style="color:#94a3b8; font-size:11px; grid-column:1/-1;">Is rang ki photos upload karein...</small>'}
+            </div>
+
+            <!-- Size-wise stock for this color -->
+            <div style="background:#f1f5f9; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+              <div style="display:grid; grid-template-columns: 70px 75px 1fr 65px; gap:6px; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 4px;">
+                <span>SIZE</span><span>JODI (QTY)</span><span>BOX BARCODE</span><span></span>
+              </div>
+              ${sizeRowsHtml}
             </div>
           </div>
         `;
       });
+
       container.innerHTML = html;
     }
 
-    function uploadPhotosForColor(input, colorName) {
+    function updateColorSizeQty(col, size, val) {
+      if (colorDataMap[col]) {
+        if (!colorDataMap[col].sizes) colorDataMap[col].sizes = {};
+        colorDataMap[col].sizes[size] = Number(val) || 0;
+      }
+    }
+
+    function updateColorBarcode(col, size, val) {
+      if (colorDataMap[col]) {
+        if (!colorDataMap[col].barcodes) colorDataMap[col].barcodes = {};
+        colorDataMap[col].barcodes[size] = val.trim();
+      }
+    }
+
+    function scanBarcodeForColorInput(inputId, col, size) {
+      targetScanInputId = { inputId, col, size };
+      openScannerModal('color_size_barcode');
+    }
+
+    function uploadPhotosForColorBlock(input, colorName) {
       if (input.files && input.files.length > 0) {
         Array.from(input.files).forEach(file => {
           const reader = new FileReader();
@@ -602,7 +588,7 @@
             const img = new Image();
             img.onload = function() {
               const canvas = document.createElement('canvas');
-              const MAX = 400; // Lightweight compressed
+              const MAX = 400; // Compressed
               let w = img.width, h = img.height;
               if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
               else { if (h > MAX) { w *= MAX / h; h = MAX; } }
@@ -611,9 +597,9 @@
               ctx.drawImage(img, 0, 0, w, h);
               const base64 = canvas.toDataURL('image/jpeg', 0.65);
 
-              if (!formColorPhotosMap[colorName]) formColorPhotosMap[colorName] = [];
-              formColorPhotosMap[colorName].push(base64);
-              renderColorPhotoSections();
+              if (!colorDataMap[colorName].photos) colorDataMap[colorName].photos = [];
+              colorDataMap[colorName].photos.push(base64);
+              renderColorBlocks();
             };
             img.src = e.target.result;
           };
@@ -622,120 +608,55 @@
       }
     }
 
-    function deleteColorPhoto(c, idx) {
-      formColorPhotosMap[c].splice(idx, 1);
-      renderColorPhotoSections();
+    function deleteColorBlockPhoto(c, idx) {
+      colorDataMap[c].photos.splice(idx, 1);
+      renderColorBlocks();
     }
 
-    // SIZE LIST FIX & BUILDER
-    function changeSizePreset(gender) {
-      activeFormSizes = [...(GENDER_PRESETS[gender] || GENDER_PRESETS['Men'])];
-      buildSizeBarcodeInputs();
-    }
-
-    function promptCustomSize() {
-      const customSz = prompt("Naya Custom Size daalein (Jaise: 12, 13, 4.5):");
-      if (customSz) {
-        const trimmed = customSz.trim().toUpperCase();
-        if (!activeFormSizes.includes(trimmed)) {
-          activeFormSizes.push(trimmed);
-          buildSizeBarcodeInputs();
-        }
-      }
-    }
-
-    function removeFormSize(sz) {
-      activeFormSizes = activeFormSizes.filter(s => String(s) !== String(sz));
-      buildSizeBarcodeInputs();
-    }
-
-    function buildSizeBarcodeInputs(sizesData = {}, barcodesData = {}) {
-      const container = document.getElementById('sizeBarcodeInputsContainer');
-      let html = '';
-      activeFormSizes.forEach(s => {
-        const qty = sizesData[s] !== undefined ? sizesData[s] : (document.getElementById(`sz_qty_${s}`) ? document.getElementById(`sz_qty_${s}`).value : 0);
-        const bcode = barcodesData[s] !== undefined ? barcodesData[s] : (document.getElementById(`sz_code_${s}`) ? document.getElementById(`sz_code_${s}`).value : '');
-        html += `<div class="size-barcode-row">
-          <span style="font-weight:bold; color:#0f172a; font-size:13px; background:#e0e7ff; padding:4px 8px; border-radius:4px; text-align:center;">Size ${s}</span>
-          <input type="number" min="0" value="${qty}" id="sz_qty_${s}" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
-          <input type="text" value="${bcode}" id="sz_code_${s}" placeholder="Box barcode..." class="form-control" style="padding:4px 6px; font-family:monospace; font-size:11px;">
-          <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:11px; justify-content:center;" onclick="scanForSpecificSize('${s}')">📷 Scan</button>
-          <button type="button" onclick="removeFormSize('${s}')" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">✕</button>
-        </div>`;
-      });
-      container.innerHTML = html;
-    }
-
-    function scanForSpecificSize(size) {
-      targetScanSize = size;
-      openScannerModal('size_barcode');
-    }
-
-    function autoGenerateAllBarcodes() {
-      const randPrefix = 'FP' + Math.floor(100 + Math.random() * 900);
-      activeFormSizes.forEach(s => {
-        const inp = document.getElementById('sz_code_' + s);
-        if (inp) inp.value = `${randPrefix}-S${s}`;
-      });
-    }
-
+    // FORM OPEN / SUBMIT
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
-      formColorPhotosMap = { "Black": [] };
-      renderColorPhotoSections();
-      
+      colorDataMap = {
+        "Black": { photos: [], sizes: {}, barcodes: {} }
+      };
+      activeSizesList.forEach(s => {
+        colorDataMap["Black"].sizes[s] = 0;
+        colorDataMap["Black"].barcodes[s] = '';
+      });
+
+      renderColorBlocks();
       document.querySelector('input[name="fItemType"][value="footwear"]').checked = true;
       toggleItemTypeForm('footwear');
-      document.getElementById('fGenderSelect').value = "Men";
-      activeFormSizes = [...GENDER_PRESETS['Men']];
-      buildSizeBarcodeInputs();
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
     function closeShoeModal() { document.getElementById('shoeModal').style.display = 'none'; }
 
-    // SAFE SUBMIT WITH VALIDATION
     function submitShoeForm(e) {
       e.preventDefault();
       const id = document.getElementById('fId').value || ('item_' + Date.now());
       const itemType = document.querySelector('input[name="fItemType"]:checked').value;
       const name = document.getElementById('fName').value.trim();
       const brand = document.getElementById('fBrand').value.trim();
-      
-      let category = document.getElementById('fCategorySelect').value;
-      if (category === 'CUSTOM') {
-        category = document.getElementById('fCustomCategoryInput').value.trim() || 'General';
-      }
-
+      const category = document.getElementById('fCategorySelect').value;
       const cost = Number(document.getElementById('fCost').value) || 0;
       const price = Number(document.getElementById('fPrice').value) || 0;
 
-      if (!name) { alert("Kripya item ka naam bharein!"); return; }
-      if (price <= 0) { alert("Kripya Bikri Rate bharein!"); return; }
+      if (!name) { alert("Item name zaroori hai!"); return; }
+      if (price <= 0) { alert("Bikri rate bharein!"); return; }
 
-      let sizes = {};
-      let barcodes = {};
-      let generalQty = 0;
-      let generalBarcode = '';
-
-      if (itemType === 'footwear') {
-        activeFormSizes.forEach(s => {
-          const qInp = document.getElementById('sz_qty_' + s);
-          const bInp = document.getElementById('sz_code_' + s);
-          sizes[s] = qInp ? Number(qInp.value) || 0 : 0;
-          barcodes[s] = bInp ? bInp.value.trim() : '';
-        });
-      } else {
-        generalQty = Number(document.getElementById('fGeneralQty').value) || 0;
-        generalBarcode = document.getElementById('fGeneralBarcode').value.trim();
+      const colors = Object.keys(colorDataMap);
+      if (itemType === 'footwear' && colors.length === 0) {
+        alert("Kam se kam ek rang jodkar uska stock bharein!");
+        return;
       }
 
-      const colors = Object.keys(formColorPhotosMap);
+      // Pick first photo as main fallback
       let mainPhoto = '';
-      for (let c in formColorPhotosMap) {
-        if (formColorPhotosMap[c] && formColorPhotosMap[c][0]) {
-          mainPhoto = formColorPhotosMap[c][0];
+      for (let c in colorDataMap) {
+        if (colorDataMap[c].photos && colorDataMap[c].photos[0]) {
+          mainPhoto = colorDataMap[c].photos[0];
           break;
         }
       }
@@ -744,22 +665,20 @@
       const itemObj = {
         id, itemType, name, brand, category, cost, price,
         gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
-        colors: colors.length > 0 ? colors : ['Standard'],
-        colorPhotos: formColorPhotosMap,
+        colors: colors,
+        colorData: colorDataMap, // Full color-wise size & stock map
         photo: mainPhoto,
-        sizes: (itemType === 'footwear') ? sizes : {},
-        barcodes: (itemType === 'footwear') ? barcodes : {},
-        generalQty: (itemType === 'general') ? generalQty : 0,
-        generalBarcode: (itemType === 'general') ? generalBarcode : ''
+        generalQty: (itemType === 'general') ? Number(document.getElementById('fGeneralQty').value) || 0 : 0,
+        generalBarcode: (itemType === 'general') ? document.getElementById('fGeneralBarcode').value.trim() : ''
       };
 
       db.ref('footwear_stock/' + itemObj.id).set(itemObj)
         .then(() => {
           closeShoeModal();
-          alert("✓ Safalta purvak Cloud par save ho gaya!");
+          alert("✓ Safalta-purvak Har Rang Ka Stock Cloud Par Save Ho Gaya!");
         })
         .catch((err) => {
-          alert("Error aaya: " + err.message);
+          alert("Error: " + err.message);
         });
     }
 
@@ -770,47 +689,30 @@
       document.getElementById('fId').value = it.id;
       document.getElementById('fName').value = it.name;
       document.getElementById('fBrand').value = it.brand;
-      
+      document.getElementById('fCategorySelect').value = it.category;
+      document.getElementById('fCost').value = it.cost;
+      document.getElementById('fPrice').value = it.price;
+
       const itemType = it.itemType || 'footwear';
       document.querySelector(`input[name="fItemType"][value="${itemType}"]`).checked = true;
       toggleItemTypeForm(itemType);
 
-      document.getElementById('fCost').value = it.cost;
-      document.getElementById('fPrice').value = it.price;
-
-      if (itemType === 'footwear') {
-        const itGender = it.gender || 'Men';
-        document.getElementById('fGenderSelect').value = itGender;
-        activeFormSizes = Object.keys(it.sizes || {});
-        if (activeFormSizes.length === 0) activeFormSizes = [...(GENDER_PRESETS[itGender] || GENDER_PRESETS['Men'])];
-        buildSizeBarcodeInputs(it.sizes, it.barcodes);
+      if (it.colorData && Object.keys(it.colorData).length > 0) {
+        colorDataMap = JSON.parse(JSON.stringify(it.colorData));
       } else {
-        document.getElementById('fGeneralQty').value = it.generalQty || 0;
-        document.getElementById('fGeneralBarcode').value = it.generalBarcode || '';
+        colorDataMap = { "Standard": { photos: it.photos || [it.photo], sizes: it.sizes || {}, barcodes: it.barcodes || {} } };
       }
 
-      if (it.colorPhotos && Object.keys(it.colorPhotos).length > 0) {
-        formColorPhotosMap = JSON.parse(JSON.stringify(it.colorPhotos));
-      } else {
-        formColorPhotosMap = {};
-        const colList = it.colors || (it.color ? [it.color] : ['Black']);
-        colList.forEach(c => {
-          formColorPhotosMap[c] = it.photos ? [...it.photos] : (it.photo ? [it.photo] : []);
-        });
-      }
-      renderColorPhotoSections();
-
+      renderColorBlocks();
       document.getElementById('shoeModalTitle').innerText = "Item Edit Karein";
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
     function deleteShoe(id) {
-      if (confirm("Item ko sabhi devices se hatana chahte hain?")) {
-        db.ref('footwear_stock/' + id).remove();
-      }
+      if (confirm("Item hatana chahte hain?")) db.ref('footwear_stock/' + id).remove();
     }
 
-    // RENDER FUNCTIONS
+    // ==================== RENDER ADMIN TABLE ====================
     function renderApp() {
       if (currentAppMode === 'admin') renderAdminTable();
       else renderCustomerCatalog();
@@ -819,7 +721,6 @@
     function renderAdminTable() {
       const search = (document.getElementById('adminSearchFilter').value || '').toLowerCase().trim();
       const catFlt = document.getElementById('adminCategoryFilter').value;
-      const stockLevelFlt = document.getElementById('adminStockLevelFilter').value;
 
       let totalStockUnits = 0, totalCost = 0, totalTagValue = 0, lowStock = 0;
       let tableHtml = '';
@@ -828,36 +729,42 @@
         const itemType = it.itemType || 'footwear';
         const itemCat = it.category || 'Footwear';
 
-        let p = (itemType === 'general') ? (Number(it.generalQty) || 0) : Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
+        // Calculate total pairs across all colors
+        let p = 0;
+        let breakdownByColorHtml = '';
+
+        if (itemType === 'general') {
+          p = Number(it.generalQty) || 0;
+          breakdownByColorHtml = `<span class="size-badge ${p > 2 ? 'size-in' : 'size-low'}">${p} Pcs</span>`;
+        } else if (it.colorData) {
+          for (let c in it.colorData) {
+            const cSizes = it.colorData[c].sizes || {};
+            let cPairs = 0;
+            let cBadges = [];
+            for (let sz in cSizes) {
+              const q = Number(cSizes[sz]) || 0;
+              cPairs += q;
+              p += q;
+              if (q > 0) cBadges.push(`${sz}:${q}`);
+            }
+            breakdownByColorHtml += `
+              <div style="margin-bottom:3px;">
+                <b style="color:#4f46e5; font-size:11px;">● ${c} (${cPairs} Jodi):</b> 
+                <small style="color:#334155;">${cBadges.join(', ') || 'Khatam'}</small>
+              </div>
+            `;
+          }
+        }
+
         totalStockUnits += p;
         totalCost += (p * (it.cost || 0));
         totalTagValue += (p * (it.price || 0));
         if (p <= 3) lowStock++;
 
-        const colorsList = it.colors || (it.colorPhotos ? Object.keys(it.colorPhotos) : (it.color ? [it.color] : []));
-        const allBarcodesStr = (itemType === 'general' ? (it.generalBarcode || '') : Object.values(it.barcodes || {}).join(' ')).toLowerCase();
-
         if (catFlt !== 'ALL' && !itemCat.toLowerCase().includes(catFlt.toLowerCase())) return;
-        if (stockLevelFlt === 'LOW' && p > 3) return;
-        if (stockLevelFlt === 'OUT' && p !== 0) return;
-
-        if (search && !it.name.toLowerCase().includes(search) && !it.brand.toLowerCase().includes(search) && !allBarcodesStr.includes(search)) return;
-
-        let breakdownHtml = '';
-        if (itemType === 'general') {
-          breakdownHtml = `<span class="size-badge ${p > 2 ? 'size-in' : (p > 0 ? 'size-low' : 'size-out')}">${p} Qty</span>`;
-        } else {
-          breakdownHtml = Object.keys(it.sizes || {}).map(s => {
-            const q = it.sizes[s] || 0;
-            return `<span class="size-badge ${q === 0 ? 'size-out' : (q <= 2 ? 'size-low' : 'size-in')}">${s}:${q}</span>`;
-          }).join('');
-        }
+        if (search && !it.name.toLowerCase().includes(search) && !it.brand.toLowerCase().includes(search)) return;
 
         let mainImg = it.photo || 'https://via.placeholder.com/50';
-        if (it.colorPhotos) {
-          const firstColor = Object.keys(it.colorPhotos)[0];
-          if (firstColor && it.colorPhotos[firstColor] && it.colorPhotos[firstColor][0]) mainImg = it.colorPhotos[firstColor][0];
-        }
 
         tableHtml += `<tr>
           <td>
@@ -866,10 +773,9 @@
               <div><b>${it.name}</b><br><span class="cat-chip">${itemCat}</span></div>
             </div>
           </td>
-          <td><b>${it.brand}</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ${colorsList.join(', ')}</small></td>
-          <td>${it.gender||'All'}</td>
-          <td>${breakdownHtml}</td>
-          <td><b style="${p<=3?'color:#ef4444;':'color:#0f172a;'}">${p}</b></td>
+          <td><b>${it.brand}</b></td>
+          <td>${breakdownByColorHtml || '<small style="color:#94a3b8;">No Stock</small>'}</td>
+          <td><b style="${p<=3?'color:#ef4444;':'color:#0f172a;'}">${p} Jodi</b></td>
           <td><b style="color:#10b981;">₹${it.price}</b></td>
           <td style="text-align:right;">
             <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="openCheckPopup('${it.id}')">Stock</button>
@@ -879,7 +785,7 @@
         </tr>`;
       });
 
-      document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Koi item nahi mila.</td></tr>';
+      document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi item nahi mila.</td></tr>';
       document.getElementById('dTotalPairs').innerText = totalStockUnits;
       document.getElementById('dTotalModels').innerText = items.length + " Models";
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
@@ -887,81 +793,128 @@
       document.getElementById('dLowStock').innerText = lowStock;
     }
 
+    // ==================== CUSTOMER STORE CATALOG ====================
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
-      items.forEach(it => {
-        let p = (it.itemType === 'general') ? (Number(it.generalQty) || 0) : Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
-        if (p <= 0) return;
 
-        let colorsArr = it.colors || (it.colorPhotos ? Object.keys(it.colorPhotos) : ['Standard']);
-        let firstColor = colorsArr[0] || 'Standard';
-        let mainImg = it.photo || 'https://via.placeholder.com/300';
-        if (it.colorPhotos && it.colorPhotos[firstColor] && it.colorPhotos[firstColor][0]) {
-          mainImg = it.colorPhotos[firstColor][0];
+      items.forEach(it => {
+        let colors = Object.keys(it.colorData || {});
+        if (colors.length === 0) return;
+
+        let firstColor = colors[0];
+        let cData = it.colorData[firstColor] || {};
+        let firstImg = (cData.photos && cData.photos[0]) ? cData.photos[0] : (it.photo || 'https://via.placeholder.com/300');
+
+        // Color buttons
+        let colorsChipsHtml = colors.map((c, idx) => `
+          <button type="button" class="color-chip-btn ${idx===0?'active':''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
+            ● ${c}
+          </button>
+        `).join('');
+
+        // Size badges for first color
+        let sizesBadges = [];
+        for (let s in (cData.sizes || {})) {
+          if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
         }
 
         cardsHtml += `
           <div class="shoe-card">
-            <div class="item-img-container item-ratio-1-1">
-              <img src="${mainImg}" class="main-card-img" alt="${it.name}">
+            <div class="item-img-container">
+              <img id="card_img_${it.id}" src="${firstImg}" class="main-card-img" alt="${it.name}">
             </div>
             <div class="shoe-card-body">
               <div>
                 <h4 style="font-size:15px; font-weight:bold; color:#0f172a;">${it.name}</h4>
                 <p style="font-size:12px; color:#64748b;">${it.brand} • ${it.category}</p>
+
+                <div style="margin:8px 0 4px;">
+                  <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">RANG CHUNEIN:</small>
+                  ${colorsChipsHtml}
+                </div>
+
+                <div style="margin-bottom:8px;">
+                  <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">IS RANG ME UPLABDH SIZES:</small>
+                  <div id="card_sizes_${it.id}">${sizesBadges.join(' ') || '<small style="color:#ef4444;">Out of stock</small>'}</div>
+                </div>
+
                 <div style="font-size:18px; font-weight:900; color:#10b981; margin:8px 0;">₹${it.price}</div>
               </div>
-              <button class="btn btn-wa" style="width:100%; justify-content:center;" onclick="window.open('https://wa.me/${WHATSAPP_ORDER_NUMBER}?text='+encodeURIComponent('Mujhe order karna hai: ${it.name} ₹${it.price}'), '_blank')">
+              <button class="btn btn-wa" style="width:100%; justify-content:center;" onclick="window.open('https://wa.me/${WHATSAPP_ORDER_NUMBER}?text='+encodeURIComponent('Mujhe order karna hai: ${it.name} (₹${it.price})'), '_blank')">
                 📲 Order Karein
               </button>
             </div>
           </div>
         `;
       });
-      grid.innerHTML = cardsHtml;
+
+      grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Koi item stock me nahi hai.</div>';
     }
 
-    // CHECK POPUP
-    function openCheckPopup(id, highlightSize = null) {
+    function customerPickColor(btn, itemId, colorName) {
+      btn.parentElement.querySelectorAll('.color-chip-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const it = items.find(x => x.id === itemId);
+      if (!it || !it.colorData || !it.colorData[colorName]) return;
+
+      const cData = it.colorData[colorName];
+      if (cData.photos && cData.photos[0]) {
+        document.getElementById(`card_img_${itemId}`).src = cData.photos[0];
+      }
+
+      let sizesBadges = [];
+      for (let s in (cData.sizes || {})) {
+        if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
+      }
+      document.getElementById(`card_sizes_${itemId}`).innerHTML = sizesBadges.join(' ') || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
+    }
+
+    // ==================== CHECK BARCODE / STOCK POPUP ====================
+    function openCheckPopup(id, highlightColor = null, highlightSize = null) {
       const it = items.find(x => x.id === id);
       if (!it) return;
-      activePopupItem = it;
-      activeHighlightedSize = highlightSize;
 
-      document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/140';
+      document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/130';
       document.getElementById('chkTitle').innerText = it.name;
       document.getElementById('chkBrandCat').innerText = `${it.brand} • ${it.category}`;
-      document.getElementById('chkColorsBadge').innerText = `🎨 Colors: ${(it.colors||[]).join(', ')}`;
       document.getElementById('chkPrice').innerText = `₹${it.price}`;
       document.getElementById('chkCost').innerText = `₹${it.cost}`;
 
       let html = '';
-      let totalUnits = 0;
       if (it.itemType === 'general') {
-        totalUnits = Number(it.generalQty) || 0;
-        html = `<div style="grid-column:1/-1; background:#ecfdf5; padding:12px; border-radius:8px; text-align:center;"><b style="font-size:18px; color:#047857;">${totalUnits} Pieces Bachi Hain</b></div>`;
-      } else {
-        Object.keys(it.sizes || {}).forEach(s => {
-          const q = Number(it.sizes[s]) || 0;
-          totalUnits += q;
-          const isThis = (String(s) === String(highlightSize));
+        html = `<div style="background:#ecfdf5; padding:12px; border-radius:8px; text-align:center;"><b style="font-size:18px; color:#047857;">${it.generalQty || 0} Pieces Bachi Hain</b></div>`;
+      } else if (it.colorData) {
+        for (let c in it.colorData) {
+          const cData = it.colorData[c];
+          let sizesGrid = '';
+          for (let s in (cData.sizes || {})) {
+            const q = cData.sizes[s] || 0;
+            const isHighlight = (c === highlightColor && String(s) === String(highlightSize));
+            sizesGrid += `
+              <div style="background:${isHighlight ? '#fef3c7; border:2px solid #f59e0b;' : (q > 0 ? '#ecfdf5; border:1px solid #86efac;' : '#f1f5f9;')}; border-radius:6px; padding:6px 2px; text-align:center;">
+                <b style="font-size:12px; display:block;">Sz ${s}</b>
+                <b style="font-size:13px; color:${q>0?'#15803d':'#94a3b8'};">${q} Jodi</b>
+                ${isHighlight ? '<small style="display:block; font-size:8px; background:#f59e0b; font-weight:bold;">IS BOX KA</small>' : ''}
+              </div>
+            `;
+          }
+
           html += `
-            <div style="background:${isThis ? '#fef3c7; border:2px solid #f59e0b;' : (q > 0 ? '#ecfdf5; border:1px solid #86efac;' : '#f1f5f9;')}; border-radius:8px; padding:8px 4px; text-align:center;">
-              <b style="font-size:13px; display:block;">Size ${s}</b>
-              <b style="font-size:14px; color:${q>0?'#15803d':'#94a3b8'};">${q} Jodi</b>
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:10px;">
+              <b style="font-size:13px; color:#1e1b4b; display:block; margin-bottom:6px;">🎨 Rang: <span style="color:#4f46e5;">${c}</span></b>
+              <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">${sizesGrid}</div>
             </div>
           `;
-        });
+        }
       }
 
-      document.getElementById('chkTotalStockUnitsBadge').innerText = `${totalUnits} Units`;
-      document.getElementById('chkSizesGrid').innerHTML = html;
+      document.getElementById('chkColorWiseStockContainer').innerHTML = html;
       document.getElementById('checkModal').style.display = 'flex';
     }
 
     function closeCheckModal() { document.getElementById('checkModal').style.display = 'none'; }
-    function openSaleCheckoutFromCheck() { closeCheckModal(); }
 
     // SCANNER
     function openScannerModal(mode) {
@@ -981,32 +934,43 @@
 
     function onScanFound(code) {
       const c = code.trim().toLowerCase();
-      if (currentScanAction === 'size_barcode' && targetScanSize) {
-        const inp = document.getElementById(`sz_code_${targetScanSize}`);
+
+      if (currentScanAction === 'color_size_barcode' && targetScanInputId) {
+        const inp = document.getElementById(targetScanInputId.inputId);
         if (inp) inp.value = code.trim();
+        updateColorBarcode(targetScanInputId.col, targetScanInputId.size, code.trim());
         closeScannerModal();
+        alert(`Barcode set ho gaya: ${code.trim()}`);
         return;
       }
-      if (currentScanAction === 'general_barcode') {
-        document.getElementById('fGeneralBarcode').value = code.trim();
-        closeScannerModal();
-        return;
-      }
-      let matchedItem = null, matchedSize = null;
+
+      // Check scan across all items, colors and sizes
+      let matchedItem = null;
+      let matchedColor = null;
+      let matchedSize = null;
+
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
-        if (it.barcodes) {
-          for (let sz in it.barcodes) {
-            if (it.barcodes[sz] && it.barcodes[sz].toLowerCase() === c) {
-              matchedItem = it; matchedSize = sz; break;
+        if (it.colorData) {
+          for (let col in it.colorData) {
+            const bcMap = it.colorData[col].barcodes || {};
+            for (let sz in bcMap) {
+              if (bcMap[sz] && bcMap[sz].toLowerCase() === c) {
+                matchedItem = it;
+                matchedColor = col;
+                matchedSize = sz;
+                break;
+              }
             }
+            if (matchedItem) break;
           }
         }
         if (matchedItem) break;
       }
+
       if (matchedItem) {
         closeScannerModal();
-        openCheckPopup(matchedItem.id, matchedSize);
+        openCheckPopup(matchedItem.id, matchedColor, matchedSize);
       } else {
         alert("Barcode match nahi hua!");
       }
@@ -1034,7 +998,7 @@
       const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "DN_Stock_Backup.json";
+      a.download = "DN_Stock_ColorWise_Backup.json";
       a.click();
     }
 
