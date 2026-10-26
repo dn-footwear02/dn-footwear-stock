@@ -48,20 +48,19 @@
       </div>
       
       <div class="flex items-center space-x-2">
-        <!-- New Check Stock Button -->
-        <button onclick="openScannerModal('check')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition">
+        <button type="button" onclick="openScannerModal('check')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition cursor-pointer">
           <i data-lucide="search" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Stock Check Karein</span>
         </button>
-        <button onclick="openScannerModal('sale')" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-medium px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition">
+        <button type="button" onclick="openScannerModal('sale')" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-medium px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition cursor-pointer">
           <i data-lucide="scan" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Bikri Scan</span>
         </button>
-        <button onclick="openScannerModal('inward')" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition">
+        <button type="button" onclick="openScannerModal('inward')" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition cursor-pointer">
           <i data-lucide="box" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Stock Inward (+)</span>
         </button>
-        <button onclick="openPOSModal()" class="relative bg-white text-indigo-900 font-bold px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition">
+        <button type="button" onclick="openPOSModal()" class="relative bg-white text-indigo-900 font-bold px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow transition cursor-pointer">
           <i data-lucide="shopping-cart" class="w-4 h-4"></i>
           <span id="cartCountBadge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[11px] font-bold px-1.5 py-0.2 rounded-full border-2 border-white">0</span>
         </button>
@@ -138,16 +137,7 @@
             <option value="School Shoes">School Shoes</option>
           </select>
 
-          <div class="flex items-center border border-slate-200 rounded-lg p-0.5 bg-slate-50">
-            <button onclick="setViewMode('table')" id="viewBtnTable" class="p-1.5 rounded bg-white shadow-sm text-indigo-700" title="Table View">
-              <i data-lucide="list" class="w-4 h-4"></i>
-            </button>
-            <button onclick="setViewMode('grid')" id="viewBtnGrid" class="p-1.5 rounded text-slate-500 hover:text-slate-800" title="Photo Grid View">
-              <i data-lucide="grid" class="w-4 h-4"></i>
-            </button>
-          </div>
-
-          <button onclick="openFootwearModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3.5 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow shrink-0">
+          <button type="button" onclick="openFootwearModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3.5 py-2 rounded-lg text-sm flex items-center gap-1.5 shadow shrink-0 cursor-pointer">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>Naya Footwear Jodein</span>
           </button>
@@ -157,26 +147,6 @@
 
     <!-- STOCK INVENTORY CONTAINER -->
     <div id="inventoryContainer" class="min-h-[300px]"></div>
-
-    <!-- BACKUP & EXPORT SECTION -->
-    <div class="mt-8 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 bg-white p-3.5 rounded-xl border border-slate-200">
-      <div class="flex items-center gap-2">
-        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-        <span>Saara data aapke phone / laptop me surakshit save hai.</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="exportCSV()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium flex items-center gap-1">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i> Excel / CSV
-        </button>
-        <button onclick="backupData()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium flex items-center gap-1">
-          <i data-lucide="save" class="w-3.5 h-3.5"></i> Data Backup
-        </button>
-        <label class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium cursor-pointer flex items-center gap-1">
-          <i data-lucide="upload" class="w-3.5 h-3.5"></i> Restore
-          <input type="file" id="restoreInput" onchange="restoreData(event)" class="hidden" accept=".json">
-        </label>
-      </div>
-    </div>
   </main>
 
   <!-- ==================== MODALS ==================== -->
@@ -189,20 +159,20 @@
           <div id="scanModeIndicator" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
           <h3 id="scannerTitle" class="font-bold text-xs tracking-wide">Box Scan Karke Available Size Dekhein</h3>
         </div>
-        <button onclick="closeScannerModal()" class="text-slate-400 hover:text-white p-1">
+        <button type="button" onclick="closeScannerModal()" class="text-slate-400 hover:text-white p-1">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- 3-Way Mode Switcher -->
       <div class="grid grid-cols-3 bg-slate-950 p-1 border-b border-slate-800 text-[11px] font-bold gap-1">
-        <button id="scanModeCheckBtn" onclick="switchScanMode('check')" class="py-1.5 rounded-lg text-center bg-amber-500 text-slate-900 flex items-center justify-center gap-1">
+        <button type="button" id="scanModeCheckBtn" onclick="switchScanMode('check')" class="py-1.5 rounded-lg text-center bg-amber-500 text-slate-900 flex items-center justify-center gap-1">
           <i data-lucide="search" class="w-3 h-3"></i> Size Check
         </button>
-        <button id="scanModeSaleBtn" onclick="switchScanMode('sale')" class="py-1.5 rounded-lg text-center text-slate-400 hover:text-white flex items-center justify-center gap-1">
+        <button type="button" id="scanModeSaleBtn" onclick="switchScanMode('sale')" class="py-1.5 rounded-lg text-center text-slate-400 hover:text-white flex items-center justify-center gap-1">
           <i data-lucide="shopping-cart" class="w-3 h-3"></i> Bikri Scan
         </button>
-        <button id="scanModeInwardBtn" onclick="switchScanMode('inward')" class="py-1.5 rounded-lg text-center text-slate-400 hover:text-white flex items-center justify-center gap-1">
+        <button type="button" id="scanModeInwardBtn" onclick="switchScanMode('inward')" class="py-1.5 rounded-lg text-center text-slate-400 hover:text-white flex items-center justify-center gap-1">
           <i data-lucide="box" class="w-3 h-3"></i> Stock +1
         </button>
       </div>
@@ -219,19 +189,19 @@
       <div class="p-2.5 bg-slate-800 flex items-center gap-2 border-t border-slate-700">
         <input type="text" id="manualBarcodeInput" placeholder="Barcode type karein..." 
                class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-        <button onclick="handleManualBarcode()" class="bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg text-white">
+        <button type="button" onclick="handleManualBarcode()" class="bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg text-white">
           Check
         </button>
       </div>
     </div>
   </div>
 
-  <!-- 2. QUICK SIZE-CHECK POPUP CARD (Dabba scan karne par ye khulega) -->
+  <!-- 2. QUICK SIZE-CHECK POPUP CARD -->
   <div id="stockCheckCardModal" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl text-slate-800 animate-in fade-in zoom-in duration-200">
       <div class="relative h-44 bg-slate-100 overflow-hidden">
         <img id="scPhoto" src="" class="w-full h-full object-cover" alt="Shoe">
-        <button onclick="closeStockCheckCard()" class="absolute top-3 right-3 bg-black/60 text-white p-1.5 rounded-full hover:bg-black">
+        <button type="button" onclick="closeStockCheckCard()" class="absolute top-3 right-3 bg-black/60 text-white p-1.5 rounded-full hover:bg-black">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
         <div class="absolute bottom-2 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-white text-[11px] font-bold">
@@ -248,227 +218,16 @@
           </div>
         </div>
 
-        <!-- BIG AVAILABLE SIZES GRID -->
+        <!-- AVAILABLE SIZES GRID -->
         <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
           <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Available Sizes:</span>
-            <span id="scTotalPairsBadge" class="text-xs font-black bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">Kul: 12 Pairs</span>
+            <span id="scTotalPairsBadge" class="text-xs font-black bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">Kul: 0 Pairs</span>
           </div>
           
-          <div id="scSizeGrid" class="grid grid-cols-4 gap-2 pt-1 text-center">
-            <!-- Dynamically populated size buttons -->
-          </div>
+          <div id="scSizeGrid" class="grid grid-cols-4 gap-2 pt-1 text-center"></div>
         </div>
 
         <!-- Quick Action Buttons -->
         <div class="grid grid-cols-2 gap-2 pt-1">
-          <button onclick="addCurrentScannedToPOS()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow">
-            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Bikri Bill Banayein
-          </button>
-          <button onclick="closeStockCheckCard(true)" class="bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow">
-            <i data-lucide="scan" class="w-4 h-4"></i> Agla Dabba Scan
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. ADD / EDIT FOOTWEAR MODAL -->
-  <div id="footwearModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-3 overflow-y-auto">
-    <div class="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-auto">
-      <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
-        <h3 id="footwearModalTitle" class="font-bold text-base flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-400"></i> Naya Footwear Stock Jodein
-        </h3>
-        <button onclick="closeFootwearModal()" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <form id="footwearForm" onsubmit="saveFootwear(event)" class="p-5 max-h-[80vh] overflow-y-auto custom-scroll space-y-4">
-        <input type="hidden" id="editFootwearId">
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center gap-4">
-          <div class="relative w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0">
-            <img id="formPhotoPreview" src="" class="w-full h-full object-cover hidden" alt="Shoe Preview">
-            <div id="formPhotoPlaceholder" class="text-slate-400 text-center p-2">
-              <i data-lucide="camera" class="w-7 h-7 mx-auto mb-1 text-slate-300"></i>
-              <span class="text-[10px] leading-tight block">Shoe Photo</span>
-            </div>
-          </div>
-          <div class="flex-1 space-y-2">
-            <label class="block text-xs font-bold text-slate-700">Shoe Ki Photo Khinchein ya Upload Karein</label>
-            <div class="flex flex-wrap gap-2">
-              <label class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1 shadow-sm">
-                <i data-lucide="camera" class="w-3.5 h-3.5"></i> Camera Snap
-                <input type="file" accept="image/*" capture="environment" onchange="processShoePhoto(this)" class="hidden">
-              </label>
-              <label class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1">
-                <i data-lucide="image" class="w-3.5 h-3.5"></i> Gallery
-                <input type="file" accept="image/*" onchange="processShoePhoto(this)" class="hidden">
-              </label>
-              <button type="button" onclick="clearPhoto()" id="clearPhotoBtn" class="hidden text-xs text-rose-600 font-semibold hover:underline">Hatao</button>
-            </div>
-            <p class="text-[10px] text-slate-400">Photo box par barcode sticker me print hogi aur scan karte waqt dikhegi.</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Shoe / Model Name *</label>
-            <input type="text" id="fwName" required placeholder="e.g. Campus Rodeo Pro" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Brand Name *</label>
-            <input type="text" id="fwBrand" required placeholder="e.g. Campus, Sparx, Bata" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Category</label>
-            <select id="fwCategory" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-              <option value="Running/Sports">Running / Sports</option>
-              <option value="Casual/Sneakers">Casual Sneakers</option>
-              <option value="Formal Shoes">Formal Shoes</option>
-              <option value="Slippers/Chappal">Slippers & Chappal</option>
-              <option value="Sandals">Sandals</option>
-              <option value="School Shoes">School Shoes</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Kharid Mulya (Cost ₹) *</label>
-            <input type="number" id="fwCost" required min="0" placeholder="₹ 650" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Bikri Rate (Selling Price ₹) *</label>
-            <input type="number" id="fwPrice" required min="0" placeholder="₹ 999" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-emerald-600">
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-slate-700">Shoe Barcode (Box Sticker Code) *</label>
-            <button type="button" onclick="generateAutoBarcode()" class="text-[11px] text-indigo-600 font-semibold hover:underline flex items-center gap-1">
-              <i data-lucide="refresh-cw" class="w-3 h-3"></i> Auto Generate
-            </button>
-          </div>
-          <input type="text" id="fwBarcode" required placeholder="e.g. CAMP-RODEO-01" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono tracking-wider">
-        </div>
-
-        <!-- SIZE BREAKDOWN INPUT GRID -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-            <span>Size-Wise Quantity (Kitne Pairs Stock me hain):</span>
-            <span id="formTotalPairsCount" class="text-xs bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">Total: 0 Pairs</span>
-          </label>
-          <div class="grid grid-cols-4 md:grid-cols-7 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            ${[5, 6, 7, 8, 9, 10, 11].map(s => `
-              <div class="text-center">
-                <span class="block text-xs font-bold text-slate-600 mb-1">Size ${s}</span>
-                <input type="number" min="0" value="0" id="sz_${s}" oninput="calculateFormTotalPairs()" class="size-input w-full text-center py-1.5 text-sm font-semibold border border-slate-300 rounded-lg focus:ring-indigo-500">
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
-          <button type="button" onclick="closeFootwearModal()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow">Stock Save Karein</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 4. BARCODE STICKER PRINT MODAL -->
-  <div id="stickerModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-3 overflow-y-auto">
-    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-auto">
-      <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between no-print">
-        <h3 class="font-bold text-base flex items-center gap-2">
-          <i data-lucide="tag" class="w-5 h-5 text-amber-400"></i> Box Barcode Sticker Print
-        </h3>
-        <button onclick="closeStickerModal()" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-5 max-h-[80vh] overflow-y-auto custom-scroll">
-        <div class="no-print bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700">Kaunse Size ke Stickers Chahiye?</span>
-            <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow">
-              <i data-lucide="printer" class="w-4 h-4"></i> Stickers Print Karein
-            </button>
-          </div>
-          <div id="stickerSizeSelector" class="flex flex-wrap gap-2 text-xs"></div>
-        </div>
-
-        <div id="printableArea">
-          <div id="stickerPrintContainer" class="grid grid-cols-2 gap-3"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. POS BILLING & CART MODAL -->
-  <div id="posModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-3">
-    <div class="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-indigo-900 text-white flex items-center justify-between">
-        <h3 class="font-bold text-base flex items-center gap-2">
-          <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-400"></i> Bikri Counter & Cash Memo
-        </h3>
-        <button onclick="closePOSModal()" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-4 overflow-y-auto custom-scroll flex-1 space-y-3">
-        <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="posCustName" placeholder="Grahak ka Naam (Optional)" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg">
-          <input type="tel" id="posCustPhone" placeholder="Mobile / WhatsApp Number" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg">
-        </div>
-
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-3 py-2 text-[11px] font-bold text-slate-600 flex justify-between">
-            <span>ITEM & SIZE</span>
-            <span>RATE & TOTAL</span>
-          </div>
-          <div id="cartItemsList" class="divide-y divide-slate-100 max-h-56 overflow-y-auto"></div>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 text-xs">
-          <div class="flex justify-between items-center text-slate-600">
-            <span>Kul Pairs:</span>
-            <span id="posTotalPairs" class="font-bold text-slate-900">0</span>
-          </div>
-          <div class="flex justify-between items-center text-slate-600">
-            <span>Discount (Chhoot ₹):</span>
-            <input type="number" id="posDiscount" min="0" value="0" oninput="updateCartTotals()" class="w-20 text-right px-2 py-0.5 border border-slate-300 rounded">
-          </div>
-          <div class="flex justify-between items-center text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
-            <span>Final Bill Amount:</span>
-            <span id="posFinalAmount" class="text-emerald-600 text-base">₹0</span>
-          </div>
-          <div class="pt-2">
-            <label class="block font-semibold text-slate-700 mb-1">Payment Mode:</label>
-            <div class="grid grid-cols-4 gap-2">
-              <label class="border border-slate-300 rounded-lg p-1.5 text-center cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white font-bold">
-                <input type="radio" name="payMode" value="CASH" checked class="hidden"> Cash
-              </label>
-              <label class="border border-slate-300 rounded-lg p-1.5 text-center cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white font-bold">
-                <input type="radio" name="payMode" value="UPI" class="hidden"> UPI
-              </label>
-              <label class="border border-slate-300 rounded-lg p-1.5 text-center cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white font-bold">
-                <input type="radio" name="payMode" value="UDHAAR" class="hidden"> Khata
-              </label>
-              <label class="border border-slate-300 rounded-lg p-1.5 text-center cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white font-bold">
-                <input type="radio" name="payMode" value="CARD" class="hidden"> Card
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between gap-2">
-        <button onclick="clearCart()" class="text-xs text-rose-600 font-semibold px-2 py-1">Cart Khali Karein</button>
-        <button onclick="checkout(true)" class="bg-emerald-600 hover:bg-emerald-70
+          <button type="button"
