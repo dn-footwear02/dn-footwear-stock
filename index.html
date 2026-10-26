@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear & Sports - Color & Size Wise Inventory</title>
+  <title>DN Footwear & Sports - Color & Size Wise Inventory & Video Catalog</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -22,6 +22,7 @@
     .btn-green { background: #10b981; color: #fff; }
     .btn-wa { background: #25d366; color: #fff; }
     .btn-blue { background: #2563eb; color: #fff; }
+    .btn-purple { background: #9333ea; color: #fff; }
     .btn-indigo { background: #4f46e5; color: #fff; }
     .btn-red { background: #ef4444; color: #fff; }
     .btn-slate { background: #e2e8f0; color: #334155; }
@@ -48,15 +49,19 @@
     .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
-    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
     .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
     .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 
-    .item-img-container { width: 100%; background: #f1f5f9; overflow: hidden; position: relative; aspect-ratio: 1 / 1; }
+    .item-media-box { width: 100%; background: #0f172a; overflow: hidden; position: relative; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
     .main-card-img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-    .thumb-tray { display: flex; gap: 6px; padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; overflow-x: auto; }
-    .thumb-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; }
-    .thumb-img.active { border-color: #4f46e5; }
+    .main-card-video { width: 100%; height: 100%; object-fit: cover; }
+    
+    .thumb-tray { display: flex; gap: 6px; padding: 8px 10px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; overflow-x: auto; align-items: center; }
+    .thumb-item { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; position: relative; }
+    .thumb-item.active { border-color: #4f46e5; }
+    .video-thumb-badge { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.8); color: white; font-size: 8px; padding: 1px 3px; border-radius: 3px; font-weight: bold; }
+
     .shoe-card-body { padding: 14px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
 
     .color-chip-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; margin: 2px; background: white; transition: 0.15s; }
@@ -86,19 +91,11 @@
     .color-block-card { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
     .color-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
     .color-photo-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 6px; margin-bottom: 10px; }
-    .color-photo-item { position: relative; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; height: 70px; }
-    .color-photo-item img { width: 100%; height: 100%; object-fit: cover; }
+    .color-photo-item { position: relative; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; height: 70px; background: #000; }
+    .color-photo-item img, .color-photo-item video { width: 100%; height: 100%; object-fit: cover; }
     .color-photo-del { position: absolute; top: 2px; right: 2px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     
-    /* Size Row with Delete Button */
     .size-mini-row { display: grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 5px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #thermalBillArea, #thermalBillArea * { visibility: visible; }
-      #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
-      .no-print { display: none !important; }
-    }
   </style>
 </head>
 <body>
@@ -230,7 +227,7 @@
     <div id="customerCatalogGrid" class="catalog-grid"></div>
   </div>
 
-  <!-- ADD / EDIT ITEM MODAL WITH COLOR-WISE STOCK & SIZE REMOVE/ADD OPTION -->
+  <!-- ADD / EDIT ITEM MODAL WITH MULTI-PHOTO & VIDEO SUPPORT -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -302,15 +299,15 @@
           </div>
         </div>
 
-        <!-- ==================== COLOR-WISE STOCK & SIZES SECTION ==================== -->
+        <!-- ==================== COLOR-WISE PHOTOS, ANIMATIONS & SIZES SECTION ==================== -->
         <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
-              🎨 Rang (Colors) Jodein, Photo & Har Size Ka Stock Daalein:
+              🎨 Rang Jodein, Sabhi Photos & Video/Reel Upload Karein:
             </label>
           </div>
           <small style="color:#64748b; font-size:11px; display:block; margin-bottom:10px;">
-            Har rang ka alag stock aur sizes maintain honge. Jo size nahi chahiye use ✕ se hata sakte hain!
+            Har rang ki saari photos catalog me dikhengi. Saath hi aap animated video (.mp4) bhi dal sakte hain!
           </small>
 
           <div style="display:flex; gap:6px; margin-bottom:14px;">
@@ -354,7 +351,9 @@
       </div>
 
       <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px;">
-        <img id="chkImg" src="" style="width:130px; height:120px; object-fit:cover; border-radius:10px; border:1px solid #cbd5e1; flex-shrink:0;">
+        <div id="chkMediaDisplayBox" style="width:130px; height:120px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; flex-shrink:0; background:#000;">
+          <img id="chkImg" src="" style="width:100%; height:100%; object-fit:cover;">
+        </div>
         <div style="flex:1;">
           <h3 id="chkTitle" style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:3px;">Campus Rodeo</h3>
           <div id="chkBrandCat" style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:6px;">Campus • Sports</div>
@@ -420,7 +419,10 @@
     let currentScanAction = 'check';
     let targetScanInputId = null;
 
-    // COLOR DATA STRUCTURE
+    // COLOR DATA STRUCTURE WITH PHOTOS & VIDEO
+    // colorDataMap = {
+    //   "Black": { photos: [base64_1, base64_2], video: base64_video, sizes: { "7": 4 }, barcodes: {} }
+    // }
     let colorDataMap = {};
 
     function initLiveSync() {
@@ -449,7 +451,6 @@
 
     function changePresetGender(gender) {
       const defaultList = GENDER_PRESETS[gender] || GENDER_PRESETS['Men'];
-      // Har existing color block me yeh default sizes populate kar do agar pehle se nahi hai
       for (let c in colorDataMap) {
         defaultList.forEach(s => {
           if (colorDataMap[c].sizes[s] === undefined) {
@@ -461,7 +462,7 @@
       renderColorBlocks();
     }
 
-    // ==================== COLOR-WISE BLOCK BUILDER ====================
+    // COLOR BLOCKS WITH MULTI-PHOTO & VIDEO SUPPORT
     function addNewColorBlock() {
       const input = document.getElementById('manualColorInput');
       const color = input.value.trim();
@@ -473,6 +474,7 @@
 
       colorDataMap[color] = {
         photos: [],
+        video: '',
         sizes: {},
         barcodes: {}
       };
@@ -487,13 +489,12 @@
     }
 
     function removeColorBlock(c) {
-      if (confirm(`Kya aap [${c}] rang aur iska poora stock hatana chahte hain?`)) {
+      if (confirm(`Kya aap [${c}] rang aur iska poora media/stock hatana chahte hain?`)) {
         delete colorDataMap[c];
         renderColorBlocks();
       }
     }
 
-    // SIZE ADD / REMOVE IN COLOR BLOCK
     function removeSizeFromColor(col, size) {
       if (confirm(`Kya aap [${col}] me se Size [${size}] ko hatana chahte hain?`)) {
         if (colorDataMap[col]) {
@@ -532,9 +533,22 @@
         const cData = colorDataMap[col];
         const pArr = cData.photos || [];
 
-        let pListHtml = '';
+        let mediaListHtml = '';
+        
+        // Video item preview
+        if (cData.video) {
+          mediaListHtml += `
+            <div class="color-photo-item" style="border: 2px solid #9333ea;">
+              <button type="button" class="color-photo-del" onclick="deleteColorBlockVideo('${col}')">✕</button>
+              <video src="${cData.video}" autoplay muted loop style="width:100%; height:100%; object-fit:cover;"></video>
+              <span style="position:absolute; bottom:2px; left:2px; background:#9333ea; color:white; font-size:8px; padding:1px 3px; border-radius:2px; font-weight:bold;">VIDEO</span>
+            </div>
+          `;
+        }
+
+        // Photos previews
         pArr.forEach((p, idx) => {
-          pListHtml += `
+          mediaListHtml += `
             <div class="color-photo-item">
               <button type="button" class="color-photo-del" onclick="deleteColorBlockPhoto('${col}', ${idx})">✕</button>
               <img src="${p}">
@@ -542,7 +556,7 @@
           `;
         });
 
-        // Size rows with REMOVE (✕) BUTTON
+        // Size rows
         let sizeRowsHtml = '';
         const sizeKeys = Object.keys(cData.sizes || {});
 
@@ -566,18 +580,22 @@
           <div class="color-block-card">
             <div class="color-block-header">
               <b style="font-size:14px; color:#1e1b4b;">🎨 Rang: <span style="color:#4f46e5;">${col}</span></b>
-              <div style="display:flex; gap:6px;">
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <label class="btn btn-blue" style="padding:3px 8px; font-size:11px; cursor:pointer;">
-                  + Photo Upload
+                  + Photos Upload
                   <input type="file" accept="image/*" multiple onchange="uploadPhotosForColorBlock(this, '${col}')" style="display:none;">
+                </label>
+                <label class="btn btn-purple" style="padding:3px 8px; font-size:11px; cursor:pointer;">
+                  🎬 Video / Reel Upload
+                  <input type="file" accept="video/mp4,video/webm" onchange="uploadVideoForColorBlock(this, '${col}')" style="display:none;">
                 </label>
                 <button type="button" class="btn btn-red" style="padding:3px 8px; font-size:11px;" onclick="removeColorBlock('${col}')">✕ Rang Hatao</button>
               </div>
             </div>
 
-            <!-- Photos -->
+            <!-- Media Preview List (Video + All Photos) -->
             <div class="color-photo-slots">
-              ${pListHtml || '<small style="color:#94a3b8; font-size:11px; grid-column:1/-1;">Is rang ki photos upload karein...</small>'}
+              ${mediaListHtml || '<small style="color:#94a3b8; font-size:11px; grid-column:1/-1;">Is rang ki photos ya video upload karein...</small>'}
             </div>
 
             <!-- Size-wise stock for this color -->
@@ -625,7 +643,7 @@
             const img = new Image();
             img.onload = function() {
               const canvas = document.createElement('canvas');
-              const MAX = 400; // Compressed Lightweight
+              const MAX = 450; // Compressed Lightweight
               let w = img.width, h = img.height;
               if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
               else { if (h > MAX) { w *= MAX / h; h = MAX; } }
@@ -645,8 +663,31 @@
       }
     }
 
+    function uploadVideoForColorBlock(input, colorName) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        // 5MB safety limit for database performance
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Video ka size 5MB se chota hona chahiye taaki website fast chale!");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          colorDataMap[colorName].video = e.target.result;
+          renderColorBlocks();
+          alert(`[${colorName}] ke liye animated video safalta-purvak add ho gayi!`);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function deleteColorBlockPhoto(c, idx) {
       colorDataMap[c].photos.splice(idx, 1);
+      renderColorBlocks();
+    }
+
+    function deleteColorBlockVideo(c) {
+      colorDataMap[c].video = '';
       renderColorBlocks();
     }
 
@@ -659,7 +700,7 @@
       const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
 
       colorDataMap = {
-        "Black": { photos: [], sizes: {}, barcodes: {} }
+        "Black": { photos: [], video: '', sizes: {}, barcodes: {} }
       };
       defaultList.forEach(s => {
         colorDataMap["Black"].sizes[s] = 0;
@@ -715,7 +756,7 @@
       db.ref('footwear_stock/' + itemObj.id).set(itemObj)
         .then(() => {
           closeShoeModal();
-          alert("✓ Safalta-purvak Har Rang Ka Stock Cloud Par Save Ho Gaya!");
+          alert("✓ Safalta-purvak Sabhi Photos, Video aur Stock Cloud Par Save Ho Gaya!");
         })
         .catch((err) => {
           alert("Error: " + err.message);
@@ -740,7 +781,7 @@
       if (it.colorData && Object.keys(it.colorData).length > 0) {
         colorDataMap = JSON.parse(JSON.stringify(it.colorData));
       } else {
-        colorDataMap = { "Standard": { photos: it.photos || [it.photo], sizes: it.sizes || {}, barcodes: it.barcodes || {} } };
+        colorDataMap = { "Standard": { photos: it.photos || [it.photo], video: it.video || '', sizes: it.sizes || {}, barcodes: it.barcodes || {} } };
       }
 
       renderColorBlocks();
@@ -752,7 +793,7 @@
       if (confirm("Item hatana chahte hain?")) db.ref('footwear_stock/' + id).remove();
     }
 
-    // RENDER ADMIN TABLE
+    // ==================== RENDER ADMIN TABLE ====================
     function renderApp() {
       if (currentAppMode === 'admin') renderAdminTable();
       else renderCustomerCatalog();
@@ -786,9 +827,10 @@
               p += q;
               if (q > 0) cBadges.push(`${sz}:${q}`);
             }
+            const hasVideo = !!it.colorData[c].video;
             breakdownByColorHtml += `
               <div style="margin-bottom:3px;">
-                <b style="color:#4f46e5; font-size:11px;">● ${c} (${cPairs} Jodi):</b> 
+                <b style="color:#4f46e5; font-size:11px;">● ${c} (${cPairs} Jodi) ${hasVideo?'🎬':''}:</b> 
                 <small style="color:#334155;">${cBadges.join(', ') || 'Khatam'}</small>
               </div>
             `;
@@ -832,6 +874,7 @@
       document.getElementById('dLowStock').innerText = lowStock;
     }
 
+    // ==================== CUSTOMER STORE CATALOG (ALL PHOTOS & VIDEO TRAY) ====================
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
@@ -842,24 +885,47 @@
 
         let firstColor = colors[0];
         let cData = it.colorData[firstColor] || {};
-        let firstImg = (cData.photos && cData.photos[0]) ? cData.photos[0] : (it.photo || 'https://via.placeholder.com/300');
 
+        // Color chips
         let colorsChipsHtml = colors.map((c, idx) => `
           <button type="button" class="color-chip-btn ${idx===0?'active':''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
             ● ${c}
           </button>
         `).join('');
 
+        // Size badges for initial color
         let sizesBadges = [];
         for (let s in (cData.sizes || {})) {
           if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
         }
 
+        const mediaBoxId = `card_media_box_${it.id}`;
+        const trayId = `card_thumb_tray_${it.id}`;
+
+        // Initial Media Display (Prioritize Video if available, else first photo)
+        let initialMediaHtml = '';
+        if (cData.video) {
+          initialMediaHtml = `<video class="main-card-video" src="${cData.video}" autoplay muted loop playsinline></video>`;
+        } else if (cData.photos && cData.photos[0]) {
+          initialMediaHtml = `<img class="main-card-img" src="${cData.photos[0]}">`;
+        } else {
+          initialMediaHtml = `<img class="main-card-img" src="${it.photo || 'https://via.placeholder.com/300'}">`;
+        }
+
+        // Thumbnails generation (All Photos + Video)
+        let thumbsHtml = generateThumbnailsHtml(it.id, cData);
+
         cardsHtml += `
           <div class="shoe-card">
-            <div class="item-img-container">
-              <img id="card_img_${it.id}" src="${firstImg}" class="main-card-img" alt="${it.name}">
+            <div>
+              <div class="item-media-box" id="${mediaBoxId}">
+                ${initialMediaHtml}
+              </div>
+              <div class="thumb-tray" id="${trayId}">
+                ${thumbsHtml}
+              </div>
             </div>
+
             <div class="shoe-card-body">
               <div>
                 <h4 style="font-size:15px; font-weight:bold; color:#0f172a;">${it.name}</h4>
@@ -877,8 +943,8 @@
 
                 <div style="font-size:18px; font-weight:900; color:#10b981; margin:8px 0;">₹${it.price}</div>
               </div>
-              <button class="btn btn-wa" style="width:100%; justify-content:center;" onclick="window.open('https://wa.me/${WHATSAPP_ORDER_NUMBER}?text='+encodeURIComponent('Mujhe order karna hai: ${it.name} (₹${it.price})'), '_blank')">
-                📲 Order Karein
+              <button class="btn btn-wa" style="width:100%; justify-content:center;" onclick="window.open('https://wa.me/${WHATSAPP_ORDER_NUMBER}?text='+encodeURIComponent('Namaste DN Footwear! Mujhe order karna hai: ${it.name} (₹${it.price})'), '_blank')">
+                📲 WhatsApp Order Karein
               </button>
             </div>
           </div>
@@ -886,6 +952,48 @@
       });
 
       grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Koi item stock me nahi hai.</div>';
+    }
+
+    function generateThumbnailsHtml(itemId, colorData) {
+      let html = '';
+      let isFirstActive = true;
+
+      // Video thumbnail
+      if (colorData.video) {
+        html += `
+          <div class="thumb-item active" onclick="switchMediaDisplay('${itemId}', 'video', '${colorData.video}', this)">
+            <video src="${colorData.video}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+            <span class="video-thumb-badge">▶ REEL</span>
+          </div>
+        `;
+        isFirstActive = false;
+      }
+
+      // Photos thumbnails (ALL PHOTOS)
+      const photos = colorData.photos || [];
+      photos.forEach((pSrc, pIdx) => {
+        const activeClass = (isFirstActive && pIdx === 0) ? 'active' : '';
+        html += `
+          <img src="${pSrc}" class="thumb-item ${activeClass}" onclick="switchMediaDisplay('${itemId}', 'image', '${pSrc}', this)">
+        `;
+      });
+
+      return html;
+    }
+
+    function switchMediaDisplay(itemId, type, src, thumbElem) {
+      const box = document.getElementById(`card_media_box_${itemId}`);
+      if (!box) return;
+
+      if (type === 'video') {
+        box.innerHTML = `<video class="main-card-video" src="${src}" autoplay muted loop playsinline></video>`;
+      } else {
+        box.innerHTML = `<img class="main-card-img" src="${src}">`;
+      }
+
+      const tray = thumbElem.parentElement;
+      tray.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+      thumbElem.classList.add('active');
     }
 
     function customerPickColor(btn, itemId, colorName) {
@@ -896,10 +1004,20 @@
       if (!it || !it.colorData || !it.colorData[colorName]) return;
 
       const cData = it.colorData[colorName];
-      if (cData.photos && cData.photos[0]) {
-        document.getElementById(`card_img_${itemId}`).src = cData.photos[0];
+      const mediaBox = document.getElementById(`card_media_box_${itemId}`);
+      const tray = document.getElementById(`card_thumb_tray_${itemId}`);
+
+      // Update Media Box
+      if (cData.video) {
+        mediaBox.innerHTML = `<video class="main-card-video" src="${cData.video}" autoplay muted loop playsinline></video>`;
+      } else if (cData.photos && cData.photos[0]) {
+        mediaBox.innerHTML = `<img class="main-card-img" src="${cData.photos[0]}">`;
       }
 
+      // Update Tray with all photos & video of this color
+      tray.innerHTML = generateThumbnailsHtml(itemId, cData);
+
+      // Update sizes
       let sizesBadges = [];
       for (let s in (cData.sizes || {})) {
         if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
@@ -939,7 +1057,7 @@
 
           html += `
             <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:10px;">
-              <b style="font-size:13px; color:#1e1b4b; display:block; margin-bottom:6px;">🎨 Rang: <span style="color:#4f46e5;">${c}</span></b>
+              <b style="font-size:13px; color:#1e1b4b; display:block; margin-bottom:6px;">🎨 Rang: <span style="color:#4f46e5;">${c}</span> ${cData.video?'(🎬 Video Available)':''}</b>
               <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">${sizesGrid}</div>
             </div>
           `;
@@ -1033,7 +1151,7 @@
       const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "DN_Stock_ColorWise_Backup.json";
+      a.download = "DN_Stock_FullMedia_Backup.json";
       a.click();
     }
 
