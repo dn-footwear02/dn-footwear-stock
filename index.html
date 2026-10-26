@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear & Sports - Color & Size Wise Inventory & Video Catalog</title>
+  <title>DN Footwear & Sports - Color & Size Wise Inventory, POS & Store</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -16,7 +16,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #f8fafc; color: #1e293b; padding-bottom: 75px; }
     header { background: #1e1b4b; color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-    .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; text-decoration: none; }
+    .btn { border: none; padding: 7px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; text-decoration: none; white-space: nowrap; }
     .btn:active { transform: scale(0.97); }
     .btn-amber { background: #f59e0b; color: #000; }
     .btn-green { background: #10b981; color: #fff; }
@@ -49,7 +49,7 @@
     .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
-    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
     .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 
@@ -87,7 +87,6 @@
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    /* Color-wise Stock Box */
     .color-block-card { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
     .color-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
     .color-photo-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 6px; margin-bottom: 10px; }
@@ -96,6 +95,13 @@
     .color-photo-del { position: absolute; top: 2px; right: 2px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     
     .size-mini-row { display: grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 5px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #thermalBillArea, #thermalBillArea * { visibility: visible; }
+      #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -110,12 +116,13 @@
       <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Dukaan Admin & POS Mode</span>
     </div>
 
-    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
       <button id="toggleModeBtn" class="btn btn-amber" onclick="toggleAppMode()">
         🛍️ Customer Catalog Dekhein
       </button>
 
       <span id="adminNavGroup" style="display:inline-flex; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
         <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
         <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders</button>
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
@@ -125,7 +132,7 @@
     </div>
   </header>
 
-  <!-- ADMIN VIEW -->
+  <!-- ==================== 1. ADMIN DASHBOARD & POS ==================== -->
   <div id="adminViewSection" class="container">
     <div class="stats-grid">
       <div class="stat-card">
@@ -194,7 +201,7 @@
     </div>
   </div>
 
-  <!-- CUSTOMER VIEW -->
+  <!-- ==================== 2. CUSTOMER ONLINE STORE ==================== -->
   <div id="customerViewSection" class="container" style="display:none;">
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
       <div id="sliderSlidesContainer"></div>
@@ -227,7 +234,55 @@
     <div id="customerCatalogGrid" class="catalog-grid"></div>
   </div>
 
-  <!-- ADD / EDIT ITEM MODAL WITH MULTI-PHOTO & VIDEO SUPPORT -->
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- A. PIN CHANGE MODAL -->
+  <div id="pinChangeModal" class="modal">
+    <div class="modal-box" style="max-width:380px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔑 Admin Login PIN Badlein</h3>
+        <button class="btn btn-slate" onclick="closePinChangeModal()">✕</button>
+      </div>
+      <form onsubmit="saveNewAdminPin(event)">
+        <div class="form-group">
+          <label>Purana PIN Daalein:</label>
+          <input type="password" id="oldPinInput" required placeholder="Purana PIN..." class="form-control" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Naya Secret PIN Daalein:</label>
+          <input type="password" id="newPinInput" required placeholder="Naya 4-digit PIN..." class="form-control" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Naya PIN Dobara Daalein (Confirm):</label>
+          <input type="password" id="confirmPinInput" required placeholder="Dobara naya PIN..." class="form-control" maxlength="10">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-slate" onclick="closePinChangeModal()">Cancel</button>
+          <button type="submit" class="btn btn-indigo">PIN Save Karein</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- B. ADMIN LOGIN PIN MODAL -->
+  <div id="adminLoginModal" class="modal">
+    <div class="modal-box" style="max-width:360px; text-align:center;">
+      <div style="font-size:35px; margin-bottom:8px;">🔒</div>
+      <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:4px;">Admin Portal Login</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Dukaan stock aur billing counter ke liye apna 4-digit PIN daalein:</p>
+      
+      <form onsubmit="verifyAdminPinSubmit(event)">
+        <input type="password" id="adminLoginPinInput" required placeholder="PIN Daalein (Default: 1234)" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" maxlength="10" autofocus>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button type="submit" class="btn btn-indigo" style="justify-content:center; padding:10px;">Login Karein</button>
+          <button type="button" class="btn btn-slate" onclick="closeAdminLoginModal()" style="justify-content:center;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- C. ADD / EDIT ITEM MODAL -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -299,23 +354,19 @@
           </div>
         </div>
 
-        <!-- ==================== COLOR-WISE PHOTOS, ANIMATIONS & SIZES SECTION ==================== -->
+        <!-- COLOR-WISE STOCK & SIZES SECTION -->
         <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
-              🎨 Rang Jodein, Sabhi Photos & Video/Reel Upload Karein:
+              🎨 Rang (Colors) Jodein, Media & Har Size Ka Stock Daalein:
             </label>
           </div>
-          <small style="color:#64748b; font-size:11px; display:block; margin-bottom:10px;">
-            Har rang ki saari photos catalog me dikhengi. Saath hi aap animated video (.mp4) bhi dal sakte hain!
-          </small>
 
           <div style="display:flex; gap:6px; margin-bottom:14px;">
             <input type="text" id="manualColorInput" placeholder="Naya Rang type karein (e.g. Black, White, Navy)..." class="form-control">
             <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorBlock()">+ Rang Jodein</button>
           </div>
 
-          <!-- Color Blocks Container -->
           <div id="colorBlocksContainer"></div>
         </div>
 
@@ -342,7 +393,7 @@
     </div>
   </div>
 
-  <!-- CHECK MODAL -->
+  <!-- D. CHECK MODAL (WITH DIRECT BECHEIN BUTTON) -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="max-width:500px; padding:22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
@@ -351,9 +402,7 @@
       </div>
 
       <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px;">
-        <div id="chkMediaDisplayBox" style="width:130px; height:120px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; flex-shrink:0; background:#000;">
-          <img id="chkImg" src="" style="width:100%; height:100%; object-fit:cover;">
-        </div>
+        <img id="chkImg" src="" style="width:130px; height:120px; object-fit:cover; border-radius:10px; border:1px solid #cbd5e1; flex-shrink:0;">
         <div style="flex:1;">
           <h3 id="chkTitle" style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:3px;">Campus Rodeo</h3>
           <div id="chkBrandCat" style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:6px;">Campus • Sports</div>
@@ -364,15 +413,146 @@
         </div>
       </div>
 
-      <div id="chkColorWiseStockContainer" style="max-height:45vh; overflow-y:auto;"></div>
+      <div id="chkColorWiseStockContainer" style="max-height:42vh; overflow-y:auto; margin-bottom:14px;"></div>
 
-      <div style="margin-top:14px; text-align:right;">
-        <button class="btn btn-slate" onclick="closeCheckModal()">Band Karein</button>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-green" onclick="openSaleCheckoutFromCheck()" style="justify-content:center; padding:10px; font-size:13px;">
+          🛒 Bechein (Checkout)
+        </button>
+        <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center; padding:10px; font-size:13px;">
+          Band Karein
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- SCANNER MODAL -->
+  <!-- E. SMART BIKRI CHECKOUT MODAL (WITH BILL PRINT & SAVE) -->
+  <div id="saleModal" class="modal">
+    <div class="modal-box" style="max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Billing Counter</h3>
+        <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+        <img id="saleImg" src="" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
+        <div style="flex:1;">
+          <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+            <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Size: 8</span>
+            <span id="saleColorBadge" style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Black</span>
+            <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold;">Stock: 4</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="saleForm" onsubmit="confirmSaleTransaction(event, false)">
+        <div class="row" style="margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Tag Rate:</label>
+            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:5px;">₹999</div>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
+            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981; border:2px solid #10b981;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Mode:</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Cash" checked> Cash
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="UPI / QR"> UPI / QR
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Udhaar"> Udhaar
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="saleCustName" placeholder="Customer name..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="saleCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center; padding:10px;">
+            🖨️ Save & Print Bill
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:10px;">
+            ✓ Sirf Save Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- F. THERMAL RECEIPT MODAL -->
+  <div id="receiptModal" class="modal">
+    <div class="modal-box" style="max-width:350px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
+        <span style="font-weight:bold; font-size:13px;">Customer Bill Receipt</span>
+        <button class="btn btn-slate" onclick="closeReceiptModal()" style="padding:2px 8px;">✕</button>
+      </div>
+
+      <div id="thermalBillArea" style="background:#fff; border:1px dashed #cbd5e1; padding:12px; border-radius:6px; font-family:monospace; font-size:12px; color:#000;">
+        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
+          <h3 style="font-size:15px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS</h3>
+          <p style="font-size:10px; margin:2px 0;">Near Bus Stand, Siriyari (Pali)</p>
+          <p style="font-size:10px; margin:0;">Mo: 8209452284, 9636422794</p>
+        </div>
+
+        <div style="font-size:11px; margin-bottom:8px; line-height:1.4;">
+          <div>Bill No: <b id="rBillNo">DN-1001</b></div>
+          <div>Date: <span id="rDate">26-10-2026</span></div>
+          <div>Customer: <span id="rCust">Walk-in</span></div>
+          <div>Payment: <b id="rPayMode">Cash</b></div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
+          <thead>
+            <tr>
+              <th style="padding:4px 0; text-align:left; background:transparent;">Item</th>
+              <th style="padding:4px 0; text-align:center; background:transparent;">Sz/Col</th>
+              <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
+              <td style="padding:4px 0; text-align:center;" id="rItemSize">8 / Black</td>
+              <td style="padding:4px 0; text-align:right;" id="rItemRate">₹850</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="text-align:right; margin-bottom:8px;">
+          <div style="font-size:10px; color:#555;">Tag Price: <strike id="rTagPrice">₹999</strike></div>
+          <div style="font-size:14px; font-weight:900;">TOTAL: <span id="rFinalTotal">₹850</span></div>
+        </div>
+
+        <div style="text-align:center; font-size:10px; border-top:1px dashed #000; padding-top:6px;">
+          <p style="margin:0; font-weight:bold;">Dhanyawad! Phir Padharein.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;" class="no-print">
+        <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="window.print()">🖨️ Print Receipt</button>
+        <button class="btn btn-slate" style="width:100%; justify-content:center;" onclick="closeReceiptModal()">Band Karein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- G. CAMERA SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -389,6 +569,7 @@
 
   <script>
     const WHATSAPP_ORDER_NUMBER = "917733909735";
+    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "1234";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
@@ -419,13 +600,23 @@
     let currentScanAction = 'check';
     let targetScanInputId = null;
 
-    // COLOR DATA STRUCTURE WITH PHOTOS & VIDEO
-    // colorDataMap = {
-    //   "Black": { photos: [base64_1, base64_2], video: base64_video, sizes: { "7": 4 }, barcodes: {} }
-    // }
     let colorDataMap = {};
+    let activePopupItem = null;
+    let activeHighlightedColor = null;
+    let activeHighlightedSize = null;
+
+    let currentSellingItem = null;
+    let currentSellingColor = null;
+    let currentSellingSize = null;
 
     function initLiveSync() {
+      db.ref('admin_settings/pin').on('value', (snap) => {
+        if (snap.val()) {
+          adminSecurityPin = String(snap.val());
+          localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+        }
+      });
+
       db.ref('footwear_stock').on('value', (snapshot) => {
         const data = snapshot.val();
         items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -441,6 +632,100 @@
         onlineOrders = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
       });
+    }
+
+    // ==================== ADMIN PIN SECURITY SYSTEM ====================
+    function openPinChangeModal() {
+      document.getElementById('oldPinInput').value = '';
+      document.getElementById('newPinInput').value = '';
+      document.getElementById('confirmPinInput').value = '';
+      document.getElementById('pinChangeModal').style.display = 'flex';
+    }
+
+    function closePinChangeModal() {
+      document.getElementById('pinChangeModal').style.display = 'none';
+    }
+
+    function saveNewAdminPin(e) {
+      e.preventDefault();
+      const oldPin = document.getElementById('oldPinInput').value.trim();
+      const newPin = document.getElementById('newPinInput').value.trim();
+      const confirmPin = document.getElementById('confirmPinInput').value.trim();
+
+      if (oldPin !== adminSecurityPin) {
+        alert("Galat Purana PIN! Sahi PIN daalkar dobara koshish karein.");
+        return;
+      }
+      if (newPin.length < 4) {
+        alert("Naya PIN kam se kam 4-digit ka hona chahiye!");
+        return;
+      }
+      if (newPin !== confirmPin) {
+        alert("Naya PIN aur Confirm PIN match nahi ho rahe!");
+        return;
+      }
+
+      adminSecurityPin = newPin;
+      localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+      db.ref('admin_settings/pin').set(newPin).then(() => {
+        closePinChangeModal();
+        alert("✓ Naya Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
+      });
+    }
+
+    // ==================== MODE SWITCHING WITH PIN LOCK ====================
+    function toggleAppMode() {
+      if (currentAppMode === 'admin') {
+        switchAppMode('customer');
+      } else {
+        openAdminLoginModal();
+      }
+    }
+
+    function openAdminLoginModal() {
+      document.getElementById('adminLoginPinInput').value = '';
+      document.getElementById('adminLoginModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('adminLoginPinInput').focus(), 100);
+    }
+
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').style.display = 'none';
+    }
+
+    function verifyAdminPinSubmit(e) {
+      e.preventDefault();
+      const entered = document.getElementById('adminLoginPinInput').value.trim();
+      if (entered === adminSecurityPin) {
+        closeAdminLoginModal();
+        switchAppMode('admin');
+      } else {
+        alert("Galat PIN! Sirf dukaan ke admin ko access ki anumati hai.");
+        document.getElementById('adminLoginPinInput').value = '';
+      }
+    }
+
+    function switchAppMode(mode) {
+      currentAppMode = mode;
+      window.location.hash = (mode === 'customer') ? 'store' : '';
+
+      document.getElementById('adminViewSection').style.display = (mode === 'admin') ? 'block' : 'none';
+      document.getElementById('customerViewSection').style.display = (mode === 'customer') ? 'block' : 'none';
+      document.getElementById('adminNavGroup').style.display = (mode === 'admin') ? 'inline-flex' : 'none';
+      
+      const toggleBtn = document.getElementById('toggleModeBtn');
+      const subtitle = document.getElementById('appModeSubtitle');
+
+      if (mode === 'customer') {
+        toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
+        toggleBtn.className = 'btn btn-indigo';
+        subtitle.innerText = 'Customer Online Store';
+      } else {
+        toggleBtn.innerText = '🛍️ Customer Catalog Dekhein';
+        toggleBtn.className = 'btn btn-amber';
+        subtitle.innerText = 'Dukaan Admin & POS Mode';
+      }
+
+      renderApp();
     }
 
     function toggleItemTypeForm(type) {
@@ -462,7 +747,7 @@
       renderColorBlocks();
     }
 
-    // COLOR BLOCKS WITH MULTI-PHOTO & VIDEO SUPPORT
+    // COLOR BLOCKS & SIZES
     function addNewColorBlock() {
       const input = document.getElementById('manualColorInput');
       const color = input.value.trim();
@@ -534,8 +819,6 @@
         const pArr = cData.photos || [];
 
         let mediaListHtml = '';
-        
-        // Video item preview
         if (cData.video) {
           mediaListHtml += `
             <div class="color-photo-item" style="border: 2px solid #9333ea;">
@@ -546,7 +829,6 @@
           `;
         }
 
-        // Photos previews
         pArr.forEach((p, idx) => {
           mediaListHtml += `
             <div class="color-photo-item">
@@ -556,7 +838,6 @@
           `;
         });
 
-        // Size rows
         let sizeRowsHtml = '';
         const sizeKeys = Object.keys(cData.sizes || {});
 
@@ -593,12 +874,10 @@
               </div>
             </div>
 
-            <!-- Media Preview List (Video + All Photos) -->
             <div class="color-photo-slots">
               ${mediaListHtml || '<small style="color:#94a3b8; font-size:11px; grid-column:1/-1;">Is rang ki photos ya video upload karein...</small>'}
             </div>
 
-            <!-- Size-wise stock for this color -->
             <div style="background:#f1f5f9; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <span style="font-size:11px; font-weight:bold; color:#475569;">AVAILABLE SIZES & STOCK:</span>
@@ -643,7 +922,7 @@
             const img = new Image();
             img.onload = function() {
               const canvas = document.createElement('canvas');
-              const MAX = 450; // Compressed Lightweight
+              const MAX = 450;
               let w = img.width, h = img.height;
               if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
               else { if (h > MAX) { w *= MAX / h; h = MAX; } }
@@ -666,16 +945,15 @@
     function uploadVideoForColorBlock(input, colorName) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
-        // 5MB safety limit for database performance
         if (file.size > 5 * 1024 * 1024) {
-          alert("Video ka size 5MB se chota hona chahiye taaki website fast chale!");
+          alert("Video ka size 5MB se chota hona chahiye!");
           return;
         }
         const reader = new FileReader();
         reader.onload = function(e) {
           colorDataMap[colorName].video = e.target.result;
           renderColorBlocks();
-          alert(`[${colorName}] ke liye animated video safalta-purvak add ho gayi!`);
+          alert(`[${colorName}] ke liye video attach ho gaya!`);
         };
         reader.readAsDataURL(file);
       }
@@ -691,7 +969,7 @@
       renderColorBlocks();
     }
 
-    // FORM OPEN / SUBMIT
+    // FORM SUBMIT
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
@@ -756,7 +1034,7 @@
       db.ref('footwear_stock/' + itemObj.id).set(itemObj)
         .then(() => {
           closeShoeModal();
-          alert("✓ Safalta-purvak Sabhi Photos, Video aur Stock Cloud Par Save Ho Gaya!");
+          alert("✓ Safalta-purvak Cloud Par Save Ho Gaya!");
         })
         .catch((err) => {
           alert("Error: " + err.message);
@@ -793,7 +1071,7 @@
       if (confirm("Item hatana chahte hain?")) db.ref('footwear_stock/' + id).remove();
     }
 
-    // ==================== RENDER ADMIN TABLE ====================
+    // RENDER ADMIN
     function renderApp() {
       if (currentAppMode === 'admin') renderAdminTable();
       else renderCustomerCatalog();
@@ -860,6 +1138,7 @@
           <td><b style="color:#10b981;">₹${it.price}</b></td>
           <td style="text-align:right;">
             <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="openCheckPopup('${it.id}')">Stock</button>
+            <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'), null, null)">🛒 Bechein</button>
             <button class="btn btn-indigo" style="padding:4px 8px; font-size:11px;" onclick="editShoe('${it.id}')">✏️</button>
             <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe('${it.id}')">🗑️</button>
           </td>
@@ -874,7 +1153,7 @@
       document.getElementById('dLowStock').innerText = lowStock;
     }
 
-    // ==================== CUSTOMER STORE CATALOG (ALL PHOTOS & VIDEO TRAY) ====================
+    // RENDER CUSTOMER CATALOG
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
@@ -886,14 +1165,12 @@
         let firstColor = colors[0];
         let cData = it.colorData[firstColor] || {};
 
-        // Color chips
         let colorsChipsHtml = colors.map((c, idx) => `
           <button type="button" class="color-chip-btn ${idx===0?'active':''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
             ● ${c}
           </button>
         `).join('');
 
-        // Size badges for initial color
         let sizesBadges = [];
         for (let s in (cData.sizes || {})) {
           if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
@@ -902,7 +1179,6 @@
         const mediaBoxId = `card_media_box_${it.id}`;
         const trayId = `card_thumb_tray_${it.id}`;
 
-        // Initial Media Display (Prioritize Video if available, else first photo)
         let initialMediaHtml = '';
         if (cData.video) {
           initialMediaHtml = `<video class="main-card-video" src="${cData.video}" autoplay muted loop playsinline></video>`;
@@ -912,7 +1188,6 @@
           initialMediaHtml = `<img class="main-card-img" src="${it.photo || 'https://via.placeholder.com/300'}">`;
         }
 
-        // Thumbnails generation (All Photos + Video)
         let thumbsHtml = generateThumbnailsHtml(it.id, cData);
 
         cardsHtml += `
@@ -958,7 +1233,6 @@
       let html = '';
       let isFirstActive = true;
 
-      // Video thumbnail
       if (colorData.video) {
         html += `
           <div class="thumb-item active" onclick="switchMediaDisplay('${itemId}', 'video', '${colorData.video}', this)">
@@ -969,7 +1243,6 @@
         isFirstActive = false;
       }
 
-      // Photos thumbnails (ALL PHOTOS)
       const photos = colorData.photos || [];
       photos.forEach((pSrc, pIdx) => {
         const activeClass = (isFirstActive && pIdx === 0) ? 'active' : '';
@@ -1007,17 +1280,14 @@
       const mediaBox = document.getElementById(`card_media_box_${itemId}`);
       const tray = document.getElementById(`card_thumb_tray_${itemId}`);
 
-      // Update Media Box
       if (cData.video) {
         mediaBox.innerHTML = `<video class="main-card-video" src="${cData.video}" autoplay muted loop playsinline></video>`;
       } else if (cData.photos && cData.photos[0]) {
         mediaBox.innerHTML = `<img class="main-card-img" src="${cData.photos[0]}">`;
       }
 
-      // Update Tray with all photos & video of this color
       tray.innerHTML = generateThumbnailsHtml(itemId, cData);
 
-      // Update sizes
       let sizesBadges = [];
       for (let s in (cData.sizes || {})) {
         if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
@@ -1025,10 +1295,14 @@
       document.getElementById(`card_sizes_${itemId}`).innerHTML = sizesBadges.join(' ') || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
     }
 
-    // CHECK BARCODE / STOCK POPUP
+    // ==================== CHECK POPUP WITH DIRECT SELL ====================
     function openCheckPopup(id, highlightColor = null, highlightSize = null) {
       const it = items.find(x => x.id === id);
       if (!it) return;
+
+      activePopupItem = it;
+      activeHighlightedColor = highlightColor;
+      activeHighlightedSize = highlightSize;
 
       document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/130';
       document.getElementById('chkTitle').innerText = it.name;
@@ -1050,7 +1324,6 @@
               <div style="background:${isHighlight ? '#fef3c7; border:2px solid #f59e0b;' : (q > 0 ? '#ecfdf5; border:1px solid #86efac;' : '#f1f5f9;')}; border-radius:6px; padding:6px 2px; text-align:center;">
                 <b style="font-size:12px; display:block;">Sz ${s}</b>
                 <b style="font-size:13px; color:${q>0?'#15803d':'#94a3b8'};">${q} Jodi</b>
-                ${isHighlight ? '<small style="display:block; font-size:8px; background:#f59e0b; font-weight:bold;">IS BOX KA</small>' : ''}
               </div>
             `;
           }
@@ -1070,10 +1343,172 @@
 
     function closeCheckModal() { document.getElementById('checkModal').style.display = 'none'; }
 
-    // SCANNER
+    function openSaleCheckoutFromCheck() {
+      if (activePopupItem) {
+        closeCheckModal();
+        openSaleCheckout(activePopupItem, activeHighlightedColor, activeHighlightedSize);
+      }
+    }
+
+    // ==================== SMART BIKRI (POS CHECKOUT & BILLING) ====================
+    function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
+      if (!item) return;
+
+      currentSellingItem = item;
+      currentSellingColor = preferredColor;
+      currentSellingSize = preferredSize;
+
+      let availQty = 0;
+
+      if (item.itemType === 'general') {
+        availQty = item.generalQty || 0;
+        currentSellingColor = 'General';
+        currentSellingSize = '1 Piece';
+      } else {
+        // If color not selected, pick first color with stock
+        if (!currentSellingColor || !item.colorData[currentSellingColor]) {
+          const colors = Object.keys(item.colorData || {});
+          for (let c of colors) {
+            const sizes = item.colorData[c].sizes || {};
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingColor = c;
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+            if (currentSellingColor) break;
+          }
+        } else {
+          // Color selected, check size
+          const sizes = item.colorData[currentSellingColor].sizes || {};
+          if (!currentSellingSize || !sizes[currentSellingSize] || sizes[currentSellingSize] <= 0) {
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+          } else {
+            availQty = sizes[currentSellingSize];
+          }
+        }
+      }
+
+      if (availQty <= 0) {
+        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
+        return;
+      }
+
+      document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
+      document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
+      document.getElementById('saleSizeBadge').innerText = `Size: ${currentSellingSize}`;
+      document.getElementById('saleColorBadge').innerText = `${currentSellingColor}`;
+      document.getElementById('saleStockRem').innerText = `Stock: ${availQty}`;
+
+      document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
+      document.getElementById('saleFinalPrice').value = item.price;
+      document.getElementById('saleCustName').value = '';
+      document.getElementById('saleCustPhone').value = '';
+
+      closeScannerModal();
+      document.getElementById('saleModal').style.display = 'flex';
+    }
+
+    function closeSaleModal() {
+      document.getElementById('saleModal').style.display = 'none';
+    }
+
+    function confirmSaleTransaction(e, shouldPrint = false) {
+      if (e) e.preventDefault();
+      if (!currentSellingItem) return;
+
+      const finalPrice = Number(document.getElementById('saleFinalPrice').value);
+      const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+
+      if (currentSellingItem.itemType === 'general') {
+        if ((currentSellingItem.generalQty || 0) <= 0) { alert("Stock khatam hai!"); return; }
+        currentSellingItem.generalQty -= 1;
+      } else {
+        if (!currentSellingItem.colorData[currentSellingColor] || 
+            !currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] || 
+            currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] <= 0) {
+          alert("Stock khatam hai!");
+          return;
+        }
+        currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] -= 1;
+      }
+
+      // Update in Firebase Realtime Database
+      db.ref('footwear_stock/' + currentSellingItem.id).set(currentSellingItem);
+
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowStr = new Date().toLocaleString('en-IN');
+
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: new Date().toISOString(),
+        itemId: currentSellingItem.id,
+        name: currentSellingItem.name,
+        brand: currentSellingItem.brand,
+        color: currentSellingColor,
+        size: currentSellingSize,
+        costPrice: currentSellingItem.cost || 0,
+        tagPrice: currentSellingItem.price || 0,
+        sellPrice: finalPrice,
+        profit: finalPrice - (currentSellingItem.cost || 0),
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+      closeSaleModal();
+
+      if (shouldPrint) {
+        showReceipt(saleRecord, nowStr);
+      } else {
+        alert(`✓ Bikri Safal! ₹${finalPrice} me becha gaya.`);
+      }
+    }
+
+    function showReceipt(record, dateStr) {
+      document.getElementById('rBillNo').innerText = record.billNo;
+      document.getElementById('rDate').innerText = dateStr;
+      document.getElementById('rCust').innerText = `${record.customer} ${record.phone ? '('+record.phone+')' : ''}`;
+      document.getElementById('rPayMode').innerText = record.payMode;
+      document.getElementById('rItemName').innerText = `${record.name} (${record.brand})`;
+      document.getElementById('rItemSize').innerText = `${record.size} / ${record.color}`;
+      document.getElementById('rItemRate').innerText = `₹${record.sellPrice}`;
+      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice}`;
+      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice}`;
+      
+      document.getElementById('receiptModal').style.display = 'flex';
+      setTimeout(() => window.print(), 400);
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    // ==================== SCANNER ====================
     function openScannerModal(mode) {
       currentScanAction = mode;
       document.getElementById('scannerModal').style.display = 'flex';
+      
+      const titles = {
+        'check': '🔍 Dabba Scan Karke Stock Check Karein',
+        'sale': '🛒 Bikri Scan: Dabba Scan Karke Turant Bechein',
+        'inward': '📦 Stock Inward: Scan Karke +1 Jodi Badhayein',
+        'color_size_barcode': '📷 Box Barcode Scan'
+      };
+      document.getElementById('scannerTitle').innerText = titles[mode] || 'Scanner';
+
       if (window.Html5Qrcode) {
         if (!scannerObj) scannerObj = new Html5Qrcode("scannerTarget");
         scannerObj.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 180 } }, onScanFound, () => {}).catch(() => alert("Camera permission dein."));
@@ -1104,7 +1539,14 @@
 
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
-        if (it.colorData) {
+        if (it.itemType === 'general') {
+          if (it.generalBarcode && it.generalBarcode.toLowerCase() === c) {
+            matchedItem = it;
+            matchedColor = 'General';
+            matchedSize = '1 Piece';
+            break;
+          }
+        } else if (it.colorData) {
           for (let col in it.colorData) {
             const bcMap = it.colorData[col].barcodes || {};
             for (let sz in bcMap) {
@@ -1121,11 +1563,25 @@
         if (matchedItem) break;
       }
 
-      if (matchedItem) {
+      if (!matchedItem) {
+        alert(`Barcode [${code.trim()}] kisi item se match nahi hua!`);
+        return;
+      }
+
+      if (currentScanAction === 'check') {
         closeScannerModal();
         openCheckPopup(matchedItem.id, matchedColor, matchedSize);
-      } else {
-        alert("Barcode match nahi hua!");
+      } else if (currentScanAction === 'inward') {
+        if (matchedItem.itemType === 'general') {
+          matchedItem.generalQty = (matchedItem.generalQty || 0) + 1;
+        } else {
+          matchedItem.colorData[matchedColor].sizes[matchedSize] = (matchedItem.colorData[matchedColor].sizes[matchedSize] || 0) + 1;
+        }
+        db.ref('footwear_stock/' + matchedItem.id).set(matchedItem);
+        alert(`[${matchedItem.name}] ${matchedColor} Size ${matchedSize} me +1 jodi stock badh gaya!`);
+      } else if (currentScanAction === 'sale') {
+        closeScannerModal();
+        openSaleCheckout(matchedItem, matchedColor, matchedSize);
       }
     }
 
@@ -1134,28 +1590,29 @@
       if (v) onScanFound(v);
     }
 
-    function toggleAppMode() {
-      currentAppMode = (currentAppMode === 'admin') ? 'customer' : 'admin';
-      document.getElementById('adminViewSection').style.display = (currentAppMode === 'admin') ? 'block' : 'none';
-      document.getElementById('customerViewSection').style.display = (currentAppMode === 'customer') ? 'block' : 'none';
-      document.getElementById('adminNavGroup').style.display = (currentAppMode === 'admin') ? 'inline-flex' : 'none';
-      renderApp();
-    }
-
     function copyCustomerStoreLink() {
       const url = window.location.origin + window.location.pathname + '#store';
-      navigator.clipboard.writeText(url).then(() => alert("Link Copied:\n" + url));
+      navigator.clipboard.writeText(url).then(() => alert("Customer Store Link Copy Ho Gaya:\n" + url));
     }
 
     function backupJSON() {
       const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "DN_Stock_FullMedia_Backup.json";
+      a.download = "DN_Stock_Backup.json";
       a.click();
     }
 
     window.onload = function() {
+      if (window.location.hash === '#store' || window.location.hash === '#catalog') {
+        currentAppMode = 'customer';
+        document.getElementById('adminViewSection').style.display = 'none';
+        document.getElementById('customerViewSection').style.display = 'block';
+        document.getElementById('adminNavGroup').style.display = 'none';
+        document.getElementById('toggleModeBtn').innerText = '🔒 Admin Mode (Dukaan Login)';
+        document.getElementById('toggleModeBtn').className = 'btn btn-indigo';
+        document.getElementById('appModeSubtitle').innerText = 'Customer Online Store';
+      }
       initLiveSync();
     };
   </script>
