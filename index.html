@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear - Live Cloud Stock & POS</title>
+  <title>DN Footwear - Stock, Custom Sizes & Low Stock Alerts</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -25,16 +25,18 @@
     .btn-red { background: #ef4444; color: #fff; }
     .btn-slate { background: #e2e8f0; color: #334155; }
     
-    .container { max-width: 1150px; margin: 20px auto; padding: 0 15px; }
+    .container { max-width: 1180px; margin: 20px auto; padding: 0 15px; }
     .sync-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .sync-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; }
+    .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; transition: 0.2s; }
+    .stat-card-clickable { cursor: pointer; }
+    .stat-card-clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239,68,68,0.15); border-color: #ef4444; }
     .stat-num { font-size: 22px; font-weight: 800; margin-top: 4px; color: #0f172a; }
 
-    .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
@@ -45,27 +47,41 @@
     .shoe-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
     .size-badge { display: inline-block; padding: 3px 6px; font-size: 11px; font-weight: 700; border-radius: 4px; margin: 1px; }
     .size-in { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-    .size-out { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
+    .size-low { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .size-out { background: #fee2e2; color: #991b1b; text-decoration: line-through; border: 1px solid #fecaca; }
+
+    .gender-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+    .chip-men { background: #e0e7ff; color: #3730a3; }
+    .chip-ladies { background: #fce7f3; color: #9d174d; }
+    .chip-kids { background: #fef3c7; color: #92400e; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
-    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .size-barcode-row { display: grid; grid-template-columns: 60px 80px 1fr 75px; gap: 8px; align-items: center; margin-bottom: 6px; background: white; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
+    .size-barcode-row { display: grid; grid-template-columns: 75px 80px 1fr 70px 30px; gap: 6px; align-items: center; margin-bottom: 6px; background: white; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #thermalBillArea, #thermalBillArea *, #reorderPrintArea, #reorderPrintArea * { visibility: visible; }
+      #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
+      #reorderPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- TOP APP BAR -->
+  <!-- HEADER -->
   <header>
     <div>
       <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
         DN Footwear & Sports
-        <span class="sync-status" id="cloudBadge"><span class="sync-dot"></span> Live Sync</span>
+        <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
       </h2>
-      <span style="font-size:11px; opacity:0.8;">Firebase Cloud Database • Sabhi Devices Connected</span>
+      <span style="font-size:11px; opacity:0.8;">Customized Sizes, Kids & Ladies Stock System</span>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Dabba Scan (Check)</button>
@@ -76,7 +92,7 @@
   </header>
 
   <div class="container">
-    <!-- STATS -->
+    <!-- STATS (Clickable Kam Stock Card) -->
     <div class="stats-grid">
       <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">KUL FOOTWEAR PAIRS</small>
@@ -92,28 +108,52 @@
         <div class="stat-num" id="dTodaySales" style="color:#10b981;">₹0</div>
         <small id="dTodayPairs" style="color:#64748b;">0 Pairs Beche</small>
       </div>
-      <div class="stat-card">
-        <small style="color:#64748b; font-weight:700;">KAM STOCK WARNING (&le; 3)</small>
+      <div class="stat-card stat-card-clickable" onclick="toggleLowStockFilter()" style="border-left: 4px solid #ef4444;" title="Kam stock wale dekhne ke liye click karein">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <small style="color:#ef4444; font-weight:700;">KAM STOCK WARNING (≤ 3)</small>
+          <span style="font-size:10px; background:#fee2e2; color:#ef4444; padding:2px 5px; border-radius:4px; font-weight:bold;">Filter</span>
+        </div>
         <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
+        <small style="color:#64748b; font-size:11px;">Naya maal mangwane ke liye click karein</small>
       </div>
     </div>
 
-    <!-- FILTER -->
+    <!-- FILTER BAR -->
     <div class="filter-bar">
       <input type="text" id="searchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, barcode ya color..." class="search-box">
-      <button class="btn btn-slate" onclick="backupJSON()">💾 Data Backup</button>
+      
+      <select id="genderFilter" onchange="renderApp()" class="form-control" style="width:auto;">
+        <option value="ALL">Sabhi (Men, Ladies, Kids)</option>
+        <option value="Men">Men (Gents)</option>
+        <option value="Ladies">Ladies (Women)</option>
+        <option value="Kids">Kids (Bachhe)</option>
+      </select>
+
+      <!-- STOCK LEVEL FILTER -->
+      <select id="stockLevelFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold; border-color:#cbd5e1;">
+        <option value="ALL">Sabhi Stock (All)</option>
+        <option value="LOW" style="color:#ea580c; font-weight:bold;">⚠️ Kam Stock (≤ 3 Pairs)</option>
+        <option value="OUT" style="color:#dc2626; font-weight:bold;">🚨 Bilkul Khatam (0 Stock)</option>
+      </select>
+
+      <button class="btn btn-red" onclick="openReorderModal()" style="font-size:12px;" title="Naya maal order karne ke liye list dekhein">
+        📋 Reorder List (Kam Stock)
+      </button>
+
+      <button class="btn btn-slate" onclick="backupJSON()">💾 Backup</button>
     </div>
 
-    <!-- TABLE -->
+    <!-- INVENTORY TABLE -->
     <div style="overflow-x:auto;">
       <table>
         <thead>
           <tr>
             <th>Photo & Name</th>
             <th>Brand & Color</th>
-            <th>Available Sizes (Stock)</th>
-            <th>Kul Jodi</th>
-            <th>Bikri Rate</th>
+            <th>Type</th>
+            <th>Available Sizes (Stock Status)</th>
+            <th>Kul Stock</th>
+            <th>Tag Rate</th>
             <th style="text-align:right;">Actions</th>
           </tr>
         </thead>
@@ -157,14 +197,31 @@
             <input type="text" id="fColor" required placeholder="e.g. Black / White" class="form-control">
           </div>
           <div class="form-group">
-            <label>Category</label>
+            <label>Category (Item Type)</label>
             <select id="fCategory" class="form-control">
               <option value="Sports/Running">Sports & Running</option>
               <option value="Casual/Sneakers">Casual Sneakers</option>
               <option value="Formal Shoes">Formal Shoes</option>
               <option value="Slippers/Chappal">Slippers & Chappal</option>
               <option value="Sandals">Sandals</option>
+              <option value="School Shoes">School Shoes</option>
             </select>
+          </div>
+        </div>
+
+        <!-- GENDER & PRESET SIZE SELECTION -->
+        <div class="form-group" style="background:#eef2ff; padding:10px; border-radius:8px; border:1px solid #c7d2fe;">
+          <label style="color:#3730a3;">Kiske Liye Hai (Select Gender & Sizes):</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #c7d2fe; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer; background:white;">
+              <input type="radio" name="fGender" value="Men" checked onchange="changeSizePreset('Men')"> Men (Gents: 6-11)
+            </label>
+            <label style="border:1px solid #c7d2fe; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer; background:white;">
+              <input type="radio" name="fGender" value="Ladies" onchange="changeSizePreset('Ladies')"> Ladies (3-8)
+            </label>
+            <label style="border:1px solid #c7d2fe; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer; background:white;">
+              <input type="radio" name="fGender" value="Kids" onchange="changeSizePreset('Kids')"> Kids (Bachhe: 1-13)
+            </label>
           </div>
         </div>
 
@@ -174,23 +231,27 @@
             <input type="number" id="fCost" required min="0" placeholder="550" class="form-control">
           </div>
           <div class="form-group">
-            <label>Bikri Rate (₹) *</label>
+            <label>Bikri Rate (Tag Price ₹) *</label>
             <input type="number" id="fPrice" required min="0" placeholder="899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
         </div>
 
-        <!-- PER SIZE BARCODE INPUTS -->
+        <!-- SIZE BREAKDOWN & CUSTOM SIZES -->
         <div class="form-group" style="background:#f1f5f9; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <label style="margin:0; font-size:12px; font-weight:800; color:#0f172a;">Har Size Ka Alag Barcode & Scanner:</label>
-            <button type="button" onclick="autoGenerateAllBarcodes()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Sabhi Bharo</button>
+            <label style="margin:0; font-size:12px; font-weight:800; color:#0f172a;">Size-wise Stock & Barcodes:</label>
+            <div style="display:flex; gap:6px;">
+              <button type="button" onclick="promptCustomSize()" class="btn btn-blue" style="padding:3px 8px; font-size:11px;">+ Custom Size Jodein</button>
+              <button type="button" onclick="autoGenerateAllBarcodes()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Barcode</button>
+            </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: 60px 80px 1fr 75px; gap:8px; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 6px;">
+          <div style="display:grid; grid-template-columns: 75px 80px 1fr 70px 30px; gap:6px; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 6px;">
             <span>SIZE</span>
             <span>QTY</span>
             <span>BOX BARCODE</span>
             <span style="text-align:center;">SCAN</span>
+            <span></span>
           </div>
 
           <div id="sizeBarcodeInputsContainer"></div>
@@ -206,10 +267,10 @@
 
   <!-- 2. QUICK SIZE CHECK POPUP MODAL -->
   <div id="checkModal" class="modal">
-    <div class="modal-box" style="text-align:center; max-width:400px;">
+    <div class="modal-box" style="text-align:center; max-width:420px;">
       <img id="chkImg" src="" style="width:130px; height:130px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
       <h3 id="chkTitle" style="font-size:16px; margin-bottom:2px;">Campus Rodeo</h3>
-      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Color: Black</div>
+      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Type: Men • Color: Black</div>
       <div id="chkPrice" style="font-size:16px; font-weight:800; color:#10b981; margin-bottom:12px;">₹999</div>
 
       <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
@@ -224,64 +285,164 @@
     </div>
   </div>
 
-  <!-- 3. NEW BIKRI (SALE CHECKOUT) POPUP -->
+  <!-- 3. REORDER LIST MODAL (KAM STOCK SUMMARY LIST) -->
+  <div id="reorderModal" class="modal">
+    <div class="modal-box" style="max-width:550px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
+        <h3 style="font-size:16px; font-weight:800; color:#dc2626; display:flex; align-items:center; gap:6px;">
+          ⚠️ Kam Stock & Reorder List
+        </h3>
+        <button class="btn btn-slate" onclick="closeReorderModal()">✕</button>
+      </div>
+
+      <div id="reorderPrintArea">
+        <div style="margin-bottom:12px;">
+          <h4 style="font-size:16px; font-weight:900; margin:0;">DN FOOTWEAR - PURCHASE REORDER SHEET</h4>
+          <p style="font-size:11px; color:#64748b; margin:2px 0;">Ye wo models aur sizes hain jinme stock kam ya khatam ho gaya hai:</p>
+        </div>
+
+        <div id="reorderListContent" style="max-height:55vh; overflow-y:auto;">
+          <!-- Dynamically filled table -->
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; border-top:1px solid #e2e8f0; padding-top:10px;" class="no-print">
+        <span id="reorderTotalCount" style="font-size:12px; font-weight:bold; color:#dc2626;">0 items need restock</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-blue" onclick="window.print()">🖨️ Print Sheet</button>
+          <button class="btn btn-slate" onclick="closeReorderModal()">Band Karein</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. SMART BIKRI CHECKOUT MODAL -->
   <div id="saleModal" class="modal">
-    <div class="modal-box" style="max-width:420px;">
+    <div class="modal-box" style="max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Confirm Karein</h3>
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Billing Counter</h3>
         <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
       </div>
 
-      <div style="display:flex; gap:10px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:12px;">
-        <img id="saleImg" src="" style="width:55px; height:55px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
-        <div>
+      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+        <img id="saleImg" src="" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
+        <div style="flex:1;">
           <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
-          <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:bold;">Size: 8</span>
-          <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold; margin-left:6px;">Stock: 4 Pairs</span>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+            <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Size: 8</span>
+            <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold;">Stock: 4 Pairs</span>
+          </div>
         </div>
       </div>
 
-      <form onsubmit="confirmSaleTransaction(event)">
-        <div class="row" style="margin-bottom:10px;">
+      <form id="saleForm" onsubmit="confirmSaleTransaction(event, false)">
+        <div class="row" style="margin-bottom:12px;">
           <div>
-            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Dukaan Tag Rate:</label>
-            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:4px;">₹999</div>
+            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Box Tag Rate:</label>
+            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:5px;">₹999</div>
           </div>
           <div>
             <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
-            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:16px; font-weight:bold; color:#10b981; border-color:#10b981;">
+            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981; border:2px solid #10b981;">
           </div>
         </div>
 
         <div class="form-group">
-          <label>Payment Mode (Kaise Paise Mile):</label>
+          <label>Payment Mode (Kaise Paise Aaye):</label>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
-            <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="CASH" checked> Cash
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Cash" checked> Cash
             </label>
-            <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="UPI"> UPI / QR
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="UPI / QR"> UPI / PhonePe
             </label>
-            <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="KHATA"> Udhaar
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Udhaar"> Udhaar / Khata
             </label>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Grahak Ka Naam / Mobile (Optional):</label>
-          <input type="text" id="saleCustomer" placeholder="Grahak ka naam ya phone number..." class="form-control">
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="saleCustName" placeholder="Customer name..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="saleCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
-          <button type="button" class="btn btn-slate" onclick="closeSaleModal()">Cancel</button>
-          <button type="submit" class="btn btn-green" style="padding:10px 18px; font-size:14px;">Bikri Save Karein (Stock -1)</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center; padding:10px;">
+            🖨️ Save & Print Bill
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:10px;">
+            ✓ Sirf Save Karein
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- 4. CAMERA BARCODE SCANNER MODAL -->
+  <!-- 5. THERMAL RECEIPT MODAL -->
+  <div id="receiptModal" class="modal">
+    <div class="modal-box" style="max-width:350px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
+        <span style="font-weight:bold; font-size:13px;">Customer Bill Receipt</span>
+        <button class="btn btn-slate" onclick="closeReceiptModal()" style="padding:2px 8px;">✕</button>
+      </div>
+
+      <div id="thermalBillArea" style="background:#fff; border:1px dashed #cbd5e1; padding:12px; border-radius:6px; font-family:monospace; font-size:12px; color:#000;">
+        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
+          <h3 style="font-size:15px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS</h3>
+          <p style="font-size:10px; margin:2px 0;">Bus Stand Road, Siriyari</p>
+          <p style="font-size:10px; margin:0;">Mo: 8209452284, 9636422794</p>
+        </div>
+
+        <div style="font-size:11px; margin-bottom:8px; line-height:1.4;">
+          <div>Bill No: <b id="rBillNo">DN-1001</b></div>
+          <div>Date: <span id="rDate">26-10-2026</span></div>
+          <div>Customer: <span id="rCust">Walk-in</span></div>
+          <div>Payment: <b id="rPayMode">Cash</b></div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
+          <thead>
+            <tr>
+              <th style="padding:4px 0; text-align:left; background:transparent;">Item</th>
+              <th style="padding:4px 0; text-align:center; background:transparent;">Sz</th>
+              <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
+              <td style="padding:4px 0; text-align:center;" id="rItemSize">8</td>
+              <td style="padding:4px 0; text-align:right;" id="rItemRate">₹850</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="text-align:right; margin-bottom:8px;">
+          <div style="font-size:10px; color:#555;">Tag Price: <strike id="rTagPrice">₹999</strike></div>
+          <div style="font-size:14px; font-weight:900;">TOTAL: <span id="rFinalTotal">₹850</span></div>
+        </div>
+
+        <div style="text-align:center; font-size:10px; border-top:1px dashed #000; padding-top:6px;">
+          <p style="margin:0; font-weight:bold;">Dhanyawad! Phir Padharein.</p>
+          <p style="margin:2px 0 0 0; font-size:9px;">Exchange bill ke sath 7 dino me suvidha uplabdh.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;" class="no-print">
+        <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="window.print()">🖨️ Print Receipt</button>
+        <button class="btn btn-slate" style="width:100%; justify-content:center;" onclick="closeReceiptModal()">Band Karein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CAMERA BARCODE SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -297,9 +458,7 @@
   </div>
 
   <script>
-    // ========================================================
-    // YOUR LIVE FIREBASE CONFIGURATION
-    // ========================================================
+    // FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
       authDomain: "dn-stock.firebaseapp.com",
@@ -314,7 +473,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const ALL_SIZES = [5, 6, 7, 8, 9, 10, 11];
+    const GENDER_PRESETS = {
+      'Men': [6, 7, 8, 9, 10, 11],
+      'Ladies': [3, 4, 5, 6, 7, 8],
+      'Kids': [1, 2, 3, 4, 11, 12, 13]
+    };
+
+    let activeFormSizes = [...GENDER_PRESETS['Men']];
     let items = [];
     let salesHistory = [];
 
@@ -330,7 +495,6 @@
 
     // REALTIME LIVE DATABASE SYNC
     function initLiveSync() {
-      // Stock Listen
       db.ref('footwear_stock').on('value', (snapshot) => {
         const data = snapshot.val();
         items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -338,7 +502,6 @@
         renderApp();
       });
 
-      // Sales History Listen
       db.ref('footwear_sales').on('value', (snapshot) => {
         const data = snapshot.val();
         salesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -354,18 +517,37 @@
       db.ref('footwear_stock/' + id).remove();
     }
 
+    function toggleLowStockFilter() {
+      const select = document.getElementById('stockLevelFilter');
+      select.value = (select.value === 'LOW') ? 'ALL' : 'LOW';
+      renderApp();
+    }
+
     function renderApp() {
       const tbody = document.getElementById('inventoryRows');
       const search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
+      const genderFlt = document.getElementById('genderFilter').value;
+      const stockLevelFlt = document.getElementById('stockLevelFilter').value;
 
       let totalPairs = 0, totalCost = 0, lowStock = 0;
       let html = '';
 
       items.forEach(it => {
+        const itGender = it.gender || 'Men';
+        if (genderFlt !== 'ALL' && itGender !== genderFlt) return;
+
         const p = Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
         totalPairs += p;
         totalCost += (p * (it.cost || 0));
-        if (p <= 3) lowStock++;
+        
+        // Low Stock calculation (<= 3 pairs)
+        const isLow = (p <= 3);
+        const isOut = (p === 0);
+        if (isLow) lowStock++;
+
+        // Apply Stock Level Filter
+        if (stockLevelFlt === 'LOW' && !isLow) return;
+        if (stockLevelFlt === 'OUT' && !isOut) return;
 
         const allBarcodesStr = Object.values(it.barcodes || {}).join(' ').toLowerCase();
 
@@ -376,39 +558,50 @@
 
         if (!matchSearch) return;
 
-        const sizeBadges = ALL_SIZES.map(s => {
-          const q = (it.sizes && it.sizes[s]) ? it.sizes[s] : 0;
-          return q > 0 
-            ? `<span class="size-badge size-in">${s}:${q}</span>` 
-            : `<span class="size-badge size-out">${s}</span>`;
+        const availableKeys = Object.keys(it.sizes || {});
+        const sizeBadges = availableKeys.map(s => {
+          const q = it.sizes[s] || 0;
+          let badgeClass = 'size-in';
+          if (q === 0) badgeClass = 'size-out';
+          else if (q <= 2) badgeClass = 'size-low';
+          return `<span class="size-badge ${badgeClass}" title="Size ${s}: ${q} pairs">${s}:${q}</span>`;
         }).join('');
+
+        let chipClass = 'chip-men';
+        if (itGender === 'Ladies') chipClass = 'chip-ladies';
+        if (itGender === 'Kids') chipClass = 'chip-kids';
 
         html += `<tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
               <img src="${it.photo || 'https://via.placeholder.com/50'}" class="shoe-img">
-              <div><b>${it.name}</b><br><small style="color:#64748b;">${it.category}</small></div>
+              <div>
+                <b>${it.name}</b>
+                ${isLow ? '<span style="font-size:9px; background:#fee2e2; color:#dc2626; padding:1px 4px; border-radius:3px; font-weight:bold; margin-left:4px;">Kam Stock</span>' : ''}
+                <br><small style="color:#64748b;">${it.category}</small>
+              </div>
             </div>
           </td>
           <td><b>${it.brand}</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ${it.color || 'Standard'}</small></td>
+          <td><span class="gender-chip ${chipClass}">${itGender}</span></td>
           <td>${sizeBadges}</td>
-          <td><b>${p}</b> Pairs</td>
+          <td><b style="${isLow ? 'color:#ef4444;' : 'color:#0f172a;'}">${p} Pairs</b></td>
           <td><b style="color:#10b981;">₹${it.price}</b></td>
           <td style="text-align:right;">
             <button class="btn btn-amber" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="openCheckPopup('${it.id}')">Sizes</button>
+            <button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'), null)">🛒 Bechein</button>
             <button class="btn btn-indigo" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="editShoe('${it.id}')">✏️</button>
             <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe('${it.id}')">🗑️</button>
           </td>
         </tr>`;
       });
 
-      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Database me abhi koi stock nahi hai. "+ Naya Footwear Jodein" par click karein!</td></tr>';
+      tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Filter ke mutabiq koi footwear nahi mila.</td></tr>';
       document.getElementById('dTotalPairs').innerText = totalPairs;
       document.getElementById('dTotalModels').innerText = items.length + " Models";
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
       document.getElementById('dLowStock').innerText = lowStock;
 
-      // Aaj Ki Bikri Calculation
       const today = new Date().toISOString().slice(0, 10);
       let todaySalesAmount = 0;
       let todayPairsSold = 0;
@@ -422,20 +615,98 @@
       document.getElementById('dTodayPairs').innerText = todayPairsSold + " Pairs Beche";
     }
 
+    // ==================== LOW STOCK REORDER MODAL ====================
+    function openReorderModal() {
+      const container = document.getElementById('reorderListContent');
+      let lowItemsCount = 0;
+      let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">' +
+                 '<thead><tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1;">' +
+                 '<th style="padding:8px; text-align:left;">Shoe Name & Brand</th>' +
+                 '<th style="padding:8px; text-align:center;">Type</th>' +
+                 '<th style="padding:8px; text-align:left;">Kaunse Sizes Kam / 0 Hain</th>' +
+                 '<th style="padding:8px; text-align:right;">Kul Bacha</th>' +
+                 '</tr></thead><tbody>';
+
+      items.forEach(it => {
+        const totalP = Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
+        const lowSizes = [];
+
+        Object.keys(it.sizes || {}).forEach(sz => {
+          const qty = it.sizes[sz] || 0;
+          if (qty <= 1) {
+            lowSizes.push(`<b style="${qty === 0 ? 'color:#dc2626;' : 'color:#ea580c;'}">Sz ${sz} (${qty})</b>`);
+          }
+        });
+
+        if (totalP <= 3 || lowSizes.length > 0) {
+          lowItemsCount++;
+          html += `<tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:8px;"><b>${it.name}</b><br><small style="color:#64748b;">${it.brand} • ${it.color||''}</small></td>
+            <td style="padding:8px; text-align:center;"><small>${it.gender||'Men'}</small></td>
+            <td style="padding:8px;">${lowSizes.join(', ') || 'Sabhi sizes low'}</td>
+            <td style="padding:8px; text-align:right;"><b style="${totalP <= 2 ? 'color:#dc2626;' : 'color:#ea580c;'}">${totalP} Pairs</b></td>
+          </tr>`;
+        }
+      });
+
+      html += '</tbody></table>';
+
+      if (lowItemsCount === 0) {
+        html = '<div style="text-align:center; padding:30px; color:#10b981; font-weight:bold;">Badhiya! Sabhi joote paryapt stock me hain. Koi bhi item kam nahi hai.</div>';
+      }
+
+      container.innerHTML = html;
+      document.getElementById('reorderTotalCount').innerText = `${lowItemsCount} Models me stock kam hai`;
+      document.getElementById('reorderModal').style.display = 'flex';
+    }
+
+    function closeReorderModal() {
+      document.getElementById('reorderModal').style.display = 'none';
+    }
+
+    // FORM SIZES HANDLING
+    function changeSizePreset(gender) {
+      activeFormSizes = [...(GENDER_PRESETS[gender] || GENDER_PRESETS['Men'])];
+      buildSizeBarcodeInputs();
+    }
+
+    function promptCustomSize() {
+      const customSz = prompt("Naya Custom Size daalein (Jaise: 12, 13, 4.5, ya Free):");
+      if (customSz) {
+        const trimmed = customSz.trim().toUpperCase();
+        if (!activeFormSizes.includes(trimmed)) {
+          activeFormSizes.push(trimmed);
+          buildSizeBarcodeInputs();
+        } else {
+          alert("Yeh size pehle se list me hai!");
+        }
+      }
+    }
+
+    function removeFormSize(sz) {
+      if (confirm(`Kya aap Size [${sz}] ko is list se hatana chahte hain?`)) {
+        activeFormSizes = activeFormSizes.filter(s => String(s) !== String(sz));
+        buildSizeBarcodeInputs();
+      }
+    }
+
     function buildSizeBarcodeInputs(sizesData = {}, barcodesData = {}) {
       const container = document.getElementById('sizeBarcodeInputsContainer');
       let html = '';
-      ALL_SIZES.forEach(s => {
-        const qty = sizesData[s] !== undefined ? sizesData[s] : 0;
-        const bcode = barcodesData[s] || '';
+
+      activeFormSizes.forEach(s => {
+        const qty = sizesData[s] !== undefined ? sizesData[s] : (document.getElementById(`sz_qty_${s}`) ? document.getElementById(`sz_qty_${s}`).value : 0);
+        const bcode = barcodesData[s] !== undefined ? barcodesData[s] : (document.getElementById(`sz_code_${s}`) ? document.getElementById(`sz_code_${s}`).value : '');
 
         html += `<div class="size-barcode-row">
-          <span style="font-weight:bold; color:#0f172a;">Size ${s}</span>
+          <span style="font-weight:bold; color:#0f172a; font-size:12px;">Sz ${s}</span>
           <input type="number" min="0" value="${qty}" id="sz_qty_${s}" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
-          <input type="text" value="${bcode}" id="sz_code_${s}" placeholder="Size ${s} box barcode..." class="form-control" style="padding:4px 8px; font-family:monospace; font-size:12px;">
-          <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:11px; justify-content:center;" onclick="scanForSpecificSize(${s})">📷 Scan</button>
+          <input type="text" value="${bcode}" id="sz_code_${s}" placeholder="Box barcode..." class="form-control" style="padding:4px 6px; font-family:monospace; font-size:11px;">
+          <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:11px; justify-content:center;" onclick="scanForSpecificSize('${s}')">📷 Scan</button>
+          <button type="button" onclick="removeFormSize('${s}')" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Size Hatayein">✕</button>
         </div>`;
       });
+
       container.innerHTML = html;
     }
 
@@ -446,8 +717,9 @@
 
     function autoGenerateAllBarcodes() {
       const randPrefix = 'FP' + Math.floor(100 + Math.random() * 900);
-      ALL_SIZES.forEach(s => {
-        document.getElementById('sz_code_' + s).value = `${randPrefix}-S${s}`;
+      activeFormSizes.forEach(s => {
+        const inp = document.getElementById('sz_code_' + s);
+        if (inp) inp.value = `${randPrefix}-S${s}`;
       });
     }
 
@@ -457,6 +729,9 @@
       uploadedPhotoData = '';
       document.getElementById('fImgPreview').src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80";
       document.getElementById('shoeModalTitle').innerText = "Naya Footwear Jodein";
+      
+      document.querySelector('input[name="fGender"][value="Men"]').checked = true;
+      activeFormSizes = [...GENDER_PRESETS['Men']];
       buildSizeBarcodeInputs();
       document.getElementById('shoeModal').style.display = 'flex';
     }
@@ -495,27 +770,30 @@
       const brand = document.getElementById('fBrand').value.trim();
       const color = document.getElementById('fColor').value.trim();
       const category = document.getElementById('fCategory').value;
+      const gender = document.querySelector('input[name="fGender"]:checked').value;
       const cost = Number(document.getElementById('fCost').value) || 0;
       const price = Number(document.getElementById('fPrice').value) || 0;
 
       const sizes = {};
       const barcodes = {};
 
-      ALL_SIZES.forEach(s => {
-        sizes[s] = Number(document.getElementById('sz_qty_' + s).value) || 0;
-        barcodes[s] = document.getElementById('sz_code_' + s).value.trim();
+      activeFormSizes.forEach(s => {
+        const qInp = document.getElementById('sz_qty_' + s);
+        const bInp = document.getElementById('sz_code_' + s);
+        sizes[s] = qInp ? Number(qInp.value) || 0 : 0;
+        barcodes[s] = bInp ? bInp.value.trim() : '';
       });
 
       const existing = items.find(x => x.id === id);
       const itemObj = {
-        id, name, brand, color, category, cost, price,
+        id, name, brand, color, category, gender, cost, price,
         photo: uploadedPhotoData || (existing ? existing.photo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80'),
         sizes, barcodes
       };
 
       saveItemToCloud(itemObj);
       closeShoeModal();
-      alert("Footwear Cloud par save ho gaya! Har device par update ho gaya hai.");
+      alert("Footwear Cloud par save ho gaya! Sabhi devices me update ho gaya hai.");
     }
 
     function editShoe(id) {
@@ -529,6 +807,13 @@
       document.getElementById('fCategory').value = it.category;
       document.getElementById('fCost').value = it.cost;
       document.getElementById('fPrice').value = it.price;
+
+      const itGender = it.gender || 'Men';
+      const genRadio = document.querySelector(`input[name="fGender"][value="${itGender}"]`);
+      if (genRadio) genRadio.checked = true;
+
+      activeFormSizes = Object.keys(it.sizes || {});
+      if (activeFormSizes.length === 0) activeFormSizes = [...(GENDER_PRESETS[itGender] || GENDER_PRESETS['Men'])];
 
       uploadedPhotoData = it.photo || '';
       document.getElementById('fImgPreview').src = it.photo || 'https://via.placeholder.com/50';
@@ -555,13 +840,14 @@
 
       document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/120';
       document.getElementById('chkTitle').innerText = it.name;
-      document.getElementById('chkMeta').innerText = `${it.brand} • Color: ${it.color || 'Standard'}`;
+      document.getElementById('chkMeta').innerText = `${it.brand} • Type: ${it.gender || 'Men'} • Color: ${it.color || 'Standard'}`;
       document.getElementById('chkPrice').innerText = `Rate: ₹${it.price}`;
 
       let html = '';
-      ALL_SIZES.forEach(s => {
-        const q = (it.sizes && it.sizes[s]) ? it.sizes[s] : 0;
-        const isThisScannedBox = (s === highlightSize);
+      const shoeSizes = Object.keys(it.sizes || {});
+      shoeSizes.forEach(s => {
+        const q = it.sizes[s] || 0;
+        const isThisScannedBox = (String(s) === String(highlightSize));
 
         if (q > 0) {
           html += `<div style="background:${isThisScannedBox ? '#fef3c7; border:2px solid #f59e0b;' : '#dcfce7; border:1px solid #86efac;'} border-radius:6px; padding:6px 2px;">
@@ -585,14 +871,14 @@
       document.getElementById('checkModal').style.display = 'none';
     }
 
-    // ==================== BIKRI (SALE CHECKOUT) SYSTEM ====================
+    // BIKRI (SALE CHECKOUT)
     function openSaleCheckout(item, preferredSize = null) {
       if (!item) return;
 
-      // Agar size scan se pata nahi chala toh pehla available size le lo
+      const availSizes = Object.keys(item.sizes || {});
       let sellSize = preferredSize;
       if (!sellSize || !item.sizes[sellSize] || item.sizes[sellSize] <= 0) {
-        sellSize = ALL_SIZES.find(s => item.sizes[s] > 0);
+        sellSize = availSizes.find(s => item.sizes[s] > 0);
       }
 
       if (!sellSize) {
@@ -609,10 +895,12 @@
       document.getElementById('saleStockRem').innerText = `Stock: ${item.sizes[sellSize]} Pairs`;
 
       document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
-      document.getElementById('saleFinalPrice').value = item.price; // Default selling price
-      document.getElementById('saleCustomer').value = '';
+      document.getElementById('saleFinalPrice').value = item.price; 
+      document.getElementById('saleCustName').value = '';
+      document.getElementById('saleCustPhone').value = '';
 
       closeCheckModal();
+      closeScannerModal();
       document.getElementById('saleModal').style.display = 'flex';
     }
 
@@ -620,26 +908,29 @@
       document.getElementById('saleModal').style.display = 'none';
     }
 
-    function confirmSaleTransaction(e) {
-      e.preventDefault();
+    function confirmSaleTransaction(e, shouldPrint = false) {
+      if (e) e.preventDefault();
       if (!currentSellingItem || !currentSellingSize) return;
 
       const finalPrice = Number(document.getElementById('saleFinalPrice').value);
       const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
-      const customer = document.getElementById('saleCustomer').value.trim() || 'Walk-in Customer';
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
 
       if (currentSellingItem.sizes[currentSellingSize] <= 0) {
         alert("Stock me joota uplabdh nahi hai!");
         return;
       }
 
-      // Stock minus 1
       currentSellingItem.sizes[currentSellingSize] -= 1;
       saveItemToCloud(currentSellingItem);
 
-      // Record transaction
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowStr = new Date().toLocaleString('en-IN');
+
       const saleRecord = {
         id: 'sale_' + Date.now(),
+        billNo: billNo,
         date: new Date().toISOString(),
         itemId: currentSellingItem.id,
         name: currentSellingItem.name,
@@ -650,16 +941,43 @@
         sellPrice: finalPrice,
         profit: finalPrice - (currentSellingItem.cost || 0),
         payMode: payMode,
-        customer: customer
+        customer: custName,
+        phone: custPhone
       };
 
       db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
 
       closeSaleModal();
-      alert(`Bikri Safal! ₹${finalPrice} me becha gaya. Size ${currentSellingSize} ka stock -1 ho gaya.`);
+
+      if (shouldPrint) {
+        showReceipt(saleRecord, nowStr);
+      } else {
+        alert(`Bikri Safal! ₹${finalPrice} me becha gaya. Stock update ho gaya hai.`);
+      }
     }
 
-    // ==================== BARCODE SCANNER ====================
+    function showReceipt(record, dateStr) {
+      document.getElementById('rBillNo').innerText = record.billNo;
+      document.getElementById('rDate').innerText = dateStr;
+      document.getElementById('rCust').innerText = `${record.customer} ${record.phone ? '('+record.phone+')' : ''}`;
+      document.getElementById('rPayMode').innerText = record.payMode;
+      document.getElementById('rItemName').innerText = `${record.name} (${record.brand})`;
+      document.getElementById('rItemSize').innerText = record.size;
+      document.getElementById('rItemRate').innerText = `₹${record.sellPrice}`;
+      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice}`;
+      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice}`;
+
+      document.getElementById('receiptModal').style.display = 'flex';
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    // SCANNER
     function openScannerModal(mode) {
       currentScanAction = mode;
       document.getElementById('scannerModal').style.display = 'flex';
@@ -696,7 +1014,8 @@
       const c = code.trim().toLowerCase();
 
       if (currentScanAction === 'size_barcode' && targetScanSize) {
-        document.getElementById(`sz_code_${targetScanSize}`).value = code.trim();
+        const inp = document.getElementById(`sz_code_${targetScanSize}`);
+        if (inp) inp.value = code.trim();
         closeScannerModal();
         alert(`Size ${targetScanSize} ka Barcode set ho gaya: ${code.trim()}`);
         return;
@@ -711,7 +1030,7 @@
           for (let sz in it.barcodes) {
             if (it.barcodes[sz] && it.barcodes[sz].toLowerCase() === c) {
               matchedItem = it;
-              matchedSize = Number(sz);
+              matchedSize = sz;
               break;
             }
           }
