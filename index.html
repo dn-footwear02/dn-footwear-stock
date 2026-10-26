@@ -1,13 +1,41 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
+  authDomain: "dn-stock.firebaseapp.com",
+  databaseURL: "https://dn-stock-default-rtdb.firebaseio.com",
+  projectId: "dn-stock",
+  storageBucket: "dn-stock.firebasestorage.app",
+  messagingSenderId: "108722534878",
+  appId: "1:108722534878:web:6db2959ce4132d961b454f",
+  measurementId: "G-DJB9LF6ZDJ"
+};
+```[cite: 9]
+
+Maine aapki **poori `index.html` file me aapka real database connect kar diya hai**. Ab aap chahe laptop me stock add karein ya phone me, sabhi devices par bina refresh kiye live sync hoga!
+
+---
+
+### Complete Ready-to-Use `index.html` Code:
+
+Is poore code ko copy karke GitHub par apni `index.html` file me paste kar dein aur neeche **Commit changes** kar dein:
+
+```html
 <!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear - Stock & POS</title>
+  <title>DN Footwear - Live Cloud Stock & POS</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <!-- Barcode Scanner -->
   <script src="https://unpkg.com/html5-qrcode" defer></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #1e293b; padding-bottom: 50px; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 60px; }
     header { background: #1e1b4b; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; }
     .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
     .btn:active { transform: scale(0.97); }
@@ -18,7 +46,11 @@
     .btn-red { background: #ef4444; color: #fff; }
     .btn-slate { background: #e2e8f0; color: #334155; }
     
-    .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+    .container { max-width: 1150px; margin: 20px auto; padding: 0 15px; }
+    .sync-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
+    .sync-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; }
     .stat-num { font-size: 22px; font-weight: 800; margin-top: 4px; color: #0f172a; }
@@ -32,40 +64,40 @@
     tr:hover { background: #f8fafc; }
 
     .shoe-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
-    .size-badge { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: 700; border-radius: 4px; margin: 1px; }
+    .size-badge { display: inline-block; padding: 3px 6px; font-size: 11px; font-weight: 700; border-radius: 4px; margin: 1px; }
     .size-in { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .size-out { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
-    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 490px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .size-inputs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
-    .size-inputs div { text-align: center; }
-    .size-inputs small { font-weight: 700; color: #64748b; font-size: 11px; }
-    .size-inputs input { width: 100%; text-align: center; padding: 5px 0; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 700; font-size: 12px; }
+    .size-barcode-row { display: grid; grid-template-columns: 60px 80px 1fr 75px; gap: 8px; align-items: center; margin-bottom: 6px; background: white; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
   </style>
 </head>
 <body>
 
-  <!-- TOP HEADER -->
+  <!-- TOP APP BAR -->
   <header>
     <div>
-      <h2 style="font-size:18px; font-weight:800;">DN Footwear & Sports</h2>
-      <span style="font-size:11px; opacity:0.8;">Footwear Stock, Sizes & POS</span>
+      <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+        DN Footwear & Sports
+        <span class="sync-status" id="cloudBadge"><span class="sync-dot"></span> Live Sync</span>
+      </h2>
+      <span style="font-size:11px; opacity:0.8;">Firebase Cloud Database • Sabhi Devices Connected</span>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Stock Check</button>
+      <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Dabba Scan (Check)</button>
       <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
-      <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
+      <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock Inward (+)</button>
       <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Footwear Jodein</button>
     </div>
   </header>
 
   <div class="container">
-    <!-- DASHBOARD -->
+    <!-- STATS -->
     <div class="stats-grid">
       <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">KUL FOOTWEAR PAIRS</small>
@@ -82,20 +114,20 @@
       </div>
     </div>
 
-    <!-- FILTER BAR -->
+    <!-- FILTER -->
     <div class="filter-bar">
-      <input type="text" id="searchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, barcode, color..." class="search-box">
+      <input type="text" id="searchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, barcode ya color..." class="search-box">
       <button class="btn btn-slate" onclick="backupJSON()">💾 Data Backup</button>
     </div>
 
-    <!-- INVENTORY TABLE -->
+    <!-- TABLE -->
     <div style="overflow-x:auto;">
       <table>
         <thead>
           <tr>
             <th>Photo & Name</th>
             <th>Brand & Color</th>
-            <th>Sizes (5 to 11) Available</th>
+            <th>Available Sizes (Stock)</th>
             <th>Kul Jodi</th>
             <th>Bikri Rate</th>
             <th style="text-align:right;">Actions</th>
@@ -117,7 +149,7 @@
         <input type="hidden" id="fId">
 
         <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-          <label>Shoe Photo (Camera Snap ya Gallery):</label>
+          <label>Shoe Photo (Camera / Gallery):</label>
           <div style="display:flex; gap:10px; align-items:center;">
             <img id="fImgPreview" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80" style="width:55px; height:55px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
             <input type="file" accept="image/*" onchange="previewUploadImage(this)" class="form-control">
@@ -163,35 +195,26 @@
           </div>
         </div>
 
-        <!-- BARCODE SECTION WITH SCAN & AUTO GENERATE BUTTONS -->
-        <div class="form-group">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <label style="margin:0;">Shoe Barcode (Box Sticker Code) *</label>
-            <button type="button" onclick="autoGenerateBarcode()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Generate</button>
+        <!-- PER SIZE BARCODE INPUTS -->
+        <div class="form-group" style="background:#f1f5f9; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label style="margin:0; font-size:12px; font-weight:800; color:#0f172a;">Har Size Ka Alag Barcode & Scanner:</label>
+            <button type="button" onclick="autoGenerateAllBarcodes()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Sabhi Bharo</button>
           </div>
-          <div style="display:flex; gap:6px;">
-            <input type="text" id="fBarcode" required placeholder="Dabbe ka barcode type karein..." class="form-control" style="font-family:monospace; letter-spacing:1px;">
-            <button type="button" class="btn btn-amber" style="padding:6px 12px; font-size:12px; white-space:nowrap;" onclick="scanBoxForForm()">📷 Box Scan</button>
-          </div>
-          <small style="color:#64748b; font-size:11px;">Dabbe par chapa company barcode camera se scan kar sakte hain ya manual likh sakte hain.</small>
-        </div>
 
-        <div class="form-group">
-          <label>Size-wise Quantity (Kitne Pairs Stock me hain):</label>
-          <div class="size-inputs">
-            <div><small>5</small><input type="number" min="0" value="0" id="sz_5"></div>
-            <div><small>6</small><input type="number" min="0" value="0" id="sz_6"></div>
-            <div><small>7</small><input type="number" min="0" value="0" id="sz_7"></div>
-            <div><small>8</small><input type="number" min="0" value="0" id="sz_8"></div>
-            <div><small>9</small><input type="number" min="0" value="0" id="sz_9"></div>
-            <div><small>10</small><input type="number" min="0" value="0" id="sz_10"></div>
-            <div><small>11</small><input type="number" min="0" value="0" id="sz_11"></div>
+          <div style="display:grid; grid-template-columns: 60px 80px 1fr 75px; gap:8px; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 6px;">
+            <span>SIZE</span>
+            <span>QTY</span>
+            <span>BOX BARCODE</span>
+            <span style="text-align:center;">SCAN</span>
           </div>
+
+          <div id="sizeBarcodeInputsContainer"></div>
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
           <button type="button" class="btn btn-slate" onclick="closeShoeModal()">Cancel</button>
-          <button type="submit" class="btn btn-indigo">Stock Save Karein</button>
+          <button type="submit" class="btn btn-indigo">Cloud Par Save Karein</button>
         </div>
       </form>
     </div>
@@ -199,14 +222,14 @@
 
   <!-- 2. QUICK SIZE CHECK POPUP MODAL -->
   <div id="checkModal" class="modal">
-    <div class="modal-box" style="text-align:center; max-width:380px;">
+    <div class="modal-box" style="text-align:center; max-width:400px;">
       <img id="chkImg" src="" style="width:130px; height:130px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
       <h3 id="chkTitle" style="font-size:16px; margin-bottom:2px;">Campus Rodeo</h3>
-      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:6px;">Campus • Color: Black</div>
+      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Color: Black</div>
       <div id="chkPrice" style="font-size:16px; font-weight:800; color:#10b981; margin-bottom:12px;">₹999</div>
 
       <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
-        <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:8px;">AVAILABLE SIZES (KITNI JODI HAI):</div>
+        <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:8px;">AVAILABLE SIZES (STOCK STATUS):</div>
         <div id="chkSizesGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;"></div>
       </div>
 
@@ -217,7 +240,7 @@
     </div>
   </div>
 
-  <!-- 3. SCANNER MODAL -->
+  <!-- 3. CAMERA BARCODE SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -233,102 +256,146 @@
   </div>
 
   <script>
-    var items = JSON.parse(localStorage.getItem('DN_APP_STOCK_V1')) || [
-      {
-        id: "1",
-        name: "Campus Rodeo Running",
-        brand: "Campus",
-        color: "Black / Grey",
-        category: "Sports/Running",
-        cost: 650,
-        price: 999,
-        barcode: "CAMP-101",
-        photo: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80",
-        sizes: { 5: 2, 6: 4, 7: 6, 8: 8, 9: 4, 10: 0, 11: 0 }
-      },
-      {
-        id: "2",
-        name: "Sparx SM-676 Casual",
-        brand: "Sparx",
-        color: "White / Navy",
-        category: "Casual/Sneakers",
-        cost: 450,
-        price: 749,
-        barcode: "SPX-676",
-        photo: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=200&q=80",
-        sizes: { 5: 0, 6: 3, 7: 5, 8: 3, 9: 0, 10: 0, 11: 0 }
-      }
-    ];
+    // ========================================================
+    // YOUR LIVE FIREBASE CONFIGURATION
+    // ========================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
+      authDomain: "dn-stock.firebaseapp.com",
+      databaseURL: "https://dn-stock-default-rtdb.firebaseio.com",
+      projectId: "dn-stock",
+      storageBucket: "dn-stock.firebasestorage.app",
+      messagingSenderId: "108722534878",
+      appId: "1:108722534878:web:6db2959ce4132d961b454f",
+      measurementId: "G-DJB9LF6ZDJ"
+    };
 
-    var scannerObj = null;
-    var currentScanAction = 'check'; // 'check' | 'sale' | 'inward' | 'form_barcode'
-    var uploadedPhotoData = '';
-    var activePopupItem = null;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    function saveState() {
-      localStorage.setItem('DN_APP_STOCK_V1', JSON.stringify(items));
-      renderApp();
+    const ALL_SIZES = [5, 6, 7, 8, 9, 10, 11];
+    let items = [];
+
+    let scannerObj = null;
+    let currentScanAction = 'check';
+    let targetScanSize = null;
+    let uploadedPhotoData = '';
+    let activePopupItem = null;
+    let activeHighlightedSize = null;
+
+    // REALTIME LIVE DATABASE SYNC
+    function initLiveSync() {
+      db.ref('footwear_stock').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          items = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        } else {
+          items = [];
+        }
+        localStorage.setItem('DN_MULTI_BARCODE_STOCK', JSON.stringify(items));
+        renderApp();
+      });
+    }
+
+    function saveItemToCloud(itemObj) {
+      db.ref('footwear_stock/' + itemObj.id).set(itemObj);
+    }
+
+    function deleteItemFromCloud(id) {
+      db.ref('footwear_stock/' + id).remove();
     }
 
     function renderApp() {
-      var tbody = document.getElementById('inventoryRows');
-      var search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
+      const tbody = document.getElementById('inventoryRows');
+      const search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
 
-      var totalPairs = 0, totalCost = 0, lowStock = 0;
-      var html = '';
+      let totalPairs = 0, totalCost = 0, lowStock = 0;
+      let html = '';
 
-      items.forEach(function(it) {
-        var p = Object.values(it.sizes).reduce(function(a, b) { return a + Number(b); }, 0);
+      items.forEach(it => {
+        const p = Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
         totalPairs += p;
-        totalCost += (p * it.cost);
+        totalCost += (p * (it.cost || 0));
         if (p <= 3) lowStock++;
 
-        var matchSearch = it.name.toLowerCase().includes(search) || 
+        const allBarcodesStr = Object.values(it.barcodes || {}).join(' ').toLowerCase();
+
+        const matchSearch = it.name.toLowerCase().includes(search) || 
                           it.brand.toLowerCase().includes(search) || 
-                          it.barcode.toLowerCase().includes(search) ||
+                          allBarcodesStr.includes(search) ||
                           (it.color && it.color.toLowerCase().includes(search));
 
         if (!matchSearch) return;
 
-        var sizeBadges = [5, 6, 7, 8, 9, 10, 11].map(function(s) {
-          var q = it.sizes[s] || 0;
-          return q > 0 ? '<span class="size-badge size-in">' + s + ':' + q + '</span>' : '<span class="size-badge size-out">' + s + '</span>';
+        const sizeBadges = ALL_SIZES.map(s => {
+          const q = (it.sizes && it.sizes[s]) ? it.sizes[s] : 0;
+          return q > 0 
+            ? `<span class="size-badge size-in">${s}:${q}</span>` 
+            : `<span class="size-badge size-out">${s}</span>`;
         }).join('');
 
-        html += '<tr>' +
-          '<td>' +
-            '<div style="display:flex; align-items:center; gap:8px;">' +
-              '<img src="' + (it.photo || 'https://via.placeholder.com/50') + '" class="shoe-img">' +
-              '<div><b>' + it.name + '</b><br><small style="color:#64748b;">' + it.category + '</small></div>' +
-            '</div>' +
-          '</td>' +
-          '<td><b>' + it.brand + '</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ' + (it.color || 'Standard') + '</small><br><small style="font-family:monospace; color:#64748b;">' + it.barcode + '</small></td>' +
-          '<td>' + sizeBadges + '</td>' +
-          '<td><b>' + p + '</b> Pairs</td>' +
-          '<td><b style="color:#10b981;">₹' + it.price + '</b></td>' +
-          '<td style="text-align:right;">' +
-            '<button class="btn btn-amber" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="openCheckPopup(\'' + it.id + '\')">Sizes</button>' +
-            '<button class="btn btn-indigo" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="editShoe(\'' + it.id + '\')">✏️</button>' +
-            '<button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe(\'' + it.id + '\')">🗑️</button>' +
-          '</td>' +
-        '</tr>';
+        html += `<tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="${it.photo || 'https://via.placeholder.com/50'}" class="shoe-img">
+              <div><b>${it.name}</b><br><small style="color:#64748b;">${it.category}</small></div>
+            </div>
+          </td>
+          <td><b>${it.brand}</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ${it.color || 'Standard'}</small></td>
+          <td>${sizeBadges}</td>
+          <td><b>${p}</b> Pairs</td>
+          <td><b style="color:#10b981;">₹${it.price}</b></td>
+          <td style="text-align:right;">
+            <button class="btn btn-amber" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="openCheckPopup('${it.id}')">Sizes</button>
+            <button class="btn btn-indigo" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="editShoe('${it.id}')">✏️</button>
+            <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe('${it.id}')">🗑️</button>
+          </td>
+        </tr>`;
       });
 
-      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi Footwear Nahi Mila.</td></tr>';
+      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Database me abhi koi stock nahi hai. "+ Naya Footwear Jodein" par click karein!</td></tr>';
       document.getElementById('dTotalPairs').innerText = totalPairs;
       document.getElementById('dTotalModels').innerText = items.length + " Models";
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
       document.getElementById('dLowStock').innerText = lowStock;
     }
 
-    // FORM MODAL
+    function buildSizeBarcodeInputs(sizesData = {}, barcodesData = {}) {
+      const container = document.getElementById('sizeBarcodeInputsContainer');
+      let html = '';
+      ALL_SIZES.forEach(s => {
+        const qty = sizesData[s] !== undefined ? sizesData[s] : 0;
+        const bcode = barcodesData[s] || '';
+
+        html += `<div class="size-barcode-row">
+          <span style="font-weight:bold; color:#0f172a;">Size ${s}</span>
+          <input type="number" min="0" value="${qty}" id="sz_qty_${s}" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
+          <input type="text" value="${bcode}" id="sz_code_${s}" placeholder="Size ${s} box barcode..." class="form-control" style="padding:4px 8px; font-family:monospace; font-size:12px;">
+          <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:11px; justify-content:center;" onclick="scanForSpecificSize(${s})">📷 Scan</button>
+        </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function scanForSpecificSize(size) {
+      targetScanSize = size;
+      openScannerModal('size_barcode');
+    }
+
+    function autoGenerateAllBarcodes() {
+      const randPrefix = 'FP' + Math.floor(100 + Math.random() * 900);
+      ALL_SIZES.forEach(s => {
+        document.getElementById('sz_code_' + s).value = `${randPrefix}-S${s}`;
+      });
+    }
+
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
       uploadedPhotoData = '';
       document.getElementById('fImgPreview').src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80";
-      autoGenerateBarcode();
       document.getElementById('shoeModalTitle').innerText = "Naya Footwear Jodein";
+      buildSizeBarcodeInputs();
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
@@ -336,20 +403,24 @@
       document.getElementById('shoeModal').style.display = 'none';
     }
 
-    function autoGenerateBarcode() {
-      document.getElementById('fBarcode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
-    }
-
-    function scanBoxForForm() {
-      openScannerModal('form_barcode');
-    }
-
     function previewUploadImage(input) {
       if (input.files && input.files[0]) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = function(e) {
-          uploadedPhotoData = e.target.result;
-          document.getElementById('fImgPreview').src = uploadedPhotoData;
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX = 300;
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+            else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            uploadedPhotoData = canvas.toDataURL('image/jpeg', 0.7);
+            document.getElementById('fImgPreview').src = uploadedPhotoData;
+          };
+          img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
       }
@@ -357,46 +428,36 @@
 
     function submitShoeForm(e) {
       e.preventDefault();
-      var id = document.getElementById('fId').value || String(Date.now());
-      var name = document.getElementById('fName').value.trim();
-      var brand = document.getElementById('fBrand').value.trim();
-      var color = document.getElementById('fColor').value.trim();
-      var category = document.getElementById('fCategory').value;
-      var cost = Number(document.getElementById('fCost').value) || 0;
-      var price = Number(document.getElementById('fPrice').value) || 0;
-      var barcode = document.getElementById('fBarcode').value.trim();
+      const id = document.getElementById('fId').value || ('shoe_' + Date.now());
+      const name = document.getElementById('fName').value.trim();
+      const brand = document.getElementById('fBrand').value.trim();
+      const color = document.getElementById('fColor').value.trim();
+      const category = document.getElementById('fCategory').value;
+      const cost = Number(document.getElementById('fCost').value) || 0;
+      const price = Number(document.getElementById('fPrice').value) || 0;
 
-      var sizes = {
-        5: Number(document.getElementById('sz_5').value) || 0,
-        6: Number(document.getElementById('sz_6').value) || 0,
-        7: Number(document.getElementById('sz_7').value) || 0,
-        8: Number(document.getElementById('sz_8').value) || 0,
-        9: Number(document.getElementById('sz_9').value) || 0,
-        10: Number(document.getElementById('sz_10').value) || 0,
-        11: Number(document.getElementById('sz_11').value) || 0
+      const sizes = {};
+      const barcodes = {};
+
+      ALL_SIZES.forEach(s => {
+        sizes[s] = Number(document.getElementById('sz_qty_' + s).value) || 0;
+        barcodes[s] = document.getElementById('sz_code_' + s).value.trim();
+      });
+
+      const existing = items.find(x => x.id === id);
+      const itemObj = {
+        id, name, brand, color, category, cost, price,
+        photo: uploadedPhotoData || (existing ? existing.photo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80'),
+        sizes, barcodes
       };
 
-      var existingIdx = items.findIndex(function(x) { return x.id === id; });
-      var obj = {
-        id: id, name: name, brand: brand, color: color, category: category,
-        cost: cost, price: price, barcode: barcode,
-        photo: uploadedPhotoData || (existingIdx > -1 ? items[existingIdx].photo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80'),
-        sizes: sizes
-      };
-
-      if (existingIdx > -1) {
-        items[existingIdx] = obj;
-      } else {
-        items.unshift(obj);
-      }
-
-      saveState();
+      saveItemToCloud(itemObj);
       closeShoeModal();
-      alert("Footwear Stock Me Save Ho Gaya!");
+      alert("Footwear Cloud par save ho gaya! Har device par update ho gaya hai.");
     }
 
     function editShoe(id) {
-      var it = items.find(function(x) { return x.id === id; });
+      const it = items.find(x => x.id === id);
       if (!it) return;
 
       document.getElementById('fId').value = it.id;
@@ -406,53 +467,51 @@
       document.getElementById('fCategory').value = it.category;
       document.getElementById('fCost').value = it.cost;
       document.getElementById('fPrice').value = it.price;
-      document.getElementById('fBarcode').value = it.barcode;
-
-      [5, 6, 7, 8, 9, 10, 11].forEach(function(s) {
-        document.getElementById('sz_' + s).value = it.sizes[s] || 0;
-      });
 
       uploadedPhotoData = it.photo || '';
       document.getElementById('fImgPreview').src = it.photo || 'https://via.placeholder.com/50';
       document.getElementById('shoeModalTitle').innerText = "Footwear Edit Karein";
+
+      buildSizeBarcodeInputs(it.sizes, it.barcodes);
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
     function deleteShoe(id) {
-      var it = items.find(function(x) { return x.id === id; });
+      const it = items.find(x => x.id === id);
       if (!it) return;
 
-      if (confirm("Kya aap sach me [" + it.name + "] ko stock se HATANA chahte hain?")) {
-        items = items.filter(function(x) { return x.id !== id; });
-        saveState();
-        alert("Item stock se hata diya gaya hai.");
+      if (confirm(`Kya aap sach me [${it.name}] ko sabhi devices se hatana chahte hain?`)) {
+        deleteItemFromCloud(id);
       }
     }
 
-    // POPUP SIZE CHECK
-    function openCheckPopup(id) {
-      var it = items.find(function(x) { return x.id === id; });
+    function openCheckPopup(id, highlightSize = null) {
+      const it = items.find(x => x.id === id);
       if (!it) return;
       activePopupItem = it;
+      activeHighlightedSize = highlightSize;
 
       document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/120';
       document.getElementById('chkTitle').innerText = it.name;
-      document.getElementById('chkMeta').innerText = it.brand + ' • Color: ' + (it.color || 'Standard');
-      document.getElementById('chkPrice').innerText = 'Rate: ₹' + it.price;
+      document.getElementById('chkMeta').innerText = `${it.brand} • Color: ${it.color || 'Standard'}`;
+      document.getElementById('chkPrice').innerText = `Rate: ₹${it.price}`;
 
-      var html = '';
-      [5, 6, 7, 8, 9, 10, 11].forEach(function(s) {
-        var q = it.sizes[s] || 0;
+      let html = '';
+      ALL_SIZES.forEach(s => {
+        const q = (it.sizes && it.sizes[s]) ? it.sizes[s] : 0;
+        const isThisScannedBox = (s === highlightSize);
+
         if (q > 0) {
-          html += '<div style="background:#dcfce7; border:1px solid #86efac; border-radius:6px; padding:6px 2px;">' +
-                  '<b style="font-size:12px; display:block; color:#166534;">Sz ' + s + '</b>' +
-                  '<span style="font-size:11px; font-weight:bold; color:#15803d;">' + q + ' Jodi</span>' +
-                  '</div>';
+          html += `<div style="background:${isThisScannedBox ? '#fef3c7; border:2px solid #f59e0b;' : '#dcfce7; border:1px solid #86efac;'} border-radius:6px; padding:6px 2px;">
+                  <b style="font-size:12px; display:block; color:#166534;">Sz ${s}</b>
+                  <span style="font-size:11px; font-weight:bold; color:#15803d;">${q} Jodi</span>
+                  ${isThisScannedBox ? '<small style="display:block; font-size:9px; background:#f59e0b; color:#000; font-weight:bold; border-radius:3px; margin-top:2px;">IS BOX KA</small>' : ''}
+                  </div>`;
         } else {
-          html += '<div style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:6px 2px; opacity:0.5;">' +
-                  '<s style="font-size:12px; color:#94a3b8; display:block;">Sz ' + s + '</s>' +
-                  '<span style="font-size:10px; color:#ef4444; font-weight:bold;">Khatam</span>' +
-                  '</div>';
+          html += `<div style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:6px 2px; opacity:0.5;">
+                  <s style="font-size:12px; color:#94a3b8; display:block;">Sz ${s}</s>
+                  <span style="font-size:10px; color:#ef4444; font-weight:bold;">Khatam</span>
+                  </div>`;
         }
       });
 
@@ -466,26 +525,26 @@
 
     function sellFromPopup() {
       if (!activePopupItem) return;
-      var sz = prompt("[" + activePopupItem.name + "] ka kaun sa size bechna hai? (5-11):", "7");
+      const defaultSz = activeHighlightedSize || "7";
+      const sz = prompt(`[${activePopupItem.name}] ka kaun sa size bechna hai?`, defaultSz);
       if (sz && activePopupItem.sizes[sz] > 0) {
         activePopupItem.sizes[sz] -= 1;
-        saveState();
-        alert("Bikri Safal! Size " + sz + " se 1 pair kam ho gaya.");
-        openCheckPopup(activePopupItem.id);
+        saveItemToCloud(activePopupItem);
+        alert(`Bikri Safal! Size ${sz} se 1 pair kam hua. Sabhi devices par update ho gaya!`);
+        openCheckPopup(activePopupItem.id, activeHighlightedSize);
       } else {
         alert("Yeh size stock me nahi hai!");
       }
     }
 
-    // SCANNER
     function openScannerModal(mode) {
       currentScanAction = mode;
       document.getElementById('scannerModal').style.display = 'flex';
-      var titles = {
+      const titles = {
         'check': '🔍 Dabba Scan Karke Available Sizes Dekhein',
         'sale': '🛒 Bikri Scan: Dabba scan karke stock kam karein',
         'inward': '📦 Stock Inward: Dabba scan karke +1 stock badhayein',
-        'form_barcode': '📷 Box Barcode Scan Karke Form me Bharein'
+        'size_barcode': `📷 Size ${targetScanSize || ''} Ka Box Barcode Scan Karein`
       };
       document.getElementById('scannerTitle').innerText = titles[mode] || 'Camera Scanner';
 
@@ -495,16 +554,14 @@
           { facingMode: "environment" },
           { fps: 15, qrbox: { width: 250, height: 180 } },
           onScanFound,
-          function() {}
-        ).catch(function() {
-          alert("Camera chalu nahi hua. Browser me camera allow karein.");
-        });
+          () => {}
+        ).catch(() => alert("Camera permission allow karein."));
       }
     }
 
     function closeScannerModal() {
       if (scannerObj && scannerObj.isScanning) {
-        scannerObj.stop().then(function() {
+        scannerObj.stop().then(() => {
           document.getElementById('scannerModal').style.display = 'none';
         });
       } else {
@@ -513,59 +570,70 @@
     }
 
     function onScanFound(code) {
-      var c = code.trim();
+      const c = code.trim().toLowerCase();
 
-      // Agar form ke liye barcode scan kiya gaya hai:
-      if (currentScanAction === 'form_barcode') {
-        document.getElementById('fBarcode').value = c;
+      if (currentScanAction === 'size_barcode' && targetScanSize) {
+        document.getElementById(`sz_code_${targetScanSize}`).value = code.trim();
         closeScannerModal();
-        alert("Box Barcode Scan Ho Gaya: " + c);
+        alert(`Size ${targetScanSize} ka Barcode set ho gaya: ${code.trim()}`);
         return;
       }
 
-      var found = items.find(function(x) { return x.barcode.toLowerCase() === c.toLowerCase(); });
-      if (!found) {
-        alert("Barcode [" + c + "] database me nahi mila!");
+      let matchedItem = null;
+      let matchedSize = null;
+
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        if (it.barcodes) {
+          for (let sz in it.barcodes) {
+            if (it.barcodes[sz] && it.barcodes[sz].toLowerCase() === c) {
+              matchedItem = it;
+              matchedSize = Number(sz);
+              break;
+            }
+          }
+        }
+        if (matchedItem) break;
+      }
+
+      if (!matchedItem) {
+        alert(`Barcode [${code.trim()}] kisi bhi jootey ke size se match nahi hua!`);
         return;
       }
 
       if (currentScanAction === 'check') {
         closeScannerModal();
-        openCheckPopup(found.id);
+        openCheckPopup(matchedItem.id, matchedSize);
       } else if (currentScanAction === 'inward') {
-        var sz = prompt("[" + found.name + "] ka kaun sa size badhana hai? (5-11):", "7");
-        if (sz && found.sizes.hasOwnProperty(sz)) {
-          found.sizes[sz] = (found.sizes[sz] || 0) + 1;
-          saveState();
-          alert("Size " + sz + " me 1 pair badh gaya! Ab kul: " + found.sizes[sz]);
-        }
+        matchedItem.sizes[matchedSize] = (matchedItem.sizes[matchedSize] || 0) + 1;
+        saveItemToCloud(matchedItem);
+        alert(`[${matchedItem.name}] Size ${matchedSize} me +1 stock ho gaya!`);
       } else if (currentScanAction === 'sale') {
-        var sellSz = prompt("[" + found.name + "] ka kaun sa size bechna hai? (5-11):", "7");
-        if (sellSz && found.sizes[sellSz] > 0) {
-          found.sizes[sellSz] -= 1;
-          saveState();
-          alert("Bikri Safal! Size " + sellSz + " se 1 pair kam hua.");
+        if (matchedItem.sizes[matchedSize] > 0) {
+          matchedItem.sizes[matchedSize] -= 1;
+          saveItemToCloud(matchedItem);
+          alert(`Bikri Safal! [${matchedItem.name}] Size ${matchedSize} se 1 pair kam hua.`);
         } else {
-          alert("Size uplabdh nahi hai!");
+          alert(`[${matchedItem.name}] Size ${matchedSize} out of stock hai!`);
         }
       }
     }
 
     function handleManualScan() {
-      var val = document.getElementById('manualInput').value.trim();
+      const val = document.getElementById('manualInput').value.trim();
       if (val) onScanFound(val);
     }
 
     function backupJSON() {
-      var blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
-      var a = document.createElement('a');
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "DN_Footwear_Backup.json";
+      a.download = "DN_Footwear_LiveStock_Backup.json";
       a.click();
     }
 
     window.onload = function() {
-      renderApp();
+      initLiveSync();
     };
   </script>
 </body>
