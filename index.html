@@ -1,4 +1,4 @@
--<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -152,7 +152,7 @@
         <small id="dTotalTagValue" style="color:#64748b; font-weight:bold;">Tag Value: ₹0</small>
       </div>
 
-      <!-- TOTAL BIKRI CARD (WITH CASH & UPI BREAKDOWN) -->
+      <!-- TOTAL BIKRI CARD -->
       <div class="stat-card" style="border-left: 4px solid #10b981; cursor:pointer;" onclick="openSalesReportModal()" title="Click karke poori report dekhein">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <small style="color:#10b981; font-weight:700;">TOTAL BIKRI (SALES)</small>
@@ -212,7 +212,7 @@
       </table>
     </div>
 
-    <!-- ==================== UNLIMITED SLIDE PHOTO MANAGER (NICHE ADDED) ==================== -->
+    <!-- ==================== UNLIMITED SLIDE PHOTO MANAGER ==================== -->
     <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
         <div>
@@ -269,7 +269,7 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- A. TOTAL BIKRI REPORT MODAL (CASH, UPI & EXCEL DOWNLOAD) -->
+  <!-- A. TOTAL BIKRI REPORT MODAL -->
   <div id="salesReportModal" class="modal">
     <div class="modal-box" style="max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
@@ -524,7 +524,7 @@
     </div>
   </div>
 
-  <!-- E. CHECK MODAL (WITH DIRECT BECHEIN BUTTON) -->
+  <!-- E. CHECK MODAL -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="max-width:500px; padding:22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
@@ -777,23 +777,34 @@
         renderApp();
       });
 
-      // SYNC UNLIMITED CATALOG BANNERS
+      // Banner Sync
+      initBannerSync();
+    }
+
+    // ==================== UNLIMITED SLIDE PHOTO FUNCTIONS ====================
+    function initBannerSync() {
+      try {
+        const localCached = JSON.parse(localStorage.getItem('dn_cached_banners') || '[]');
+        if (localCached && localCached.length > 0) {
+          catalogBanners = localCached;
+          renderAdminSlideThumbs();
+          renderCustomerSlider();
+        }
+      } catch(e) {}
+
       db.ref('catalog_banners').on('value', (snapshot) => {
         const val = snapshot.val();
         if (val) {
-          catalogBanners = Array.isArray(val) ? val : Object.values(val);
+          catalogBanners = Array.isArray(val) ? val.filter(Boolean) : Object.values(val);
         } else {
-          // Fallback initial banner
-          catalogBanners = [
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80"
-          ];
+          catalogBanners = [];
         }
+        localStorage.setItem('dn_cached_banners', JSON.stringify(catalogBanners));
         renderAdminSlideThumbs();
         renderCustomerSlider();
       });
     }
 
-    // ==================== UNLIMITED SLIDE PHOTO FUNCTIONS ====================
     function handleUnlimitedSlideUpload(event) {
       const files = event.target.files;
       if (!files || files.length === 0) return;
@@ -807,25 +818,35 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 900;
+            const MAX_WIDTH = 800;
             let w = img.width, h = img.height;
             if (w > MAX_WIDTH) {
-              h = (h * MAX_WIDTH) / w;
+              h = Math.round((h * MAX_WIDTH) / w);
               w = MAX_WIDTH;
             }
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
-            const compressed = canvas.toDataURL('image/jpeg', 0.75);
-
+            
+            const compressed = canvas.toDataURL('image/jpeg', 0.65);
             newPhotos.push(compressed);
             loadedCount++;
+
             if (loadedCount === files.length) {
               const updatedBanners = [...catalogBanners, ...newPhotos];
-              db.ref('catalog_banners').set(updatedBanners).then(() => {
-                alert(`✓ ${newPhotos.length} Banner Photos jud gayi hain!`);
-              });
+              catalogBanners = updatedBanners;
+              localStorage.setItem('dn_cached_banners', JSON.stringify(updatedBanners));
+              renderAdminSlideThumbs();
+              renderCustomerSlider();
+
+              db.ref('catalog_banners').set(updatedBanners)
+                .then(() => {
+                  alert(`✓ ${newPhotos.length} Photo(s) slide me jud gayi hain!`);
+                })
+                .catch(err => {
+                  console.error(err);
+                });
             }
           };
           img.src = e.target.result;
@@ -838,14 +859,28 @@
     function deleteSingleCatalogBanner(index) {
       if (confirm("Kya aap is slide photo ko hatana chahte hain?")) {
         catalogBanners.splice(index, 1);
-        db.ref('catalog_banners').set(catalogBanners);
+        localStorage.setItem('dn_cached_banners', JSON.stringify(catalogBanners));
+        renderAdminSlideThumbs();
+        renderCustomerSlider();
+
+        db.ref('catalog_banners').set(catalogBanners)
+          .then(() => {
+            alert("✓ Slide photo hata di gayi hai!");
+          });
       }
     }
 
     function deleteAllCatalogBanners() {
-      if (confirm("Kya aap saari catalog banner slides delete karna chahte hain?")) {
+      if (confirm("Kya aap saari slide photos delete karna chahte hain?")) {
         catalogBanners = [];
-        db.ref('catalog_banners').set([]);
+        localStorage.removeItem('dn_cached_banners');
+        renderAdminSlideThumbs();
+        renderCustomerSlider();
+
+        db.ref('catalog_banners').set([])
+          .then(() => {
+            alert("✓ Saari slides delete ho gayi hain!");
+          });
       }
     }
 
@@ -859,9 +894,9 @@
       }
 
       box.innerHTML = catalogBanners.map((src, idx) => `
-        <div style="position:relative; width:90px; height:60px; border-radius:8px; overflow:hidden; border:1px solid #cbd5e1; flex-shrink:0; background:#000;">
-          <img src="${src}" style="width:100%; height:100%; object-fit:cover;">
-          <button onclick="deleteSingleCatalogBanner(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;" title="Delete">✕</button>
+        <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#0f172a; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+          <img src="${src}" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <button type="button" onclick="deleteSingleCatalogBanner(${idx})" style="position:absolute; top:3px; right:3px; background:rgba(239,68,68,0.95); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.3);" title="Hatao">✕</button>
         </div>
       `).join('');
     }
@@ -871,7 +906,7 @@
       if (!container) return;
 
       if (!catalogBanners || catalogBanners.length === 0) {
-        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px;">Koi Banner Photo Uplabdh Nahi Hai</div>';
+        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px; font-weight:bold;">Koi Banner Photo Uplabdh Nahi Hai</div>';
         return;
       }
 
@@ -890,7 +925,7 @@
       if (catalogBanners.length > 1) {
         bannerSlideTimer = setInterval(() => {
           shiftBannerSlide(1);
-        }, 3200);
+        }, 3000);
       }
     }
 
@@ -1171,8 +1206,12 @@
     // COLOR BLOCKS & SIZES
     function addNewColorBlock() {
       const input = document.getElementById('manualColorInput');
-      const color = input.value.trim();
-      if (!color) { alert("Pehle rang ka naam likhein!"); return; }
+      const rawColor = input.value.trim();
+      if (!rawColor) { alert("Pehle rang ka naam likhein!"); return; }
+
+      // Firebase dot/slash error fix
+      const color = rawColor.replace(/[\.\#\$\/\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+
       if (colorDataMap[color]) { alert("Yeh rang pehle se jud chuka hai!"); return; }
 
       const curGender = document.getElementById('fGenderSelect').value || 'Men';
@@ -1345,7 +1384,7 @@
               const canvas = document.createElement('canvas');
               const MAX = 450;
               let w = img.width, h = img.height;
-              if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+              if (w > MAX) { if (w > MAX) { h *= MAX / w; w = MAX; } }
               else { if (h > MAX) { w *= MAX / h; h = MAX; } }
               canvas.width = w; canvas.height = h;
               const ctx = canvas.getContext('2d');
@@ -1427,16 +1466,23 @@
       if (!name) { alert("Item name zaroori hai!"); return; }
       if (price <= 0) { alert("Bikri rate bharein!"); return; }
 
-      const colors = Object.keys(colorDataMap);
-      if (itemType === 'footwear' && colors.length === 0) {
+      const rawColors = Object.keys(colorDataMap);
+      if (itemType === 'footwear' && rawColors.length === 0) {
         alert("Kam se kam ek rang jodkar uska stock bharein!");
         return;
       }
 
+      // Safe clean keys for Firebase
+      const safeColorData = {};
+      rawColors.forEach(c => {
+        const cleanKey = c.replace(/[\.\#\$\/\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+        safeColorData[cleanKey] = colorDataMap[c];
+      });
+
       let mainPhoto = '';
-      for (let c in colorDataMap) {
-        if (colorDataMap[c].photos && colorDataMap[c].photos[0]) {
-          mainPhoto = colorDataMap[c].photos[0];
+      for (let c in safeColorData) {
+        if (safeColorData[c].photos && safeColorData[c].photos[0]) {
+          mainPhoto = safeColorData[c].photos[0];
           break;
         }
       }
@@ -1445,8 +1491,8 @@
       const itemObj = {
         id, itemType, name, brand, category, cost, price,
         gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
-        colors: colors,
-        colorData: colorDataMap,
+        colors: Object.keys(safeColorData),
+        colorData: safeColorData,
         photo: mainPhoto,
         generalQty: (itemType === 'general') ? Number(document.getElementById('fGeneralQty').value) || 0 : 0,
         generalBarcode: (itemType === 'general') ? document.getElementById('fGeneralBarcode').value.trim() : ''
@@ -1458,7 +1504,7 @@
           alert("✓ Safalta-purvak Cloud Par Save Ho Gaya!");
         })
         .catch((err) => {
-          alert("Error: " + err.message);
+          alert("Firebase Error: " + err.message);
         });
     }
 
@@ -1881,7 +1927,6 @@
         currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] -= 1;
       }
 
-      // Update in Firebase Realtime Database
       db.ref('footwear_stock/' + currentSellingItem.id).set(currentSellingItem);
 
       const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
