@@ -88,6 +88,11 @@
         <div class="stat-num" id="dTotalCost" style="color:#2563eb;">₹0</div>
       </div>
       <div class="stat-card">
+        <small style="color:#64748b; font-weight:700;">AAJ KI KUL BIKRI (SALES)</small>
+        <div class="stat-num" id="dTodaySales" style="color:#10b981;">₹0</div>
+        <small id="dTodayPairs" style="color:#64748b;">0 Pairs Beche</small>
+      </div>
+      <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">KAM STOCK WARNING (&le; 3)</small>
         <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
       </div>
@@ -213,13 +218,70 @@
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-        <button class="btn btn-green" onclick="sellFromPopup()" style="justify-content:center;">🛒 Bechein</button>
+        <button class="btn btn-green" onclick="openSaleCheckout(activePopupItem, activeHighlightedSize)" style="justify-content:center;">🛒 Bechein</button>
         <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center;">Band Karein</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. CAMERA BARCODE SCANNER MODAL -->
+  <!-- 3. NEW BIKRI (SALE CHECKOUT) POPUP -->
+  <div id="saleModal" class="modal">
+    <div class="modal-box" style="max-width:420px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Confirm Karein</h3>
+        <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:12px;">
+        <img id="saleImg" src="" style="width:55px; height:55px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
+        <div>
+          <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
+          <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:bold;">Size: 8</span>
+          <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold; margin-left:6px;">Stock: 4 Pairs</span>
+        </div>
+      </div>
+
+      <form onsubmit="confirmSaleTransaction(event)">
+        <div class="row" style="margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Dukaan Tag Rate:</label>
+            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:4px;">₹999</div>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
+            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:16px; font-weight:bold; color:#10b981; border-color:#10b981;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Mode (Kaise Paise Mile):</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="CASH" checked> Cash
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="UPI"> UPI / QR
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="KHATA"> Udhaar
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Grahak Ka Naam / Mobile (Optional):</label>
+          <input type="text" id="saleCustomer" placeholder="Grahak ka naam ya phone number..." class="form-control">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-slate" onclick="closeSaleModal()">Cancel</button>
+          <button type="submit" class="btn btn-green" style="padding:10px 18px; font-size:14px;">Bikri Save Karein (Stock -1)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. CAMERA BARCODE SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -254,6 +316,7 @@
 
     const ALL_SIZES = [5, 6, 7, 8, 9, 10, 11];
     let items = [];
+    let salesHistory = [];
 
     let scannerObj = null;
     let currentScanAction = 'check';
@@ -262,16 +325,23 @@
     let activePopupItem = null;
     let activeHighlightedSize = null;
 
+    let currentSellingItem = null;
+    let currentSellingSize = null;
+
     // REALTIME LIVE DATABASE SYNC
     function initLiveSync() {
+      // Stock Listen
       db.ref('footwear_stock').on('value', (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-          items = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        } else {
-          items = [];
-        }
+        items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         localStorage.setItem('DN_MULTI_BARCODE_STOCK', JSON.stringify(items));
+        renderApp();
+      });
+
+      // Sales History Listen
+      db.ref('footwear_sales').on('value', (snapshot) => {
+        const data = snapshot.val();
+        salesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
       });
     }
@@ -337,6 +407,19 @@
       document.getElementById('dTotalModels').innerText = items.length + " Models";
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
       document.getElementById('dLowStock').innerText = lowStock;
+
+      // Aaj Ki Bikri Calculation
+      const today = new Date().toISOString().slice(0, 10);
+      let todaySalesAmount = 0;
+      let todayPairsSold = 0;
+      salesHistory.forEach(s => {
+        if (s.date && s.date.startsWith(today)) {
+          todaySalesAmount += Number(s.sellPrice) || 0;
+          todayPairsSold += 1;
+        }
+      });
+      document.getElementById('dTodaySales').innerText = "₹" + todaySalesAmount.toLocaleString('en-IN');
+      document.getElementById('dTodayPairs').innerText = todayPairsSold + " Pairs Beche";
     }
 
     function buildSizeBarcodeInputs(sizesData = {}, barcodesData = {}) {
@@ -502,26 +585,87 @@
       document.getElementById('checkModal').style.display = 'none';
     }
 
-    function sellFromPopup() {
-      if (!activePopupItem) return;
-      const defaultSz = activeHighlightedSize || "7";
-      const sz = prompt(`[${activePopupItem.name}] ka kaun sa size bechna hai?`, defaultSz);
-      if (sz && activePopupItem.sizes[sz] > 0) {
-        activePopupItem.sizes[sz] -= 1;
-        saveItemToCloud(activePopupItem);
-        alert(`Bikri Safal! Size ${sz} se 1 pair kam hua. Sabhi devices par update ho gaya!`);
-        openCheckPopup(activePopupItem.id, activeHighlightedSize);
-      } else {
-        alert("Yeh size stock me nahi hai!");
+    // ==================== BIKRI (SALE CHECKOUT) SYSTEM ====================
+    function openSaleCheckout(item, preferredSize = null) {
+      if (!item) return;
+
+      // Agar size scan se pata nahi chala toh pehla available size le lo
+      let sellSize = preferredSize;
+      if (!sellSize || !item.sizes[sellSize] || item.sizes[sellSize] <= 0) {
+        sellSize = ALL_SIZES.find(s => item.sizes[s] > 0);
       }
+
+      if (!sellSize) {
+        alert("Yeh joota sabhi sizes me out of stock hai!");
+        return;
+      }
+
+      currentSellingItem = item;
+      currentSellingSize = sellSize;
+
+      document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
+      document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
+      document.getElementById('saleSizeBadge').innerText = `Size: ${sellSize}`;
+      document.getElementById('saleStockRem').innerText = `Stock: ${item.sizes[sellSize]} Pairs`;
+
+      document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
+      document.getElementById('saleFinalPrice').value = item.price; // Default selling price
+      document.getElementById('saleCustomer').value = '';
+
+      closeCheckModal();
+      document.getElementById('saleModal').style.display = 'flex';
     }
 
+    function closeSaleModal() {
+      document.getElementById('saleModal').style.display = 'none';
+    }
+
+    function confirmSaleTransaction(e) {
+      e.preventDefault();
+      if (!currentSellingItem || !currentSellingSize) return;
+
+      const finalPrice = Number(document.getElementById('saleFinalPrice').value);
+      const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
+      const customer = document.getElementById('saleCustomer').value.trim() || 'Walk-in Customer';
+
+      if (currentSellingItem.sizes[currentSellingSize] <= 0) {
+        alert("Stock me joota uplabdh nahi hai!");
+        return;
+      }
+
+      // Stock minus 1
+      currentSellingItem.sizes[currentSellingSize] -= 1;
+      saveItemToCloud(currentSellingItem);
+
+      // Record transaction
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        date: new Date().toISOString(),
+        itemId: currentSellingItem.id,
+        name: currentSellingItem.name,
+        brand: currentSellingItem.brand,
+        size: currentSellingSize,
+        costPrice: currentSellingItem.cost || 0,
+        tagPrice: currentSellingItem.price || 0,
+        sellPrice: finalPrice,
+        profit: finalPrice - (currentSellingItem.cost || 0),
+        payMode: payMode,
+        customer: customer
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+
+      closeSaleModal();
+      alert(`Bikri Safal! ₹${finalPrice} me becha gaya. Size ${currentSellingSize} ka stock -1 ho gaya.`);
+    }
+
+    // ==================== BARCODE SCANNER ====================
     function openScannerModal(mode) {
       currentScanAction = mode;
       document.getElementById('scannerModal').style.display = 'flex';
       const titles = {
         'check': '🔍 Dabba Scan Karke Available Sizes Dekhein',
-        'sale': '🛒 Bikri Scan: Dabba scan karke stock kam karein',
+        'sale': '🛒 Bikri Scan: Dabba scan karke bechein',
         'inward': '📦 Stock Inward: Dabba scan karke +1 stock badhayein',
         'size_barcode': `📷 Size ${targetScanSize || ''} Ka Box Barcode Scan Karein`
       };
@@ -588,13 +732,8 @@
         saveItemToCloud(matchedItem);
         alert(`[${matchedItem.name}] Size ${matchedSize} me +1 stock ho gaya!`);
       } else if (currentScanAction === 'sale') {
-        if (matchedItem.sizes[matchedSize] > 0) {
-          matchedItem.sizes[matchedSize] -= 1;
-          saveItemToCloud(matchedItem);
-          alert(`Bikri Safal! [${matchedItem.name}] Size ${matchedSize} se 1 pair kam hua.`);
-        } else {
-          alert(`[${matchedItem.name}] Size ${matchedSize} out of stock hai!`);
-        }
+        closeScannerModal();
+        openSaleCheckout(matchedItem, matchedSize);
       }
     }
 
@@ -604,7 +743,7 @@
     }
 
     function backupJSON() {
-      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify({ stock: items, sales: salesHistory }, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = "DN_Footwear_LiveStock_Backup.json";
