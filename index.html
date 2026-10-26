@@ -1,383 +1,202 @@
-<!DOCTYPE html>
+-<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DN Footwear & Sports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DN Footwear & Sports - Color & Size Wise Inventory, POS & Sales Report</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <!-- Barcode Scanner -->
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
+
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      background-color: #f1f5f9;
-      color: #1e293b;
-    }
-
-    /* TOP HEADER */
-    .top-navbar {
-      background: #0f172a;
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 18px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .brand-title {
-      font-size: 19px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .live-sync {
-      background: #10b981;
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 12px;
-      font-weight: 600;
-    }
-    .top-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .btn-nav {
-      border: none;
-      padding: 7px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      text-decoration: none;
-    }
-    .btn-catalog { background: #f59e0b; color: #111; }
-    .btn-pin { background: #e2e8f0; color: #334155; }
-    .btn-bikri { background: #06b6d4; color: #fff; }
-    .btn-barcode { background: #fbbf24; color: #1e293b; }
-    .btn-orders { background: #f97316; color: #fff; }
-    .btn-scan { background: #10b981; color: #fff; }
-
-    /* STATS SUMMARY TILES */
-    .stats-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      padding: 15px;
-    }
-    .stat-card {
-      background: #fff;
-      padding: 14px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      border-left: 4px solid #cbd5e1;
-    }
-    .stat-card.blue { border-left-color: #3b82f6; }
-    .stat-card.green { border-left-color: #10b981; }
-    .stat-card.orange { border-left-color: #f97316; }
-    .stat-card.red { border-left-color: #ef4444; }
-    .stat-title {
-      font-size: 11px;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .stat-value {
-      font-size: 22px;
-      font-weight: 700;
-      margin-top: 4px;
-      color: #0f172a;
-    }
-    .stat-sub {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 3px;
-    }
-
-    /* SEARCH & FILTER BAR */
-    .filter-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 15px 10px 15px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .search-input {
-      width: 100%;
-      max-width: 380px;
-      padding: 8px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      outline: none;
-    }
-    .cat-select {
-      padding: 8px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      background: #fff;
-    }
-
-    /* PRODUCT TABLE */
-    .table-box {
-      margin: 0 15px 20px 15px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 13px;
-    }
-    th {
-      background: #f8fafc;
-      color: #475569;
-      font-weight: 600;
-      padding: 10px 12px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: middle;
-    }
-    .prod-pic {
-      width: 44px;
-      height: 44px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: #e2e8f0;
-    }
-
-    /* UNLIMITED BANNER MANAGER (ADMIN) */
-    .admin-banner-panel {
-      background: #ffffff;
-      margin: 0 15px 25px 15px;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .banner-control-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin: 12px 0;
-    }
-    .btn-upload-slide {
-      background: #0284c7;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      border: none;
-      font-size: 13px;
-    }
-    .btn-clear-slide {
-      background: #ef4444;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
-      font-size: 13px;
-    }
-    .slide-preview-wrapper {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding: 8px 0;
-    }
-    .preview-card {
-      position: relative;
-      flex-shrink: 0;
-      width: 90px;
-      height: 60px;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #cbd5e1;
-    }
-    .preview-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .del-btn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background: rgba(239, 68, 68, 0.9);
-      color: #fff;
-      font-size: 11px;
-      line-height: 14px;
-      height: 16px;
-      width: 16px;
-      text-align: center;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    /* CUSTOMER STORE / CATALOG VIEW (#store) */
-    #customerStoreView {
-      display: none;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 15px;
-    }
-    .store-slider-container {
-      position: relative;
-      width: 100%;
-      height: 250px;
-      background: #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .slider-track {
-      display: flex;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.4s ease-in-out;
-    }
-    .slider-slide {
-      min-width: 100%;
-      height: 100%;
-    }
-    .slider-slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .slider-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.55);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      font-size: 16px;
-      z-index: 5;
-    }
-    .slider-btn.prev { left: 10px; }
-    .slider-btn.next { right: 10px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 75px; }
+    header { background: #1e1b4b; color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .btn { border: none; padding: 7px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; text-decoration: none; white-space: nowrap; }
+    .btn:active { transform: scale(0.97); }
+    .btn-amber { background: #f59e0b; color: #000; }
+    .btn-green { background: #10b981; color: #fff; }
+    .btn-wa { background: #25d366; color: #fff; }
+    .btn-blue { background: #2563eb; color: #fff; }
+    .btn-purple { background: #9333ea; color: #fff; }
+    .btn-indigo { background: #4f46e5; color: #fff; }
+    .btn-red { background: #ef4444; color: #fff; }
+    .btn-slate { background: #e2e8f0; color: #334155; }
     
-    .contact-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #e0f2fe;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 13px;
-    }
-    .contact-badges {
-      display: flex;
-      gap: 8px;
-    }
-    .c-badge {
-      background: #0284c7;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .empty-placeholder {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      color: #94a3b8;
-      font-weight: 500;
+    .container { max-width: 1200px; margin: 18px auto; padding: 0 15px; }
+    .sync-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
+    .sync-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; }
+    .stat-num { font-size: 22px; font-weight: 800; margin-top: 4px; color: #0f172a; }
+
+    .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
+    .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+
+    .slider-wrapper { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #0f172a; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .ratio-21-9 { aspect-ratio: 21 / 9; max-height: 320px; }
+    .slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; align-items: center; justify-content: center; }
+    .slider-slide.active { opacity: 1; z-index: 2; }
+    .slider-img { width: 100%; height: 100%; object-fit: cover; }
+    .slider-caption { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 25px 20px 10px; }
+
+    .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+    .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+    .item-media-box { width: 100%; background: #0f172a; overflow: hidden; position: relative; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
+    .main-card-img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .main-card-video { width: 100%; height: 100%; object-fit: cover; }
+    
+    .thumb-tray { display: flex; gap: 6px; padding: 8px 10px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; overflow-x: auto; align-items: center; }
+    .thumb-item { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; position: relative; }
+    .thumb-item.active { border-color: #4f46e5; }
+    .video-thumb-badge { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.8); color: white; font-size: 8px; padding: 1px 3px; border-radius: 3px; font-weight: bold; }
+
+    .shoe-card-body { padding: 14px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+
+    .color-chip-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; margin: 2px; background: white; transition: 0.15s; }
+    .color-chip-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; box-shadow: 0 0 0 1.5px #4f46e5; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; padding: 12px 10px; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #475569; text-align: left; }
+    td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tr:hover { background: #f8fafc; }
+
+    .shoe-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
+    .size-badge { display: inline-block; padding: 3px 6px; font-size: 11px; font-weight: 700; border-radius: 4px; margin: 1px; }
+    .size-in { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .size-low { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .size-out { background: #fee2e2; color: #991b1b; text-decoration: line-through; border: 1px solid #fecaca; }
+
+    .cat-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: #e0e7ff; color: #3730a3; text-transform: uppercase; }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
+    .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* Color-wise Stock Box */
+    .color-block-card { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+    .color-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
+    .color-photo-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 6px; margin-bottom: 10px; }
+    .color-photo-item { position: relative; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; height: 70px; background: #000; }
+    .color-photo-item img, .color-photo-item video { width: 100%; height: 100%; object-fit: cover; }
+    .color-photo-del { position: absolute; top: 2px; right: 2px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    
+    .size-mini-row { display: grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 5px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #thermalBillArea, #thermalBillArea *, #reportPrintArea, #reportPrintArea * { visibility: visible; }
+      #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
+      #reportPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ================= TOP HEADER ================= -->
-  <header class="top-navbar">
-    <div class="brand-title">
-      👟 DN Footwear & Sports <span class="live-sync">● Live Sync</span>
+  <!-- HEADER -->
+  <header>
+    <div>
+      <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+        DN Footwear & Sports
+        <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
+      </h2>
+      <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Dukaan Admin & POS Mode</span>
     </div>
-    <div class="top-actions" id="adminNavbarActions">
-      <button class="btn-nav btn-catalog" onclick="toggleView('store')">📂 Customer Catalog Dekhein</button>
-      <button class="btn-nav btn-pin">🔑 PIN Badlein</button>
-      <button class="btn-nav btn-bikri">📊 Bikri Report</button>
-      <button class="btn-nav btn-barcode">🔍 Barcode Check</button>
-      <button class="btn-nav btn-orders">📦 Online Orders</button>
-      <button class="btn-nav btn-scan">📷 Bikri Scan</button>
-    </div>
-    <div class="top-actions" id="storeNavbarActions" style="display:none;">
-      <button class="btn-nav btn-catalog" onclick="toggleView('admin')">⚙️ Back to Admin</button>
+
+    <!-- Right Header Controls -->
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+      <button id="toggleModeBtn" class="btn btn-amber" onclick="toggleAppMode()">
+        🛍️ Customer Catalog Dekhein
+      </button>
+
+      <!-- Admin Specific Buttons -->
+      <span id="adminNavGroup" style="display:inline-flex; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
+        <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
+        <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
+        <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders</button>
+        <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
+        <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
+        <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
+      </span>
     </div>
   </header>
 
-  <!-- ================= 1. ADMIN PANEL VIEW ================= -->
-  <main id="adminPanelView">
-    
-    <!-- STATS -->
-    <div class="stats-container">
+  <!-- ==================== 1. ADMIN DASHBOARD & POS ==================== -->
+  <div id="adminViewSection" class="container">
+    <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-title">Kul Stock (Items / Pairs)</div>
-        <div class="stat-value">24</div>
-        <div class="stat-sub">5 Models</div>
+        <small style="color:#64748b; font-weight:700;">KUL STOCK (ITEMS / PAIRS)</small>
+        <div class="stat-num" id="dTotalPairs">0</div>
+        <small id="dTotalModels" style="color:#64748b;">0 Models</small>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-title">Total Stock Rupees</div>
-        <div class="stat-value">₹9,190</div>
-        <div class="stat-sub">Tag Value: ₹13,310</div>
+
+      <div class="stat-card" style="border-left: 4px solid #2563eb;">
+        <small style="color:#2563eb; font-weight:700;">TOTAL STOCK RUPEES</small>
+        <div class="stat-num" id="dTotalCost" style="color:#2563eb;">₹0</div>
+        <small id="dTotalTagValue" style="color:#64748b; font-weight:bold;">Tag Value: ₹0</small>
       </div>
-      <div class="stat-card green">
-        <div class="stat-title">Total Bikri (Sales)</div>
-        <div class="stat-value">₹0</div>
-        <div class="stat-sub">Cash: ₹0 | UPI: ₹0</div>
+
+      <!-- TOTAL BIKRI CARD (WITH CASH & UPI BREAKDOWN) -->
+      <div class="stat-card" style="border-left: 4px solid #10b981; cursor:pointer;" onclick="openSalesReportModal()" title="Click karke poori report dekhein">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <small style="color:#10b981; font-weight:700;">TOTAL BIKRI (SALES)</small>
+          <span style="font-size:10px; background:#dcfce7; color:#15803d; padding:2px 5px; border-radius:4px; font-weight:bold;">Report</span>
+        </div>
+        <div class="stat-num" id="dTotalSalesVal" style="color:#10b981;">₹0</div>
+        <div style="display:flex; gap:8px; margin-top:4px; font-size:11px; font-weight:bold;">
+          <span style="color:#059669;">💵 Cash: <span id="dSalesCash">₹0</span></span>
+          <span style="color:#2563eb;">📱 UPI: <span id="dSalesUpi">₹0</span></span>
+        </div>
       </div>
-      <div class="stat-card orange">
-        <div class="stat-title">Online Orders (Pending)</div>
-        <div class="stat-value">0</div>
-        <div class="stat-sub">Pending orders</div>
+
+      <div class="stat-card">
+        <small style="color:#64748b; font-weight:700;">ONLINE ORDERS (PENDING)</small>
+        <div class="stat-num" id="dPendingOrders" style="color:#f59e0b;">0</div>
+        <small style="color:#64748b; font-size:11px;">Pending orders</small>
       </div>
-      <div class="stat-card red">
-        <div class="stat-title">Kam Stock Warning</div>
-        <div class="stat-value">1</div>
-        <div class="stat-sub">Restock jald karein</div>
+
+      <div class="stat-card" style="border-left: 4px solid #ef4444;">
+        <small style="color:#ef4444; font-weight:700;">KAM STOCK WARNING (≤ 3)</small>
+        <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
+        <small style="color:#64748b; font-size:11px;">Restock jald karein</small>
       </div>
     </div>
 
     <!-- FILTER BAR -->
     <div class="filter-bar">
-      <input type="text" class="search-input" placeholder="Search item, brand, color, barcode...">
-      <select class="cat-select">
-        <option>Sabhi Categories</option>
-        <option>SPORTS / RUNNING</option>
-        <option>SLIPPERS / CHAPPAL</option>
+      <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, brand, color, barcode..." class="search-box">
+      
+      <select id="adminCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
+        <option value="ALL">Sabhi Categories</option>
+        <option value="Shoes">Footwear (Shoes / Sandals)</option>
+        <option value="Socks">Socks (Moje)</option>
+        <option value="Chasma">Chasma (Sunglasses)</option>
+        <option value="Belt">Belt (Leather)</option>
+        <option value="Purse">Purse / Wallet</option>
       </select>
+
+      <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Store Link Copy</button>
+      <button class="btn btn-slate" onclick="backupJSON()">💾 Backup</button>
     </div>
 
     <!-- TABLE -->
-    <div class="table-box">
+    <div style="overflow-x:auto;">
       <table>
         <thead>
           <tr>
@@ -386,248 +205,1854 @@
             <th>Rang (Colors) & Stock Breakdown</th>
             <th>Kul Jodi</th>
             <th>Tag Rate</th>
-            <th>Action</th>
+            <th style="text-align:right;">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div class="prod-pic" style="background:#bfdbfe; display:flex; align-items:center; justify-content:center; font-size:18px;">👟</div>
-                <div><strong>TRUMP 10</strong><br><small style="color:#64748b;">SPORTS/RUNNING</small></div>
-              </div>
-            </td>
-            <td>NICE</td>
-            <td>Standard (4 Jodi): 7:1, 8:1, 9:1, 10:1</td>
-            <td>4 Jodi</td>
-            <td>₹1400</td>
-            <td><button style="padding:4px 8px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer;">Bechein</button></td>
-          </tr>
-          <tr>
-            <td>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div class="prod-pic" style="background:#ddd; display:flex; align-items:center; justify-content:center; font-size:18px;">👟</div>
-                <div><strong>SNEAKER</strong><br><small style="color:#64748b;">SPORTS/RUNNING</small></div>
-              </div>
-            </td>
-            <td>SHEJI SHOE</td>
-            <td>WHITE (4 Jodi), WHITE BLACK (4 Jodi)</td>
-            <td>8 Jodi</td>
-            <td>₹500</td>
-            <td><button style="padding:4px 8px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer;">Bechein</button></td>
-          </tr>
-        </tbody>
+        <tbody id="inventoryRows"></tbody>
       </table>
     </div>
 
-    <!-- ================= UNLIMITED BANNER MANAGER (NICHE ADDED) ================= -->
-    <section class="admin-banner-panel">
-      <h3 style="font-size:15px; color:#0f172a;">📸 Customer Catalog Banner Slides (Unlimited Add Option)</h3>
-      <p style="font-size:12px; color:#64748b; margin-top:3px;">
-        Yahan aap customer catalog ke banner ke liye jitni chahe utni photos jod sakte hain.
-      </p>
-
-      <div class="banner-control-row">
-        <!-- Unlimited Photo File Input -->
-        <input type="file" id="slidePhotoInput" accept="image/*" multiple style="display:none;" onchange="handleSlideUpload(event)">
-        <button class="btn-upload-slide" onclick="document.getElementById('slidePhotoInput').click()">
-          + Add Slide Photos
-        </button>
-        <button class="btn-clear-slide" onclick="clearAllSlides()">
-          Delete All Slides
-        </button>
-        <span id="slideCountText" style="font-size:13px; color:#475569; font-weight:600;">Total: 0 photos</span>
+    <!-- ==================== UNLIMITED SLIDE PHOTO MANAGER (NICHE ADDED) ==================== -->
+    <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <div>
+          <h3 style="font-size:16px; font-weight:800; color:#1e1b4b;">📸 Customer Catalog Banner Slides (Unlimited Add Option)</h3>
+          <p style="font-size:12px; color:#64748b; margin-top:2px;">Yahan se jitni chahe utni banner photos add karein, yeh customer catalog ke upar slide me dikhengi.</p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="file" id="unlimitedSlideInput" accept="image/*" multiple style="display:none;" onchange="handleUnlimitedSlideUpload(event)">
+          <button class="btn btn-indigo" onclick="document.getElementById('unlimitedSlideInput').click()">+ Add Slide Photos</button>
+          <button class="btn btn-red" onclick="deleteAllCatalogBanners()">Delete All</button>
+        </div>
       </div>
-
-      <!-- Preview Cards -->
-      <div id="adminSlidePreviews" class="slide-preview-wrapper"></div>
-    </section>
-
-  </main>
-
-  <!-- ================= 2. CUSTOMER CATALOG VIEW (#store) ================= -->
-  <main id="customerStoreView">
-    
-    <!-- BANNER SLIDER -->
-    <div class="store-slider-container">
-      <button class="slider-btn prev" onclick="shiftCatalogSlide(-1)">❮</button>
-      <div class="slider-track" id="catalogSlideTrack">
-        <!-- Images dynamically populate hongi -->
+      <div id="adminSlideThumbsList" style="display:flex; gap:10px; overflow-x:auto; padding:6px 0; min-height:60px; align-items:center;">
+        <span style="font-size:12px; color:#94a3b8;">Loading slides...</span>
       </div>
-      <button class="slider-btn next" onclick="shiftCatalogSlide(1)">❯</button>
+    </div>
+  </div>
+
+  <!-- ==================== 2. CUSTOMER ONLINE STORE ==================== -->
+  <div id="customerViewSection" class="container" style="display:none;">
+    <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
+      <div id="sliderSlidesContainer"></div>
+      <!-- Slider Navigation Arrows -->
+      <button onclick="shiftBannerSlide(-1)" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❮</button>
+      <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
     </div>
 
-    <!-- CONTACT BANNER -->
     <div class="contact-bar">
-      <span>📞 <strong>Sampark Karein & Order Book Karein:</strong> Best Quality | Fast Delivery</span>
-      <div class="contact-badges">
-        <a href="tel:8209432204" class="c-badge">Dashrath Singh (8209432204)</a>
-        <a href="tel:9676422794" class="c-badge">Surendra Singh (9676422794)</a>
+      <div>
+        <h4 style="font-size:15px; font-weight:800; color:#1e1b4b;">📞 Sampark Karein & Order Book Karein:</h4>
+        <p style="font-size:11px; color:#64748b;">Siriyari, Pali (Rajasthan) • Fast Delivery Available</p>
+      </div>
+      <div class="call-btn-group">
+        <a href="tel:8209452284" class="btn btn-indigo" style="font-size:12px;">📞 Dashrath Singh (8209452284)</a>
+        <a href="tel:9636422794" class="btn btn-blue" style="font-size:12px;">📞 Surendra Singh (9636422794)</a>
+        <a href="https://wa.me/917733909735" target="_blank" class="btn btn-wa" style="font-size:12px;">💬 WhatsApp (7733909735)</a>
       </div>
     </div>
 
-    <div style="background:#fff; border-radius:8px; padding:20px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <h3 style="color:#334155;">👟 Hamara Footwear Collection</h3>
-      <p style="color:#64748b; font-size:13px; margin-top:6px;">Upar slider me latest models dekhein aur order ke liye sampark karein.</p>
+    <div class="filter-bar">
+      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
+      <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto;">
+        <option value="ALL">Sabhi Samaan</option>
+        <option value="Shoes">Footwear</option>
+        <option value="Socks">Socks</option>
+        <option value="Chasma">Chasma</option>
+        <option value="Belt">Belt</option>
+        <option value="Purse">Purse</option>
+      </select>
     </div>
 
-  </main>
+    <div id="customerCatalogGrid" class="catalog-grid"></div>
+  </div>
 
-  <!-- ================= JAVASCRIPT ================= -->
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- A. TOTAL BIKRI REPORT MODAL (CASH, UPI & EXCEL DOWNLOAD) -->
+  <div id="salesReportModal" class="modal">
+    <div class="modal-box" style="max-width:750px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
+        <div>
+          <h3 style="font-size:17px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:6px;">
+            📊 Dukaan Bikri & Payment Report
+          </h3>
+          <p style="font-size:11px; color:#64748b;">Daily aur Monthly bikri, Cash aur UPI hisaab check karein aur Excel download karein.</p>
+        </div>
+        <button class="btn btn-slate" onclick="closeSalesReportModal()">✕</button>
+      </div>
+
+      <!-- Report Filters & Date Range -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;" class="no-print">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-indigo" id="repPeriodToday" onclick="setReportPeriod('today')">📅 Aaj (Daily)</button>
+          <button class="btn btn-slate" id="repPeriodMonth" onclick="setReportPeriod('month')">🗓️ Is Mahine (Monthly)</button>
+          <button class="btn btn-slate" id="repPeriodAll" onclick="setReportPeriod('all')">Sabhi (All Time)</button>
+        </div>
+
+        <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
+          <input type="date" id="reportStartDate" class="form-control" style="font-size:11px; padding:5px 8px; width:auto;" onchange="calculateSalesReport()">
+          <span style="font-size:11px; font-weight:bold;">se</span>
+          <input type="date" id="reportEndDate" class="form-control" style="font-size:11px; padding:5px 8px; width:auto;" onchange="calculateSalesReport()">
+        </div>
+      </div>
+
+      <!-- Report Printable Area -->
+      <div id="reportPrintArea">
+        <div style="margin-bottom:10px;">
+          <h4 style="font-size:16px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS - SALES STATEMENT</h4>
+          <p id="reportPeriodText" style="font-size:12px; color:#64748b; margin:2px 0; font-weight:bold;">Period: Today</p>
+        </div>
+
+        <!-- 4 Quick Cards in Report -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:14px;">
+          <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#065f46; display:block;">KUL BIKRI (TOTAL)</small>
+            <b id="repTotalAmount" style="font-size:18px; color:#059669;">₹0</b>
+            <small id="repTotalPairs" style="font-size:10px; color:#065f46; display:block;">0 Items Sold</small>
+          </div>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#1e40af; display:block;">💵 CASH BIKRI</small>
+            <b id="repCashAmount" style="font-size:18px; color:#2563eb;">₹0</b>
+            <small id="repCashPercent" style="font-size:10px; color:#1e40af; display:block;">0% of total</small>
+          </div>
+
+          <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#6b21a8; display:block;">📱 UPI / QR BIKRI</small>
+            <b id="repUpiAmount" style="font-size:18px; color:#9333ea;">₹0</b>
+            <small id="repUpiPercent" style="font-size:10px; color:#6b21a8; display:block;">0% of total</small>
+          </div>
+
+          <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#9a3412; display:block;">📈 KUL MUNAFA (PROFIT)</small>
+            <b id="repProfitAmount" style="font-size:18px; color:#ea580c;">₹0</b>
+            <small style="font-size:10px; color:#9a3412; display:block;">Estimated</small>
+          </div>
+        </div>
+
+        <!-- Sales Records Table -->
+        <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+          <table>
+            <thead>
+              <tr style="background:#f1f5f9;">
+                <th style="padding:8px 6px;">Bill & Date</th>
+                <th style="padding:8px 6px;">Customer</th>
+                <th style="padding:8px 6px;">Item, Size & Color</th>
+                <th style="padding:8px 6px;">Payment</th>
+                <th style="padding:8px 6px; text-align:right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action & Download Buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;" class="no-print">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-green" onclick="downloadSalesCSV('daily')" title="Download Daily Report as Excel">
+            📥 Daily Excel (CSV)
+          </button>
+          <button class="btn btn-blue" onclick="downloadSalesCSV('monthly')" title="Download Monthly Report as Excel">
+            📥 Monthly Excel (CSV)
+          </button>
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-slate" onclick="window.print()">🖨️ Print Sheet</button>
+          <button class="btn btn-slate" onclick="closeSalesReportModal()">Band Karein</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. PIN CHANGE MODAL -->
+  <div id="pinChangeModal" class="modal">
+    <div class="modal-box" style="max-width:380px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔑 Admin Login PIN Badlein</h3>
+        <button class="btn btn-slate" onclick="closePinChangeModal()">✕</button>
+      </div>
+      <form onsubmit="saveNewAdminPin(event)">
+        <div class="form-group">
+          <label>Purana PIN Daalein:</label>
+          <input type="password" id="oldPinInput" required placeholder="Purana PIN..." class="form-control" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Naya Secret PIN Daalein:</label>
+          <input type="password" id="newPinInput" required placeholder="Naya 4-digit PIN..." class="form-control" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Naya PIN Dobara Daalein (Confirm):</label>
+          <input type="password" id="confirmPinInput" required placeholder="Dobara naya PIN..." class="form-control" maxlength="10">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-slate" onclick="closePinChangeModal()">Cancel</button>
+          <button type="submit" class="btn btn-indigo">PIN Save Karein</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- C. ADMIN LOGIN PIN MODAL -->
+  <div id="adminLoginModal" class="modal">
+    <div class="modal-box" style="max-width:360px; text-align:center;">
+      <div style="font-size:35px; margin-bottom:8px;">🔒</div>
+      <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:4px;">Admin Portal Login</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Dukaan stock aur billing counter ke liye apna 4-digit PIN daalein:</p>
+      
+      <form onsubmit="verifyAdminPinSubmit(event)">
+        <input type="password" id="adminLoginPinInput" required placeholder="PIN Daalein (Default: 1234)" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" maxlength="10" autofocus>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button type="submit" class="btn btn-indigo" style="justify-content:center; padding:10px;">Login Karein</button>
+          <button type="button" class="btn btn-slate" onclick="closeAdminLoginModal()" style="justify-content:center;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- D. ADD / EDIT ITEM MODAL -->
+  <div id="shoeModal" class="modal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 id="shoeModalTitle" style="font-size:16px;">Naya Item Jodein</h3>
+        <button class="btn btn-slate" onclick="closeShoeModal()">✕</button>
+      </div>
+      <form id="shoeForm" onsubmit="submitShoeForm(event)">
+        <input type="hidden" id="fId">
+
+        <div class="form-group" style="background:#e0e7ff; padding:10px; border-radius:8px; border:1px solid #c7d2fe;">
+          <label style="color:#1e1b4b; font-weight:800;">Item Ka Type Chunein:</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
+            <label style="background:white; border:2px solid #cbd5e1; padding:8px; border-radius:6px; text-align:center; font-weight:bold; font-size:12px; cursor:pointer;">
+              <input type="radio" name="fItemType" value="footwear" checked onchange="toggleItemTypeForm('footwear')">
+              👟 Footwear (Shoe / Chappal)
+            </label>
+            <label style="background:white; border:2px solid #cbd5e1; padding:8px; border-radius:6px; text-align:center; font-weight:bold; font-size:12px; cursor:pointer;">
+              <input type="radio" name="fItemType" value="general" onchange="toggleItemTypeForm('general')">
+              🧦 Accessories (Socks, Belt, Purse, Chasma)
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Item / Model Name *</label>
+            <input type="text" id="fName" required placeholder="e.g. Campus Rodeo" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Brand / Company *</label>
+            <input type="text" id="fBrand" required placeholder="e.g. Campus, Sparx" class="form-control">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="fCategorySelect" class="form-control">
+              <option value="Sports/Running">Footwear: Sports & Running</option>
+              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
+              <option value="Formal Shoes">Footwear: Formal Shoes</option>
+              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
+              <option value="Sandals">Footwear: Sandals</option>
+              <option value="Socks">🧦 Socks (Moje)</option>
+              <option value="Chasma">👓 Chasma (Sunglasses)</option>
+              <option value="Belt">👔 Belt</option>
+              <option value="Purse">👛 Purse / Wallet</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="footwearGenderGroup">
+            <label>Gender / Kiske Liye:</label>
+            <select id="fGenderSelect" class="form-control" onchange="changePresetGender(this.value)">
+              <option value="Men">Men (Default: 6-11)</option>
+              <option value="Ladies">Ladies (Default: 3-8)</option>
+              <option value="Kids">Kids (Default: 1-13)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Kharid Rate (Cost ₹) *</label>
+            <input type="number" id="fCost" required min="0" placeholder="e.g. 550" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Bikri Rate (Tag Price ₹) *</label>
+            <input type="number" id="fPrice" required min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
+          </div>
+        </div>
+
+        <!-- COLOR-WISE STOCK & SIZES SECTION -->
+        <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
+              🎨 Rang (Colors) Jodein, Media & Har Size Ka Stock Daalein:
+            </label>
+          </div>
+
+          <div style="display:flex; gap:6px; margin-bottom:14px;">
+            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein (e.g. Black, White, Navy)..." class="form-control">
+            <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorBlock()">+ Rang Jodein</button>
+          </div>
+
+          <div id="colorBlocksContainer"></div>
+        </div>
+
+        <!-- GENERAL ITEM STOCK -->
+        <div id="generalItemSection" class="form-group" style="display:none; background:#f1f5f9; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
+          <label style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:6px;">General Item Stock (Socks, Belt, Chasma):</label>
+          <div class="row">
+            <div>
+              <label>Kul Quantity (Kitne Piece Stock Me Hain): *</label>
+              <input type="number" id="fGeneralQty" min="0" value="10" class="form-control" style="font-size:16px; font-weight:bold;">
+            </div>
+            <div>
+              <label>Item Barcode:</label>
+              <input type="text" id="fGeneralBarcode" placeholder="Scan ya type karein..." class="form-control">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-slate" onclick="closeShoeModal()">Cancel</button>
+          <button type="submit" class="btn btn-indigo" style="padding:10px 18px; font-size:14px;">Cloud Par Save Karein</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- E. CHECK MODAL (WITH DIRECT BECHEIN BUTTON) -->
+  <div id="checkModal" class="modal">
+    <div class="modal-box" style="max-width:500px; padding:22px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔍 Stock & Size Details</h3>
+        <button class="btn btn-slate" onclick="closeCheckModal()" style="padding:2px 8px;">✕</button>
+      </div>
+
+      <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px;">
+        <img id="chkImg" src="" style="width:130px; height:120px; object-fit:cover; border-radius:10px; border:1px solid #cbd5e1; flex-shrink:0;">
+        <div style="flex:1;">
+          <h3 id="chkTitle" style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:3px;">Campus Rodeo</h3>
+          <div id="chkBrandCat" style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:6px;">Campus • Sports</div>
+          <div style="background:#f1f5f9; padding:8px 10px; border-radius:8px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <div><small style="font-size:10px; color:#64748b;">TAG RATE:</small><b id="chkPrice" style="font-size:15px; color:#10b981; display:block;">₹999</b></div>
+            <div><small style="font-size:10px; color:#64748b;">PURCHASE COST:</small><b id="chkCost" style="font-size:14px; color:#2563eb; display:block;">₹550</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="chkColorWiseStockContainer" style="max-height:42vh; overflow-y:auto; margin-bottom:14px;"></div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-green" onclick="openSaleCheckoutFromCheck()" style="justify-content:center; padding:10px; font-size:13px;">
+          🛒 Bechein (Checkout)
+        </button>
+        <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center; padding:10px; font-size:13px;">
+          Band Karein
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- F. SMART BIKRI CHECKOUT MODAL -->
+  <div id="saleModal" class="modal">
+    <div class="modal-box" style="max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Billing Counter</h3>
+        <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+        <img id="saleImg" src="" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
+        <div style="flex:1;">
+          <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+            <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Size: 8</span>
+            <span id="saleColorBadge" style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Black</span>
+            <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold;">Stock: 4</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="saleForm" onsubmit="confirmSaleTransaction(event, false)">
+        <div class="row" style="margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Tag Rate:</label>
+            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:5px;">₹999</div>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
+            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981; border:2px solid #10b981;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Mode (Kaise Paise Aaye):</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Cash" checked> 💵 Cash
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="UPI"> 📱 UPI
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Udhaar"> 📋 Udhaar
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="saleCustName" placeholder="Customer name..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="saleCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center; padding:10px;">
+            🖨️ Save & Print Bill
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:10px;">
+            ✓ Sirf Save Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- G. THERMAL RECEIPT MODAL -->
+  <div id="receiptModal" class="modal">
+    <div class="modal-box" style="max-width:350px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
+        <span style="font-weight:bold; font-size:13px;">Customer Bill Receipt</span>
+        <button class="btn btn-slate" onclick="closeReceiptModal()" style="padding:2px 8px;">✕</button>
+      </div>
+
+      <div id="thermalBillArea" style="background:#fff; border:1px dashed #cbd5e1; padding:12px; border-radius:6px; font-family:monospace; font-size:12px; color:#000;">
+        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
+          <h3 style="font-size:15px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS</h3>
+          <p style="font-size:10px; margin:2px 0;">Near Bus Stand, Siriyari (Pali)</p>
+          <p style="font-size:10px; margin:0;">Mo: 8209452284, 9636422794</p>
+        </div>
+
+        <div style="font-size:11px; margin-bottom:8px; line-height:1.4;">
+          <div>Bill No: <b id="rBillNo">DN-1001</b></div>
+          <div>Date: <span id="rDate">26-10-2026</span></div>
+          <div>Customer: <span id="rCust">Walk-in</span></div>
+          <div>Payment: <b id="rPayMode">Cash</b></div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
+          <thead>
+            <tr>
+              <th style="padding:4px 0; text-align:left; background:transparent;">Item</th>
+              <th style="padding:4px 0; text-align:center; background:transparent;">Sz/Col</th>
+              <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
+              <td style="padding:4px 0; text-align:center;" id="rItemSize">8 / Black</td>
+              <td style="padding:4px 0; text-align:right;" id="rItemRate">₹850</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="text-align:right; margin-bottom:8px;">
+          <div style="font-size:10px; color:#555;">Tag Price: <strike id="rTagPrice">₹999</strike></div>
+          <div style="font-size:14px; font-weight:900;">TOTAL: <span id="rFinalTotal">₹850</span></div>
+        </div>
+
+        <div style="text-align:center; font-size:10px; border-top:1px dashed #000; padding-top:6px;">
+          <p style="margin:0; font-weight:bold;">Dhanyawad! Phir Padharein.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;" class="no-print">
+        <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="window.print()">🖨️ Print Receipt</button>
+        <button class="btn btn-slate" style="width:100%; justify-content:center;" onclick="closeReceiptModal()">Band Karein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- H. CAMERA SCANNER MODAL -->
+  <div id="scannerModal" class="modal">
+    <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 id="scannerTitle" style="margin:0; font-size:14px;">Camera Scanner</h4>
+        <button class="btn btn-red" onclick="closeScannerModal()">✕</button>
+      </div>
+      <div id="scannerTarget" style="width:100%; border-radius:8px; overflow:hidden; background:#000;"></div>
+      <div style="margin-top:10px; display:flex; gap:6px;">
+        <input type="text" id="manualInput" placeholder="Barcode type karein..." class="form-control" style="background:#1e293b; color:white; border-color:#334155;">
+        <button class="btn btn-indigo" onclick="handleManualScan()">Enter</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    let activeSlideIndex = 0;
-    let autoSlideTimer = null;
+    const WHATSAPP_ORDER_NUMBER = "917733909735";
+    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "1234";
 
-    // View Switcher (Admin vs Customer Catalog #store)
-    function toggleView(viewName) {
-      const adminView = document.getElementById('adminPanelView');
-      const storeView = document.getElementById('customerStoreView');
-      const adminBtns = document.getElementById('adminNavbarActions');
-      const storeBtns = document.getElementById('storeNavbarActions');
+    const firebaseConfig = {
+      apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
+      authDomain: "dn-stock.firebaseapp.com",
+      databaseURL: "https://dn-stock-default-rtdb.firebaseio.com",
+      projectId: "dn-stock",
+      storageBucket: "dn-stock.firebasestorage.app",
+      messagingSenderId: "108722534878",
+      appId: "1:108722534878:web:6db2959ce4132d961b454f",
+      measurementId: "G-DJB9LF6ZDJ"
+    };
 
-      if (viewName === 'store' || window.location.hash === '#store') {
-        adminView.style.display = 'none';
-        adminBtns.style.display = 'none';
-        storeView.style.display = 'block';
-        storeBtns.style.display = 'flex';
-        window.location.hash = 'store';
-        renderCatalogSlider();
-      } else {
-        storeView.style.display = 'none';
-        storeBtns.style.display = 'none';
-        adminView.style.display = 'block';
-        adminBtns.style.display = 'flex';
-        window.location.hash = '';
-        renderAdminPreviews();
-      }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const GENDER_PRESETS = {
+      'Men': [6, 7, 8, 9, 10, 11],
+      'Ladies': [3, 4, 5, 6, 7, 8],
+      'Kids': [1, 2, 3, 4, 11, 12, 13]
+    };
+
+    let items = [];
+    let salesHistory = [];
+    let onlineOrders = [];
+    let catalogBanners = [];
+    let currentAppMode = 'admin';
+
+    let scannerObj = null;
+    let currentScanAction = 'check';
+    let targetScanInputId = null;
+
+    let colorDataMap = {};
+    let activePopupItem = null;
+    let activeHighlightedColor = null;
+    let activeHighlightedSize = null;
+
+    let currentSellingItem = null;
+    let currentSellingColor = null;
+    let currentSellingSize = null;
+
+    // Report active filter variables
+    let currentReportPeriod = 'today';
+
+    // Banner slider state
+    let activeBannerIndex = 0;
+    let bannerSlideTimer = null;
+
+    function initLiveSync() {
+      db.ref('admin_settings/pin').on('value', (snap) => {
+        if (snap.val()) {
+          adminSecurityPin = String(snap.val());
+          localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+        }
+      });
+
+      db.ref('footwear_stock').on('value', (snapshot) => {
+        const data = snapshot.val();
+        items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        renderApp();
+      });
+
+      db.ref('footwear_sales').on('value', (snapshot) => {
+        const data = snapshot.val();
+        salesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        renderApp();
+        if (document.getElementById('salesReportModal').style.display === 'flex') {
+          calculateSalesReport();
+        }
+      });
+
+      db.ref('customer_orders').on('value', (snapshot) => {
+        const data = snapshot.val();
+        onlineOrders = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        renderApp();
+      });
+
+      // SYNC UNLIMITED CATALOG BANNERS
+      db.ref('catalog_banners').on('value', (snapshot) => {
+        const val = snapshot.val();
+        if (val) {
+          catalogBanners = Array.isArray(val) ? val : Object.values(val);
+        } else {
+          // Fallback initial banner
+          catalogBanners = [
+            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80"
+          ];
+        }
+        renderAdminSlideThumbs();
+        renderCustomerSlider();
+      });
     }
 
-    // LocalStorage Data Management
-    function getSlides() {
-      try {
-        return JSON.parse(localStorage.getItem('dn_footwear_slides')) || [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveSlides(slidesArray) {
-      localStorage.setItem('dn_footwear_slides', JSON.stringify(slidesArray));
-      renderAdminPreviews();
-      renderCatalogSlider();
-    }
-
-    // Unlimited Photos Upload Handler
-    function handleSlideUpload(event) {
+    // ==================== UNLIMITED SLIDE PHOTO FUNCTIONS ====================
+    function handleUnlimitedSlideUpload(event) {
       const files = event.target.files;
       if (!files || files.length === 0) return;
 
-      const currentSlides = getSlides();
       let loadedCount = 0;
+      let newPhotos = [];
 
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
-          currentSlides.push(e.target.result);
-          loadedCount++;
-          if (loadedCount === files.length) {
-            saveSlides(currentSlides);
-          }
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 900;
+            let w = img.width, h = img.height;
+            if (w > MAX_WIDTH) {
+              h = (h * MAX_WIDTH) / w;
+              w = MAX_WIDTH;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const compressed = canvas.toDataURL('image/jpeg', 0.75);
+
+            newPhotos.push(compressed);
+            loadedCount++;
+            if (loadedCount === files.length) {
+              const updatedBanners = [...catalogBanners, ...newPhotos];
+              db.ref('catalog_banners').set(updatedBanners).then(() => {
+                alert(`✓ ${newPhotos.length} Banner Photos jud gayi hain!`);
+              });
+            }
+          };
+          img.src = e.target.result;
         };
         reader.readAsDataURL(file);
       });
       event.target.value = '';
     }
 
-    // Single Photo Delete
-    function removeSingleSlide(index) {
-      const currentSlides = getSlides();
-      currentSlides.splice(index, 1);
-      saveSlides(currentSlides);
-    }
-
-    // Delete All
-    function clearAllSlides() {
-      if (confirm("Kya aap saari slide photos delete karna chahte hain?")) {
-        saveSlides([]);
+    function deleteSingleCatalogBanner(index) {
+      if (confirm("Kya aap is slide photo ko hatana chahte hain?")) {
+        catalogBanners.splice(index, 1);
+        db.ref('catalog_banners').set(catalogBanners);
       }
     }
 
-    // Render Admin Previews
-    function renderAdminPreviews() {
-      const slides = getSlides();
-      const container = document.getElementById('adminSlidePreviews');
-      const countLabel = document.getElementById('slideCountText');
+    function deleteAllCatalogBanners() {
+      if (confirm("Kya aap saari catalog banner slides delete karna chahte hain?")) {
+        catalogBanners = [];
+        db.ref('catalog_banners').set([]);
+      }
+    }
 
-      if (countLabel) countLabel.innerText = `Total: ${slides.length} photos`;
+    function renderAdminSlideThumbs() {
+      const box = document.getElementById('adminSlideThumbsList');
+      if (!box) return;
 
+      if (!catalogBanners || catalogBanners.length === 0) {
+        box.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Koi slide photo nahi hai. "+ Add Slide Photos" par click karke upload karein.</span>';
+        return;
+      }
+
+      box.innerHTML = catalogBanners.map((src, idx) => `
+        <div style="position:relative; width:90px; height:60px; border-radius:8px; overflow:hidden; border:1px solid #cbd5e1; flex-shrink:0; background:#000;">
+          <img src="${src}" style="width:100%; height:100%; object-fit:cover;">
+          <button onclick="deleteSingleCatalogBanner(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;" title="Delete">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function renderCustomerSlider() {
+      const container = document.getElementById('sliderSlidesContainer');
       if (!container) return;
-      if (slides.length === 0) {
-        container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Koi slide photo nahi hai. Upar "+ Add Slide Photos" se add karein.</span>';
+
+      if (!catalogBanners || catalogBanners.length === 0) {
+        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px;">Koi Banner Photo Uplabdh Nahi Hai</div>';
         return;
       }
 
-      container.innerHTML = slides.map((imgSrc, idx) => `
-        <div class="preview-card">
-          <img src="${imgSrc}" alt="Slide ${idx+1}">
-          <span class="del-btn" onclick="removeSingleSlide(${idx})" title="Delete">✕</span>
-        </div>
-      `).join('');
-    }
-
-    // Render Customer Catalog Slider
-    function renderCatalogSlider() {
-      const slides = getSlides();
-      const track = document.getElementById('catalogSlideTrack');
-      if (!track) return;
-
-      if (slides.length === 0) {
-        track.innerHTML = `<div class="empty-placeholder">Koi banner photo available nahi hai</div>`;
-        return;
-      }
-
-      track.innerHTML = slides.map(imgSrc => `
-        <div class="slider-slide">
-          <img src="${imgSrc}" alt="Store Banner">
+      container.innerHTML = catalogBanners.map((src, idx) => `
+        <div class="slider-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+          <img src="${src}" class="slider-img" alt="Store Banner">
+          <div class="slider-caption">
+            <h3 style="font-size:16px; font-weight:800;">DN Footwear & Sports Siriyari</h3>
+            <p style="font-size:11px; opacity:0.85;">Quality Footwear at Wholesale & Best Rates</p>
+          </div>
         </div>
       `).join('');
 
-      activeSlideIndex = 0;
-      track.style.transform = 'translateX(0%)';
-
-      // Auto Slide interval
-      if (autoSlideTimer) clearInterval(autoSlideTimer);
-      if (slides.length > 1) {
-        autoSlideTimer = setInterval(() => {
-          shiftCatalogSlide(1);
+      activeBannerIndex = 0;
+      if (bannerSlideTimer) clearInterval(bannerSlideTimer);
+      if (catalogBanners.length > 1) {
+        bannerSlideTimer = setInterval(() => {
+          shiftBannerSlide(1);
         }, 3200);
       }
     }
 
-    // Slide Controls
-    function shiftCatalogSlide(step) {
-      const slides = getSlides();
-      if (slides.length <= 1) return;
+    function shiftBannerSlide(direction) {
+      if (!catalogBanners || catalogBanners.length <= 1) return;
+      const slides = document.querySelectorAll('#sliderSlidesContainer .slider-slide');
+      if (!slides.length) return;
 
-      const track = document.getElementById('catalogSlideTrack');
-      activeSlideIndex = (activeSlideIndex + step + slides.length) % slides.length;
-      track.style.transform = `translateX(-${activeSlideIndex * 100}%)`;
+      slides[activeBannerIndex].classList.remove('active');
+      activeBannerIndex = (activeBannerIndex + direction + slides.length) % slides.length;
+      slides[activeBannerIndex].classList.add('active');
     }
 
-    // Window Hash Listener
-    window.addEventListener('hashchange', () => {
-      toggleView(window.location.hash === '#store' ? 'store' : 'admin');
-    });
+    // ==================== BIKRI REPORT & DOWNLOAD SYSTEM ====================
+    function openSalesReportModal() {
+      setReportPeriod('today');
+      document.getElementById('salesReportModal').style.display = 'flex';
+    }
 
-    // Initial Load
-    window.addEventListener('DOMContentLoaded', () => {
-      if (window.location.hash === '#store') {
-        toggleView('store');
+    function closeSalesReportModal() {
+      document.getElementById('salesReportModal').style.display = 'none';
+    }
+
+    function setReportPeriod(period) {
+      currentReportPeriod = period;
+      const today = new Date().toISOString().slice(0, 10);
+
+      document.getElementById('repPeriodToday').className = period === 'today' ? 'btn btn-indigo' : 'btn btn-slate';
+      document.getElementById('repPeriodMonth').className = period === 'month' ? 'btn btn-indigo' : 'btn btn-slate';
+      document.getElementById('repPeriodAll').className = period === 'all' ? 'btn btn-indigo' : 'btn btn-slate';
+
+      if (period === 'today') {
+        document.getElementById('reportStartDate').value = today;
+        document.getElementById('reportEndDate').value = today;
+        document.getElementById('reportPeriodText').innerText = `Period: Aaj Ki Report (${today})`;
+      } else if (period === 'month') {
+        const firstDay = new Date().toISOString().slice(0, 7) + '-01';
+        document.getElementById('reportStartDate').value = firstDay;
+        document.getElementById('reportEndDate').value = today;
+        document.getElementById('reportPeriodText').innerText = `Period: Is Mahine Ki Report (${firstDay} se ${today})`;
       } else {
-        toggleView('admin');
+        document.getElementById('reportStartDate').value = '';
+        document.getElementById('reportEndDate').value = '';
+        document.getElementById('reportPeriodText').innerText = `Period: All Time (Pura Records)`;
       }
-      renderAdminPreviews();
-    });
+
+      calculateSalesReport();
+    }
+
+    function calculateSalesReport() {
+      const sDate = document.getElementById('reportStartDate').value;
+      const eDate = document.getElementById('reportEndDate').value;
+
+      let filteredSales = salesHistory.filter(s => {
+        if (!s.date) return false;
+        const itemDate = s.date.slice(0, 10);
+        if (sDate && itemDate < sDate) return false;
+        if (eDate && itemDate > eDate) return false;
+        return true;
+      });
+
+      filteredSales.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      let totalSales = 0;
+      let cashTotal = 0;
+      let upiTotal = 0;
+      let profitTotal = 0;
+      let totalItems = filteredSales.length;
+
+      let tableHtml = '';
+
+      filteredSales.forEach(s => {
+        const amt = Number(s.sellPrice) || 0;
+        const profit = Number(s.profit) || 0;
+        const mode = (s.payMode || 'Cash').toUpperCase();
+
+        totalSales += amt;
+        profitTotal += profit;
+
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          upiTotal += amt;
+        } else {
+          cashTotal += amt;
+        }
+
+        const dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+
+        tableHtml += `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:6px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
+            <td style="padding:6px;"><b>${s.customer || 'Walk-in'}</b><br><small style="color:#64748b;">${s.phone || ''}</small></td>
+            <td style="padding:6px;"><b>${s.name || 'Shoe'}</b><br><small style="color:#4f46e5;">Sz: ${s.size} • ${s.color||''}</small></td>
+            <td style="padding:6px;"><span class="cat-chip" style="${mode.includes('UPI')?'background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;':'background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;'}">${mode}</span></td>
+            <td style="padding:6px; text-align:right;"><b style="color:#10b981; font-size:14px;">₹${amt}</b></td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('repTotalAmount').innerText = "₹" + totalSales.toLocaleString('en-IN');
+      document.getElementById('repTotalPairs').innerText = `${totalItems} Items Beche`;
+      document.getElementById('repCashAmount').innerText = "₹" + cashTotal.toLocaleString('en-IN');
+      document.getElementById('repUpiAmount').innerText = "₹" + upiTotal.toLocaleString('en-IN');
+      document.getElementById('repProfitAmount').innerText = "₹" + profitTotal.toLocaleString('en-IN');
+
+      const cashPercent = totalSales > 0 ? Math.round((cashTotal / totalSales) * 100) : 0;
+      const upiPercent = totalSales > 0 ? Math.round((upiTotal / totalSales) * 100) : 0;
+      document.getElementById('repCashPercent').innerText = `${cashPercent}% of total`;
+      document.getElementById('repUpiPercent').innerText = `${upiPercent}% of total`;
+
+      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
+    }
+
+    function downloadSalesCSV(type) {
+      let filtered = [];
+      const today = new Date().toISOString().slice(0, 10);
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      if (type === 'daily') {
+        filtered = salesHistory.filter(s => s.date && s.date.startsWith(today));
+      } else if (type === 'monthly') {
+        filtered = salesHistory.filter(s => s.date && s.date.startsWith(currentMonth));
+      } else {
+        filtered = [...salesHistory];
+      }
+
+      if (filtered.length === 0) {
+        alert("Download karne ke liye is samay koi bikri data nahi mila!");
+        return;
+      }
+
+      let csvContent = "\uFEFFBill No,Date & Time,Customer,Phone,Item Name,Brand,Color,Size,Cost Price,Tag Price,Sell Price,Profit,Payment Mode\n";
+
+      filtered.forEach(s => {
+        const dateClean = s.date ? new Date(s.date).toLocaleString('en-IN').replace(/,/g, '') : '';
+        const row = [
+          s.billNo || 'DN-Bill',
+          `"${dateClean}"`,
+          `"${(s.customer || 'Walk-in').replace(/"/g, '""')}"`,
+          `"${s.phone || ''}"`,
+          `"${(s.name || '').replace(/"/g, '""')}"`,
+          `"${(s.brand || '').replace(/"/g, '""')}"`,
+          `"${s.color || ''}"`,
+          `"${s.size || ''}"`,
+          s.costPrice || 0,
+          s.tagPrice || 0,
+          s.sellPrice || 0,
+          s.profit || 0,
+          `"${s.payMode || 'Cash'}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `DN_Footwear_Sales_${type.toUpperCase()}_${today}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ==================== ADMIN PIN SECURITY SYSTEM ====================
+    function openPinChangeModal() {
+      document.getElementById('oldPinInput').value = '';
+      document.getElementById('newPinInput').value = '';
+      document.getElementById('confirmPinInput').value = '';
+      document.getElementById('pinChangeModal').style.display = 'flex';
+    }
+
+    function closePinChangeModal() {
+      document.getElementById('pinChangeModal').style.display = 'none';
+    }
+
+    function saveNewAdminPin(e) {
+      e.preventDefault();
+      const oldPin = document.getElementById('oldPinInput').value.trim();
+      const newPin = document.getElementById('newPinInput').value.trim();
+      const confirmPin = document.getElementById('confirmPinInput').value.trim();
+
+      if (oldPin !== adminSecurityPin) {
+        alert("Galat Purana PIN! Sahi PIN daalkar dobara koshish karein.");
+        return;
+      }
+      if (newPin.length < 4) {
+        alert("Naya PIN kam se kam 4-digit ka hona chahiye!");
+        return;
+      }
+      if (newPin !== confirmPin) {
+        alert("Naya PIN aur Confirm PIN match nahi ho rahe!");
+        return;
+      }
+
+      adminSecurityPin = newPin;
+      localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+      db.ref('admin_settings/pin').set(newPin).then(() => {
+        closePinChangeModal();
+        alert("✓ Naya Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
+      });
+    }
+
+    // ==================== MODE SWITCHING WITH PIN LOCK ====================
+    function toggleAppMode() {
+      if (currentAppMode === 'admin') {
+        switchAppMode('customer');
+      } else {
+        openAdminLoginModal();
+      }
+    }
+
+    function openAdminLoginModal() {
+      document.getElementById('adminLoginPinInput').value = '';
+      document.getElementById('adminLoginModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('adminLoginPinInput').focus(), 100);
+    }
+
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').style.display = 'none';
+    }
+
+    function verifyAdminPinSubmit(e) {
+      e.preventDefault();
+      const entered = document.getElementById('adminLoginPinInput').value.trim();
+      if (entered === adminSecurityPin) {
+        closeAdminLoginModal();
+        switchAppMode('admin');
+      } else {
+        alert("Galat PIN! Sirf dukaan ke admin ko access ki anumati hai.");
+        document.getElementById('adminLoginPinInput').value = '';
+      }
+    }
+
+    function switchAppMode(mode) {
+      currentAppMode = mode;
+      window.location.hash = (mode === 'customer') ? 'store' : '';
+
+      document.getElementById('adminViewSection').style.display = (mode === 'admin') ? 'block' : 'none';
+      document.getElementById('customerViewSection').style.display = (mode === 'customer') ? 'block' : 'none';
+      document.getElementById('adminNavGroup').style.display = (mode === 'admin') ? 'inline-flex' : 'none';
+      
+      const toggleBtn = document.getElementById('toggleModeBtn');
+      const subtitle = document.getElementById('appModeSubtitle');
+
+      if (mode === 'customer') {
+        toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
+        toggleBtn.className = 'btn btn-indigo';
+        subtitle.innerText = 'Customer Online Store';
+        renderCustomerSlider();
+      } else {
+        toggleBtn.innerText = '🛍️ Customer Catalog Dekhein';
+        toggleBtn.className = 'btn btn-amber';
+        subtitle.innerText = 'Dukaan Admin & POS Mode';
+        renderAdminSlideThumbs();
+      }
+
+      renderApp();
+    }
+
+    function toggleItemTypeForm(type) {
+      const isFootwear = (type === 'footwear');
+      document.getElementById('footwearGenderGroup').style.display = isFootwear ? 'block' : 'none';
+      document.getElementById('generalItemSection').style.display = isFootwear ? 'none' : 'block';
+    }
+
+    function changePresetGender(gender) {
+      const defaultList = GENDER_PRESETS[gender] || GENDER_PRESETS['Men'];
+      for (let c in colorDataMap) {
+        defaultList.forEach(s => {
+          if (colorDataMap[c].sizes[s] === undefined) {
+            colorDataMap[c].sizes[s] = 0;
+            colorDataMap[c].barcodes[s] = '';
+          }
+        });
+      }
+      renderColorBlocks();
+    }
+
+    // COLOR BLOCKS & SIZES
+    function addNewColorBlock() {
+      const input = document.getElementById('manualColorInput');
+      const color = input.value.trim();
+      if (!color) { alert("Pehle rang ka naam likhein!"); return; }
+      if (colorDataMap[color]) { alert("Yeh rang pehle se jud chuka hai!"); return; }
+
+      const curGender = document.getElementById('fGenderSelect').value || 'Men';
+      const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
+
+      colorDataMap[color] = {
+        photos: [],
+        video: '',
+        sizes: {},
+        barcodes: {}
+      };
+
+      defaultList.forEach(s => {
+        colorDataMap[color].sizes[s] = 0;
+        colorDataMap[color].barcodes[s] = '';
+      });
+
+      input.value = '';
+      renderColorBlocks();
+    }
+
+    function removeColorBlock(c) {
+      if (confirm(`Kya aap [${c}] rang aur iska poora media/stock hatana chahte hain?`)) {
+        delete colorDataMap[c];
+        renderColorBlocks();
+      }
+    }
+
+    function removeSizeFromColor(col, size) {
+      if (confirm(`Kya aap [${col}] me se Size [${size}] ko hatana chahte hain?`)) {
+        if (colorDataMap[col]) {
+          delete colorDataMap[col].sizes[size];
+          if (colorDataMap[col].barcodes) delete colorDataMap[col].barcodes[size];
+          renderColorBlocks();
+        }
+      }
+    }
+
+    function promptAddSizeToColor(col) {
+      const customSz = prompt(`[${col}] me naya Size daalein (Jaise: 12, 13, 4.5):`);
+      if (customSz) {
+        const trimmed = customSz.trim().toUpperCase();
+        if (!colorDataMap[col].sizes[trimmed]) {
+          colorDataMap[col].sizes[trimmed] = 0;
+          colorDataMap[col].barcodes[trimmed] = '';
+          renderColorBlocks();
+        } else {
+          alert("Yeh size pehle se is colour me judha hai!");
+        }
+      }
+    }
+
+    function renderColorBlocks() {
+      const container = document.getElementById('colorBlocksContainer');
+      const colors = Object.keys(colorDataMap);
+
+      if (colors.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background:white; border-radius:6px; border:1px dashed #cbd5e1;">Pehle upar rang ka naam likhkar "+ Rang Jodein" dabayein!</div>';
+        return;
+      }
+
+      let html = '';
+      colors.forEach(col => {
+        const cData = colorDataMap[col];
+        const pArr = cData.photos || [];
+
+        let mediaListHtml = '';
+        if (cData.video) {
+          mediaListHtml += `
+            <div class="color-photo-item" style="border: 2px solid #9333ea;">
+              <button type="button" class="color-photo-del" onclick="deleteColorBlockVideo('${col}')">✕</button>
+              <video src="${cData.video}" autoplay muted loop style="width:100%; height:100%; object-fit:cover;"></video>
+              <span style="position:absolute; bottom:2px; left:2px; background:#9333ea; color:white; font-size:8px; padding:1px 3px; border-radius:2px; font-weight:bold;">VIDEO</span>
+            </div>
+          `;
+        }
+
+        pArr.forEach((p, idx) => {
+          mediaListHtml += `
+            <div class="color-photo-item">
+              <button type="button" class="color-photo-del" onclick="deleteColorBlockPhoto('${col}', ${idx})">✕</button>
+              <img src="${p}">
+            </div>
+          `;
+        });
+
+        let sizeRowsHtml = '';
+        const sizeKeys = Object.keys(cData.sizes || {});
+
+        sizeKeys.forEach(s => {
+          const qty = cData.sizes[s] !== undefined ? cData.sizes[s] : 0;
+          const bcode = (cData.barcodes && cData.barcodes[s] !== undefined) ? cData.barcodes[s] : '';
+          const bcodeId = `sz_bcode_${col}_${s}`.replace(/\s+/g, '_');
+
+          sizeRowsHtml += `
+            <div class="size-mini-row">
+              <b style="font-size:12px; color:#1e1b4b; background:#e0e7ff; padding:3px 6px; border-radius:4px; text-align:center;">Size ${s}</b>
+              <input type="number" min="0" value="${qty}" oninput="updateColorSizeQty('${col}', '${s}', this.value)" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
+              <input type="text" value="${bcode}" id="${bcodeId}" placeholder="Barcode..." oninput="updateColorBarcode('${col}', '${s}', this.value)" class="form-control" style="padding:4px 6px; font-family:monospace; font-size:11px;">
+              <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:10px; justify-content:center;" onclick="scanBarcodeForColorInput('${bcodeId}', '${col}', '${s}')">📷</button>
+              <button type="button" onclick="removeSizeFromColor('${col}', '${s}')" style="background:none; border:none; color:#ef4444; font-weight:bold; font-size:15px; cursor:pointer;" title="Size Hatayein">✕</button>
+            </div>
+          `;
+        });
+
+        html += `
+          <div class="color-block-card">
+            <div class="color-block-header">
+              <b style="font-size:14px; color:#1e1b4b;">🎨 Rang: <span style="color:#4f46e5;">${col}</span></b>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <label class="btn btn-blue" style="padding:3px 8px; font-size:11px; cursor:pointer;">
+                  + Photos Upload
+                  <input type="file" accept="image/*" multiple onchange="uploadPhotosForColorBlock(this, '${col}')" style="display:none;">
+                </label>
+                <label class="btn btn-purple" style="padding:3px 8px; font-size:11px; cursor:pointer;">
+                  🎬 Video / Reel Upload
+                  <input type="file" accept="video/mp4,video/webm" onchange="uploadVideoForColorBlock(this, '${col}')" style="display:none;">
+                </label>
+                <button type="button" class="btn btn-red" style="padding:3px 8px; font-size:11px;" onclick="removeColorBlock('${col}')">✕ Rang Hatao</button>
+              </div>
+            </div>
+
+            <div class="color-photo-slots">
+              ${mediaListHtml || '<small style="color:#94a3b8; font-size:11px; grid-column:1/-1;">Is rang ki photos ya video upload karein...</small>'}
+            </div>
+
+            <div style="background:#f1f5f9; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:11px; font-weight:bold; color:#475569;">AVAILABLE SIZES & STOCK:</span>
+                <button type="button" class="btn btn-blue" style="padding:2px 7px; font-size:10px;" onclick="promptAddSizeToColor('${col}')">+ Size Jodein</button>
+              </div>
+              <div style="display:grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap:6px; font-size:10px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 4px;">
+                <span>SIZE</span><span>JODI (QTY)</span><span>BOX BARCODE</span><span>SCAN</span><span>HATAO</span>
+              </div>
+              ${sizeRowsHtml || '<div style="text-align:center; padding:8px; color:#94a3b8; font-size:11px;">Koi size nahi hai. "+ Size Jodein" par click karein.</div>'}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function updateColorSizeQty(col, size, val) {
+      if (colorDataMap[col]) {
+        if (!colorDataMap[col].sizes) colorDataMap[col].sizes = {};
+        colorDataMap[col].sizes[size] = Number(val) || 0;
+      }
+    }
+
+    function updateColorBarcode(col, size, val) {
+      if (colorDataMap[col]) {
+        if (!colorDataMap[col].barcodes) colorDataMap[col].barcodes = {};
+        colorDataMap[col].barcodes[size] = val.trim();
+      }
+    }
+
+    function scanBarcodeForColorInput(inputId, col, size) {
+      targetScanInputId = { inputId, col, size };
+      openScannerModal('color_size_barcode');
+    }
+
+    function uploadPhotosForColorBlock(input, colorName) {
+      if (input.files && input.files.length > 0) {
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const MAX = 450;
+              let w = img.width, h = img.height;
+              if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+              else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+              canvas.width = w; canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              const base64 = canvas.toDataURL('image/jpeg', 0.65);
+
+              if (!colorDataMap[colorName].photos) colorDataMap[colorName].photos = [];
+              colorDataMap[colorName].photos.push(base64);
+              renderColorBlocks();
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    function uploadVideoForColorBlock(input, colorName) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Video ka size 5MB se chota hona chahiye!");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          colorDataMap[colorName].video = e.target.result;
+          renderColorBlocks();
+          alert(`[${colorName}] ke liye video attach ho gaya!`);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function deleteColorBlockPhoto(c, idx) {
+      colorDataMap[c].photos.splice(idx, 1);
+      renderColorBlocks();
+    }
+
+    function deleteColorBlockVideo(c) {
+      colorDataMap[c].video = '';
+      renderColorBlocks();
+    }
+
+    // FORM SUBMIT
+    function openNewShoeModal() {
+      document.getElementById('shoeForm').reset();
+      document.getElementById('fId').value = '';
+      
+      const curGender = document.getElementById('fGenderSelect').value || 'Men';
+      const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
+
+      colorDataMap = {
+        "Black": { photos: [], video: '', sizes: {}, barcodes: {} }
+      };
+      defaultList.forEach(s => {
+        colorDataMap["Black"].sizes[s] = 0;
+        colorDataMap["Black"].barcodes[s] = '';
+      });
+
+      renderColorBlocks();
+      document.querySelector('input[name="fItemType"][value="footwear"]').checked = true;
+      toggleItemTypeForm('footwear');
+      document.getElementById('shoeModal').style.display = 'flex';
+    }
+
+    function closeShoeModal() { document.getElementById('shoeModal').style.display = 'none'; }
+
+    function submitShoeForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('fId').value || ('item_' + Date.now());
+      const itemType = document.querySelector('input[name="fItemType"]:checked').value;
+      const name = document.getElementById('fName').value.trim();
+      const brand = document.getElementById('fBrand').value.trim();
+      const category = document.getElementById('fCategorySelect').value;
+      const cost = Number(document.getElementById('fCost').value) || 0;
+      const price = Number(document.getElementById('fPrice').value) || 0;
+
+      if (!name) { alert("Item name zaroori hai!"); return; }
+      if (price <= 0) { alert("Bikri rate bharein!"); return; }
+
+      const colors = Object.keys(colorDataMap);
+      if (itemType === 'footwear' && colors.length === 0) {
+        alert("Kam se kam ek rang jodkar uska stock bharein!");
+        return;
+      }
+
+      let mainPhoto = '';
+      for (let c in colorDataMap) {
+        if (colorDataMap[c].photos && colorDataMap[c].photos[0]) {
+          mainPhoto = colorDataMap[c].photos[0];
+          break;
+        }
+      }
+      if (!mainPhoto) mainPhoto = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80';
+
+      const itemObj = {
+        id, itemType, name, brand, category, cost, price,
+        gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
+        colors: colors,
+        colorData: colorDataMap,
+        photo: mainPhoto,
+        generalQty: (itemType === 'general') ? Number(document.getElementById('fGeneralQty').value) || 0 : 0,
+        generalBarcode: (itemType === 'general') ? document.getElementById('fGeneralBarcode').value.trim() : ''
+      };
+
+      db.ref('footwear_stock/' + itemObj.id).set(itemObj)
+        .then(() => {
+          closeShoeModal();
+          alert("✓ Safalta-purvak Cloud Par Save Ho Gaya!");
+        })
+        .catch((err) => {
+          alert("Error: " + err.message);
+        });
+    }
+
+    function editShoe(id) {
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+
+      document.getElementById('fId').value = it.id;
+      document.getElementById('fName').value = it.name;
+      document.getElementById('fBrand').value = it.brand;
+      document.getElementById('fCategorySelect').value = it.category;
+      document.getElementById('fCost').value = it.cost;
+      document.getElementById('fPrice').value = it.price;
+
+      const itemType = it.itemType || 'footwear';
+      document.querySelector(`input[name="fItemType"][value="${itemType}"]`).checked = true;
+      toggleItemTypeForm(itemType);
+
+      if (it.colorData && Object.keys(it.colorData).length > 0) {
+        colorDataMap = JSON.parse(JSON.stringify(it.colorData));
+      } else {
+        colorDataMap = { "Standard": { photos: it.photos || [it.photo], video: it.video || '', sizes: it.sizes || {}, barcodes: it.barcodes || {} } };
+      }
+
+      renderColorBlocks();
+      document.getElementById('shoeModalTitle').innerText = "Item Edit Karein";
+      document.getElementById('shoeModal').style.display = 'flex';
+    }
+
+    function deleteShoe(id) {
+      if (confirm("Item hatana chahte hain?")) db.ref('footwear_stock/' + id).remove();
+    }
+
+    // RENDER ADMIN
+    function renderApp() {
+      if (currentAppMode === 'admin') renderAdminTable();
+      else renderCustomerCatalog();
+    }
+
+    function renderAdminTable() {
+      const search = (document.getElementById('adminSearchFilter').value || '').toLowerCase().trim();
+      const catFlt = document.getElementById('adminCategoryFilter').value;
+
+      let totalStockUnits = 0, totalCost = 0, totalTagValue = 0, lowStock = 0;
+      let tableHtml = '';
+
+      items.forEach(it => {
+        const itemType = it.itemType || 'footwear';
+        const itemCat = it.category || 'Footwear';
+
+        let p = 0;
+        let breakdownByColorHtml = '';
+
+        if (itemType === 'general') {
+          p = Number(it.generalQty) || 0;
+          breakdownByColorHtml = `<span class="size-badge ${p > 2 ? 'size-in' : 'size-low'}">${p} Pcs</span>`;
+        } else if (it.colorData) {
+          for (let c in it.colorData) {
+            const cSizes = it.colorData[c].sizes || {};
+            let cPairs = 0;
+            let cBadges = [];
+            for (let sz in cSizes) {
+              const q = Number(cSizes[sz]) || 0;
+              cPairs += q;
+              p += q;
+              if (q > 0) cBadges.push(`${sz}:${q}`);
+            }
+            const hasVideo = !!it.colorData[c].video;
+            breakdownByColorHtml += `
+              <div style="margin-bottom:3px;">
+                <b style="color:#4f46e5; font-size:11px;">● ${c} (${cPairs} Jodi) ${hasVideo?'🎬':''}:</b> 
+                <small style="color:#334155;">${cBadges.join(', ') || 'Khatam'}</small>
+              </div>
+            `;
+          }
+        }
+
+        totalStockUnits += p;
+        totalCost += (p * (it.cost || 0));
+        totalTagValue += (p * (it.price || 0));
+        if (p <= 3) lowStock++;
+
+        if (catFlt !== 'ALL' && !itemCat.toLowerCase().includes(catFlt.toLowerCase())) return;
+        if (search && !it.name.toLowerCase().includes(search) && !it.brand.toLowerCase().includes(search)) return;
+
+        let mainImg = it.photo || 'https://via.placeholder.com/50';
+
+        tableHtml += `<tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="${mainImg}" class="shoe-img">
+              <div><b>${it.name}</b><br><span class="cat-chip">${itemCat}</span></div>
+            </div>
+          </td>
+          <td><b>${it.brand}</b></td>
+          <td>${breakdownByColorHtml || '<small style="color:#94a3b8;">No Stock</small>'}</td>
+          <td><b style="${p<=3?'color:#ef4444;':'color:#0f172a;'}">${p} Jodi</b></td>
+          <td><b style="color:#10b981;">₹${it.price}</b></td>
+          <td style="text-align:right;">
+            <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="openCheckPopup('${it.id}')">Stock</button>
+            <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'), null, null)">🛒 Bechein</button>
+            <button class="btn btn-indigo" style="padding:4px 8px; font-size:11px;" onclick="editShoe('${it.id}')">✏️</button>
+            <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe('${it.id}')">🗑️</button>
+          </td>
+        </tr>`;
+      });
+
+      document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi item nahi mila.</td></tr>';
+      document.getElementById('dTotalPairs').innerText = totalStockUnits;
+      document.getElementById('dTotalModels').innerText = items.length + " Models";
+      document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
+      document.getElementById('dTotalTagValue').innerText = "Tag Value: ₹" + totalTagValue.toLocaleString('en-IN');
+      document.getElementById('dLowStock').innerText = lowStock;
+
+      let allSalesAmt = 0;
+      let allCash = 0;
+      let allUpi = 0;
+
+      salesHistory.forEach(s => {
+        const amt = Number(s.sellPrice) || 0;
+        const mode = (s.payMode || 'Cash').toUpperCase();
+        allSalesAmt += amt;
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          allUpi += amt;
+        } else {
+          allCash += amt;
+        }
+      });
+
+      document.getElementById('dTotalSalesVal').innerText = "₹" + allSalesAmt.toLocaleString('en-IN');
+      document.getElementById('dSalesCash').innerText = "₹" + allCash.toLocaleString('en-IN');
+      document.getElementById('dSalesUpi').innerText = "₹" + allUpi.toLocaleString('en-IN');
+    }
+
+    // RENDER CUSTOMER CATALOG
+    function renderCustomerCatalog() {
+      const grid = document.getElementById('customerCatalogGrid');
+      let cardsHtml = '';
+
+      items.forEach(it => {
+        let colors = Object.keys(it.colorData || {});
+        if (colors.length === 0) return;
+
+        let firstColor = colors[0];
+        let cData = it.colorData[firstColor] || {};
+
+        let colorsChipsHtml = colors.map((c, idx) => `
+          <button type="button" class="color-chip-btn ${idx===0?'active':''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
+            ● ${c}
+          </button>
+        `).join('');
+
+        let sizesBadges = [];
+        for (let s in (cData.sizes || {})) {
+          if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
+        }
+
+        const mediaBoxId = `card_media_box_${it.id}`;
+        const trayId = `card_thumb_tray_${it.id}`;
+
+        let initialMediaHtml = '';
+        if (cData.video) {
+          initialMediaHtml = `<video class="main-card-video" src="${cData.video}" autoplay muted loop playsinline></video>`;
+        } else if (cData.photos && cData.photos[0]) {
+          initialMediaHtml = `<img class="main-card-img" src="${cData.photos[0]}">`;
+        } else {
+          initialMediaHtml = `<img class="main-card-img" src="${it.photo || 'https://via.placeholder.com/300'}">`;
+        }
+
+        let thumbsHtml = generateThumbnailsHtml(it.id, cData);
+
+        cardsHtml += `
+          <div class="shoe-card">
+            <div>
+              <div class="item-media-box" id="${mediaBoxId}">
+                ${initialMediaHtml}
+              </div>
+              <div class="thumb-tray" id="${trayId}">
+                ${thumbsHtml}
+              </div>
+            </div>
+
+            <div class="shoe-card-body">
+              <div>
+                <h4 style="font-size:15px; font-weight:bold; color:#0f172a;">${it.name}</h4>
+                <p style="font-size:12px; color:#64748b;">${it.brand} • ${it.category}</p>
+
+                <div style="margin:8px 0 4px;">
+                  <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">RANG CHUNEIN:</small>
+                  ${colorsChipsHtml}
+                </div>
+
+                <div style="margin-bottom:8px;">
+                  <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">IS RANG ME UPLABDH SIZES:</small>
+                  <div id="card_sizes_${it.id}">${sizesBadges.join(' ') || '<small style="color:#ef4444;">Out of stock</small>'}</div>
+                </div>
+
+                <div style="font-size:18px; font-weight:900; color:#10b981; margin:8px 0;">₹${it.price}</div>
+              </div>
+              <button class="btn btn-wa" style="width:100%; justify-content:center;" onclick="window.open('https://wa.me/${WHATSAPP_ORDER_NUMBER}?text='+encodeURIComponent('Namaste DN Footwear! Mujhe order karna hai: ${it.name} (₹${it.price})'), '_blank')">
+                📲 WhatsApp Order Karein
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Koi item stock me nahi hai.</div>';
+    }
+
+    function generateThumbnailsHtml(itemId, colorData) {
+      let html = '';
+      let isFirstActive = true;
+
+      if (colorData.video) {
+        html += `
+          <div class="thumb-item active" onclick="switchMediaDisplay('${itemId}', 'video', '${colorData.video}', this)">
+            <video src="${colorData.video}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+            <span class="video-thumb-badge">▶ REEL</span>
+          </div>
+        `;
+        isFirstActive = false;
+      }
+
+      const photos = colorData.photos || [];
+      photos.forEach((pSrc, pIdx) => {
+        const activeClass = (isFirstActive && pIdx === 0) ? 'active' : '';
+        html += `
+          <img src="${pSrc}" class="thumb-item ${activeClass}" onclick="switchMediaDisplay('${itemId}', 'image', '${pSrc}', this)">
+        `;
+      });
+
+      return html;
+    }
+
+    function switchMediaDisplay(itemId, type, src, thumbElem) {
+      const box = document.getElementById(`card_media_box_${itemId}`);
+      if (!box) return;
+
+      if (type === 'video') {
+        box.innerHTML = `<video class="main-card-video" src="${src}" autoplay muted loop playsinline></video>`;
+      } else {
+        box.innerHTML = `<img class="main-card-img" src="${src}">`;
+      }
+
+      const tray = thumbElem.parentElement;
+      tray.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+      thumbElem.classList.add('active');
+    }
+
+    function customerPickColor(btn, itemId, colorName) {
+      btn.parentElement.querySelectorAll('.color-chip-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const it = items.find(x => x.id === itemId);
+      if (!it || !it.colorData || !it.colorData[colorName]) return;
+
+      const cData = it.colorData[colorName];
+      const mediaBox = document.getElementById(`card_media_box_${itemId}`);
+      const tray = document.getElementById(`card_thumb_tray_${itemId}`);
+
+      if (cData.video) {
+        mediaBox.innerHTML = `<video class="main-card-video" src="${cData.video}" autoplay muted loop playsinline></video>`;
+      } else if (cData.photos && cData.photos[0]) {
+        mediaBox.innerHTML = `<img class="main-card-img" src="${cData.photos[0]}">`;
+      }
+
+      tray.innerHTML = generateThumbnailsHtml(itemId, cData);
+
+      let sizesBadges = [];
+      for (let s in (cData.sizes || {})) {
+        if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
+      }
+      document.getElementById(`card_sizes_${itemId}`).innerHTML = sizesBadges.join(' ') || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
+    }
+
+    // ==================== CHECK POPUP WITH DIRECT SELL ====================
+    function openCheckPopup(id, highlightColor = null, highlightSize = null) {
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+
+      activePopupItem = it;
+      activeHighlightedColor = highlightColor;
+      activeHighlightedSize = highlightSize;
+
+      document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/130';
+      document.getElementById('chkTitle').innerText = it.name;
+      document.getElementById('chkBrandCat').innerText = `${it.brand} • ${it.category}`;
+      document.getElementById('chkPrice').innerText = `₹${it.price}`;
+      document.getElementById('chkCost').innerText = `₹${it.cost}`;
+
+      let html = '';
+      if (it.itemType === 'general') {
+        html = `<div style="background:#ecfdf5; padding:12px; border-radius:8px; text-align:center;"><b style="font-size:18px; color:#047857;">${it.generalQty || 0} Pieces Bachi Hain</b></div>`;
+      } else if (it.colorData) {
+        for (let c in it.colorData) {
+          const cData = it.colorData[c];
+          let sizesGrid = '';
+          for (let s in (cData.sizes || {})) {
+            const q = cData.sizes[s] || 0;
+            const isHighlight = (c === highlightColor && String(s) === String(highlightSize));
+            sizesGrid += `
+              <div style="background:${isHighlight ? '#fef3c7; border:2px solid #f59e0b;' : (q > 0 ? '#ecfdf5; border:1px solid #86efac;' : '#f1f5f9;')}; border-radius:6px; padding:6px 2px; text-align:center;">
+                <b style="font-size:12px; display:block;">Sz ${s}</b>
+                <b style="font-size:13px; color:${q>0?'#15803d':'#94a3b8'};">${q} Jodi</b>
+              </div>
+            `;
+          }
+
+          html += `
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:10px;">
+              <b style="font-size:13px; color:#1e1b4b; display:block; margin-bottom:6px;">🎨 Rang: <span style="color:#4f46e5;">${c}</span> ${cData.video?'(🎬 Video Available)':''}</b>
+              <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">${sizesGrid}</div>
+            </div>
+          `;
+        }
+      }
+
+      document.getElementById('chkColorWiseStockContainer').innerHTML = html;
+      document.getElementById('checkModal').style.display = 'flex';
+    }
+
+    function closeCheckModal() { document.getElementById('checkModal').style.display = 'none'; }
+
+    function openSaleCheckoutFromCheck() {
+      if (activePopupItem) {
+        closeCheckModal();
+        openSaleCheckout(activePopupItem, activeHighlightedColor, activeHighlightedSize);
+      }
+    }
+
+    // ==================== SMART BIKRI (POS CHECKOUT & BILLING) ====================
+    function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
+      if (!item) return;
+
+      currentSellingItem = item;
+      currentSellingColor = preferredColor;
+      currentSellingSize = preferredSize;
+
+      let availQty = 0;
+
+      if (item.itemType === 'general') {
+        availQty = item.generalQty || 0;
+        currentSellingColor = 'General';
+        currentSellingSize = '1 Piece';
+      } else {
+        if (!currentSellingColor || !item.colorData[currentSellingColor]) {
+          const colors = Object.keys(item.colorData || {});
+          for (let c of colors) {
+            const sizes = item.colorData[c].sizes || {};
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingColor = c;
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+            if (currentSellingColor) break;
+          }
+        } else {
+          const sizes = item.colorData[currentSellingColor].sizes || {};
+          if (!currentSellingSize || !sizes[currentSellingSize] || sizes[currentSellingSize] <= 0) {
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+          } else {
+            availQty = sizes[currentSellingSize];
+          }
+        }
+      }
+
+      if (availQty <= 0) {
+        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
+        return;
+      }
+
+      document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
+      document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
+      document.getElementById('saleSizeBadge').innerText = `Size: ${currentSellingSize}`;
+      document.getElementById('saleColorBadge').innerText = `${currentSellingColor}`;
+      document.getElementById('saleStockRem').innerText = `Stock: ${availQty}`;
+
+      document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
+      document.getElementById('saleFinalPrice').value = item.price;
+      document.getElementById('saleCustName').value = '';
+      document.getElementById('saleCustPhone').value = '';
+
+      closeScannerModal();
+      document.getElementById('saleModal').style.display = 'flex';
+    }
+
+    function closeSaleModal() {
+      document.getElementById('saleModal').style.display = 'none';
+    }
+
+    function confirmSaleTransaction(e, shouldPrint = false) {
+      if (e) e.preventDefault();
+      if (!currentSellingItem) return;
+
+      const finalPrice = Number(document.getElementById('saleFinalPrice').value);
+      const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+
+      if (currentSellingItem.itemType === 'general') {
+        if ((currentSellingItem.generalQty || 0) <= 0) { alert("Stock khatam hai!"); return; }
+        currentSellingItem.generalQty -= 1;
+      } else {
+        if (!currentSellingItem.colorData[currentSellingColor] || 
+            !currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] || 
+            currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] <= 0) {
+          alert("Stock khatam hai!");
+          return;
+        }
+        currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] -= 1;
+      }
+
+      // Update in Firebase Realtime Database
+      db.ref('footwear_stock/' + currentSellingItem.id).set(currentSellingItem);
+
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowStr = new Date().toLocaleString('en-IN');
+
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: new Date().toISOString(),
+        itemId: currentSellingItem.id,
+        name: currentSellingItem.name,
+        brand: currentSellingItem.brand,
+        color: currentSellingColor,
+        size: currentSellingSize,
+        costPrice: currentSellingItem.cost || 0,
+        tagPrice: currentSellingItem.price || 0,
+        sellPrice: finalPrice,
+        profit: finalPrice - (currentSellingItem.cost || 0),
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+      closeSaleModal();
+
+      if (shouldPrint) {
+        showReceipt(saleRecord, nowStr);
+      } else {
+        alert(`✓ Bikri Safal! ₹${finalPrice} me becha gaya.`);
+      }
+    }
+
+    function showReceipt(record, dateStr) {
+      document.getElementById('rBillNo').innerText = record.billNo;
+      document.getElementById('rDate').innerText = dateStr;
+      document.getElementById('rCust').innerText = `${record.customer} ${record.phone ? '('+record.phone+')' : ''}`;
+      document.getElementById('rPayMode').innerText = record.payMode;
+      document.getElementById('rItemName').innerText = `${record.name} (${record.brand})`;
+      document.getElementById('rItemSize').innerText = `${record.size} / ${record.color}`;
+      document.getElementById('rItemRate').innerText = `₹${record.sellPrice}`;
+      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice}`;
+      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice}`;
+      
+      document.getElementById('receiptModal').style.display = 'flex';
+      setTimeout(() => window.print(), 400);
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    // ==================== SCANNER ====================
+    function openScannerModal(mode) {
+      currentScanAction = mode;
+      document.getElementById('scannerModal').style.display = 'flex';
+      
+      const titles = {
+        'check': '🔍 Dabba Scan Karke Stock Check Karein',
+        'sale': '🛒 Bikri Scan: Dabba Scan Karke Turant Bechein',
+        'inward': '📦 Stock Inward: Scan Karke +1 Jodi Badhayein',
+        'color_size_barcode': '📷 Box Barcode Scan'
+      };
+      document.getElementById('scannerTitle').innerText = titles[mode] || 'Scanner';
+
+      if (window.Html5Qrcode) {
+        if (!scannerObj) scannerObj = new Html5Qrcode("scannerTarget");
+        scannerObj.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 180 } }, onScanFound, () => {}).catch(() => alert("Camera permission dein."));
+      }
+    }
+
+    function closeScannerModal() {
+      if (scannerObj && scannerObj.isScanning) {
+        scannerObj.stop().then(() => document.getElementById('scannerModal').style.display = 'none');
+      } else document.getElementById('scannerModal').style.display = 'none';
+    }
+
+    function onScanFound(code) {
+      const c = code.trim().toLowerCase();
+
+      if (currentScanAction === 'color_size_barcode' && targetScanInputId) {
+        const inp = document.getElementById(targetScanInputId.inputId);
+        if (inp) inp.value = code.trim();
+        updateColorBarcode(targetScanInputId.col, targetScanInputId.size, code.trim());
+        closeScannerModal();
+        alert(`Barcode set ho gaya: ${code.trim()}`);
+        return;
+      }
+
+      let matchedItem = null;
+      let matchedColor = null;
+      let matchedSize = null;
+
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        if (it.itemType === 'general') {
+          if (it.generalBarcode && it.generalBarcode.toLowerCase() === c) {
+            matchedItem = it;
+            matchedColor = 'General';
+            matchedSize = '1 Piece';
+            break;
+          }
+        } else if (it.colorData) {
+          for (let col in it.colorData) {
+            const bcMap = it.colorData[col].barcodes || {};
+            for (let sz in bcMap) {
+              if (bcMap[sz] && bcMap[sz].toLowerCase() === c) {
+                matchedItem = it;
+                matchedColor = col;
+                matchedSize = sz;
+                break;
+              }
+            }
+            if (matchedItem) break;
+          }
+        }
+        if (matchedItem) break;
+      }
+
+      if (!matchedItem) {
+        alert(`Barcode [${code.trim()}] kisi item se match nahi hua!`);
+        return;
+      }
+
+      if (currentScanAction === 'check') {
+        closeScannerModal();
+        openCheckPopup(matchedItem.id, matchedColor, matchedSize);
+      } else if (currentScanAction === 'inward') {
+        if (matchedItem.itemType === 'general') {
+          matchedItem.generalQty = (matchedItem.generalQty || 0) + 1;
+        } else {
+          matchedItem.colorData[matchedColor].sizes[matchedSize] = (matchedItem.colorData[matchedColor].sizes[matchedSize] || 0) + 1;
+        }
+        db.ref('footwear_stock/' + matchedItem.id).set(matchedItem);
+        alert(`[${matchedItem.name}] ${matchedColor} Size ${matchedSize} me +1 jodi stock badh gaya!`);
+      } else if (currentScanAction === 'sale') {
+        closeScannerModal();
+        openSaleCheckout(matchedItem, matchedColor, matchedSize);
+      }
+    }
+
+    function handleManualScan() {
+      const v = document.getElementById('manualInput').value.trim();
+      if (v) onScanFound(v);
+    }
+
+    function copyCustomerStoreLink() {
+      const url = window.location.origin + window.location.pathname + '#store';
+      navigator.clipboard.writeText(url).then(() => alert("Customer Store Link Copy Ho Gaya:\n" + url));
+    }
+
+    function backupJSON() {
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "DN_Stock_Backup.json";
+      a.click();
+    }
+
+    window.onload = function() {
+      if (window.location.hash === '#store' || window.location.hash === '#catalog') {
+        currentAppMode = 'customer';
+        document.getElementById('adminViewSection').style.display = 'none';
+        document.getElementById('customerViewSection').style.display = 'block';
+        document.getElementById('adminNavGroup').style.display = 'none';
+        document.getElementById('toggleModeBtn').innerText = '🔒 Admin Mode (Dukaan Login)';
+        document.getElementById('toggleModeBtn').className = 'btn btn-indigo';
+        document.getElementById('appModeSubtitle').innerText = 'Customer Online Store';
+      }
+      initLiveSync();
+    };
   </script>
 </body>
 </html>
