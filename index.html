@@ -89,7 +89,9 @@
     .color-photo-item { position: relative; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; height: 70px; }
     .color-photo-item img { width: 100%; height: 100%; object-fit: cover; }
     .color-photo-del { position: absolute; top: 2px; right: 2px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .size-mini-row { display: grid; grid-template-columns: 70px 75px 1fr 65px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 4px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
+    
+    /* Size Row with Delete Button */
+    .size-mini-row { display: grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 5px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
 
     @media print {
       body * { visibility: hidden; }
@@ -228,7 +230,7 @@
     <div id="customerCatalogGrid" class="catalog-grid"></div>
   </div>
 
-  <!-- ADD / EDIT ITEM MODAL WITH COLOR-WISE STOCK & SIZES -->
+  <!-- ADD / EDIT ITEM MODAL WITH COLOR-WISE STOCK & SIZE REMOVE/ADD OPTION -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -282,9 +284,9 @@
           <div class="form-group" id="footwearGenderGroup">
             <label>Gender / Kiske Liye:</label>
             <select id="fGenderSelect" class="form-control" onchange="changePresetGender(this.value)">
-              <option value="Men">Men (Sizes: 6, 7, 8, 9, 10, 11)</option>
-              <option value="Ladies">Ladies (Sizes: 3, 4, 5, 6, 7, 8)</option>
-              <option value="Kids">Kids (Sizes: 1, 2, 3, 4, 11, 12, 13)</option>
+              <option value="Men">Men (Default: 6-11)</option>
+              <option value="Ladies">Ladies (Default: 3-8)</option>
+              <option value="Kids">Kids (Default: 1-13)</option>
             </select>
           </div>
         </div>
@@ -304,15 +306,15 @@
         <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
-              🎨 Rang (Colors) Jodein & Har Rang Ka Stock Daalein:
+              🎨 Rang (Colors) Jodein, Photo & Har Size Ka Stock Daalein:
             </label>
           </div>
           <small style="color:#64748b; font-size:11px; display:block; margin-bottom:10px;">
-            Jaise: "Black" likhkar add karein, fir Black ki photo aur Black ke har size ki jodi bharein. Fir "White" add karein!
+            Har rang ka alag stock aur sizes maintain honge. Jo size nahi chahiye use ✕ se hata sakte hain!
           </small>
 
           <div style="display:flex; gap:6px; margin-bottom:14px;">
-            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein (e.g. Black, White, Grey)..." class="form-control">
+            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein (e.g. Black, White, Navy)..." class="form-control">
             <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorBlock()">+ Rang Jodein</button>
           </div>
 
@@ -363,9 +365,7 @@
         </div>
       </div>
 
-      <div id="chkColorWiseStockContainer" style="max-height:45vh; overflow-y:auto;">
-        <!-- Color wise stock tables -->
-      </div>
+      <div id="chkColorWiseStockContainer" style="max-height:45vh; overflow-y:auto;"></div>
 
       <div style="margin-top:14px; text-align:right;">
         <button class="btn btn-slate" onclick="closeCheckModal()">Band Karein</button>
@@ -390,7 +390,6 @@
 
   <script>
     const WHATSAPP_ORDER_NUMBER = "917733909735";
-    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "1234";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
@@ -412,7 +411,6 @@
       'Kids': [1, 2, 3, 4, 11, 12, 13]
     };
 
-    let activeSizesList = [...GENDER_PRESETS['Men']];
     let items = [];
     let salesHistory = [];
     let onlineOrders = [];
@@ -422,11 +420,7 @@
     let currentScanAction = 'check';
     let targetScanInputId = null;
 
-    // COLOR DATA STRUCTURE:
-    // colorDataMap = {
-    //   "Black": { photos: [base64], sizes: { "7": 4, "8": 2 }, barcodes: { "7": "B-7", "8": "B-8" } },
-    //   "White": { photos: [base64], sizes: { "7": 1, "9": 5 }, barcodes: { "7": "W-7", "9": "W-9" } }
-    // }
+    // COLOR DATA STRUCTURE
     let colorDataMap = {};
 
     function initLiveSync() {
@@ -454,7 +448,16 @@
     }
 
     function changePresetGender(gender) {
-      activeSizesList = [...(GENDER_PRESETS[gender] || GENDER_PRESETS['Men'])];
+      const defaultList = GENDER_PRESETS[gender] || GENDER_PRESETS['Men'];
+      // Har existing color block me yeh default sizes populate kar do agar pehle se nahi hai
+      for (let c in colorDataMap) {
+        defaultList.forEach(s => {
+          if (colorDataMap[c].sizes[s] === undefined) {
+            colorDataMap[c].sizes[s] = 0;
+            colorDataMap[c].barcodes[s] = '';
+          }
+        });
+      }
       renderColorBlocks();
     }
 
@@ -465,14 +468,16 @@
       if (!color) { alert("Pehle rang ka naam likhein!"); return; }
       if (colorDataMap[color]) { alert("Yeh rang pehle se jud chuka hai!"); return; }
 
+      const curGender = document.getElementById('fGenderSelect').value || 'Men';
+      const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
+
       colorDataMap[color] = {
         photos: [],
         sizes: {},
         barcodes: {}
       };
 
-      // Set default 0 for sizes
-      activeSizesList.forEach(s => {
+      defaultList.forEach(s => {
         colorDataMap[color].sizes[s] = 0;
         colorDataMap[color].barcodes[s] = '';
       });
@@ -485,6 +490,31 @@
       if (confirm(`Kya aap [${c}] rang aur iska poora stock hatana chahte hain?`)) {
         delete colorDataMap[c];
         renderColorBlocks();
+      }
+    }
+
+    // SIZE ADD / REMOVE IN COLOR BLOCK
+    function removeSizeFromColor(col, size) {
+      if (confirm(`Kya aap [${col}] me se Size [${size}] ko hatana chahte hain?`)) {
+        if (colorDataMap[col]) {
+          delete colorDataMap[col].sizes[size];
+          if (colorDataMap[col].barcodes) delete colorDataMap[col].barcodes[size];
+          renderColorBlocks();
+        }
+      }
+    }
+
+    function promptAddSizeToColor(col) {
+      const customSz = prompt(`[${col}] me naya Size daalein (Jaise: 12, 13, 4.5):`);
+      if (customSz) {
+        const trimmed = customSz.trim().toUpperCase();
+        if (!colorDataMap[col].sizes[trimmed]) {
+          colorDataMap[col].sizes[trimmed] = 0;
+          colorDataMap[col].barcodes[trimmed] = '';
+          renderColorBlocks();
+        } else {
+          alert("Yeh size pehle se is colour me judha hai!");
+        }
       }
     }
 
@@ -512,10 +542,12 @@
           `;
         });
 
-        // Size rows for this specific color
+        // Size rows with REMOVE (✕) BUTTON
         let sizeRowsHtml = '';
-        activeSizesList.forEach(s => {
-          const qty = (cData.sizes && cData.sizes[s] !== undefined) ? cData.sizes[s] : 0;
+        const sizeKeys = Object.keys(cData.sizes || {});
+
+        sizeKeys.forEach(s => {
+          const qty = cData.sizes[s] !== undefined ? cData.sizes[s] : 0;
           const bcode = (cData.barcodes && cData.barcodes[s] !== undefined) ? cData.barcodes[s] : '';
           const bcodeId = `sz_bcode_${col}_${s}`.replace(/\s+/g, '_');
 
@@ -524,7 +556,8 @@
               <b style="font-size:12px; color:#1e1b4b; background:#e0e7ff; padding:3px 6px; border-radius:4px; text-align:center;">Size ${s}</b>
               <input type="number" min="0" value="${qty}" oninput="updateColorSizeQty('${col}', '${s}', this.value)" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
               <input type="text" value="${bcode}" id="${bcodeId}" placeholder="Barcode..." oninput="updateColorBarcode('${col}', '${s}', this.value)" class="form-control" style="padding:4px 6px; font-family:monospace; font-size:11px;">
-              <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:10px; justify-content:center;" onclick="scanBarcodeForColorInput('${bcodeId}', '${col}', '${s}')">📷 Scan</button>
+              <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:10px; justify-content:center;" onclick="scanBarcodeForColorInput('${bcodeId}', '${col}', '${s}')">📷</button>
+              <button type="button" onclick="removeSizeFromColor('${col}', '${s}')" style="background:none; border:none; color:#ef4444; font-weight:bold; font-size:15px; cursor:pointer;" title="Size Hatayein">✕</button>
             </div>
           `;
         });
@@ -549,10 +582,14 @@
 
             <!-- Size-wise stock for this color -->
             <div style="background:#f1f5f9; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
-              <div style="display:grid; grid-template-columns: 70px 75px 1fr 65px; gap:6px; font-size:11px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 4px;">
-                <span>SIZE</span><span>JODI (QTY)</span><span>BOX BARCODE</span><span></span>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:11px; font-weight:bold; color:#475569;">AVAILABLE SIZES & STOCK:</span>
+                <button type="button" class="btn btn-blue" style="padding:2px 7px; font-size:10px;" onclick="promptAddSizeToColor('${col}')">+ Size Jodein</button>
               </div>
-              ${sizeRowsHtml}
+              <div style="display:grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap:6px; font-size:10px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 4px;">
+                <span>SIZE</span><span>JODI (QTY)</span><span>BOX BARCODE</span><span>SCAN</span><span>HATAO</span>
+              </div>
+              ${sizeRowsHtml || '<div style="text-align:center; padding:8px; color:#94a3b8; font-size:11px;">Koi size nahi hai. "+ Size Jodein" par click karein.</div>'}
             </div>
           </div>
         `;
@@ -588,7 +625,7 @@
             const img = new Image();
             img.onload = function() {
               const canvas = document.createElement('canvas');
-              const MAX = 400; // Compressed
+              const MAX = 400; // Compressed Lightweight
               let w = img.width, h = img.height;
               if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
               else { if (h > MAX) { w *= MAX / h; h = MAX; } }
@@ -617,10 +654,14 @@
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
+      
+      const curGender = document.getElementById('fGenderSelect').value || 'Men';
+      const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
+
       colorDataMap = {
         "Black": { photos: [], sizes: {}, barcodes: {} }
       };
-      activeSizesList.forEach(s => {
+      defaultList.forEach(s => {
         colorDataMap["Black"].sizes[s] = 0;
         colorDataMap["Black"].barcodes[s] = '';
       });
@@ -652,7 +693,6 @@
         return;
       }
 
-      // Pick first photo as main fallback
       let mainPhoto = '';
       for (let c in colorDataMap) {
         if (colorDataMap[c].photos && colorDataMap[c].photos[0]) {
@@ -666,7 +706,7 @@
         id, itemType, name, brand, category, cost, price,
         gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
         colors: colors,
-        colorData: colorDataMap, // Full color-wise size & stock map
+        colorData: colorDataMap,
         photo: mainPhoto,
         generalQty: (itemType === 'general') ? Number(document.getElementById('fGeneralQty').value) || 0 : 0,
         generalBarcode: (itemType === 'general') ? document.getElementById('fGeneralBarcode').value.trim() : ''
@@ -712,7 +752,7 @@
       if (confirm("Item hatana chahte hain?")) db.ref('footwear_stock/' + id).remove();
     }
 
-    // ==================== RENDER ADMIN TABLE ====================
+    // RENDER ADMIN TABLE
     function renderApp() {
       if (currentAppMode === 'admin') renderAdminTable();
       else renderCustomerCatalog();
@@ -729,7 +769,6 @@
         const itemType = it.itemType || 'footwear';
         const itemCat = it.category || 'Footwear';
 
-        // Calculate total pairs across all colors
         let p = 0;
         let breakdownByColorHtml = '';
 
@@ -793,7 +832,6 @@
       document.getElementById('dLowStock').innerText = lowStock;
     }
 
-    // ==================== CUSTOMER STORE CATALOG ====================
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
@@ -806,14 +844,12 @@
         let cData = it.colorData[firstColor] || {};
         let firstImg = (cData.photos && cData.photos[0]) ? cData.photos[0] : (it.photo || 'https://via.placeholder.com/300');
 
-        // Color buttons
         let colorsChipsHtml = colors.map((c, idx) => `
           <button type="button" class="color-chip-btn ${idx===0?'active':''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
             ● ${c}
           </button>
         `).join('');
 
-        // Size badges for first color
         let sizesBadges = [];
         for (let s in (cData.sizes || {})) {
           if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
@@ -871,7 +907,7 @@
       document.getElementById(`card_sizes_${itemId}`).innerHTML = sizesBadges.join(' ') || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
     }
 
-    // ==================== CHECK BARCODE / STOCK POPUP ====================
+    // CHECK BARCODE / STOCK POPUP
     function openCheckPopup(id, highlightColor = null, highlightSize = null) {
       const it = items.find(x => x.id === id);
       if (!it) return;
@@ -944,7 +980,6 @@
         return;
       }
 
-      // Check scan across all items, colors and sizes
       let matchedItem = null;
       let matchedColor = null;
       let matchedSize = null;
