@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear & Sports - Color & Size Wise Inventory, POS & Store</title>
+  <title>DN Footwear & Sports - Color & Size Wise Inventory, POS & Sales Report</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -87,6 +87,7 @@
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+    /* Color-wise Stock Box */
     .color-block-card { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
     .color-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
     .color-photo-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 6px; margin-bottom: 10px; }
@@ -98,8 +99,9 @@
 
     @media print {
       body * { visibility: hidden; }
-      #thermalBillArea, #thermalBillArea * { visibility: visible; }
+      #thermalBillArea, #thermalBillArea *, #reportPrintArea, #reportPrintArea * { visibility: visible; }
       #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
+      #reportPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; }
       .no-print { display: none !important; }
     }
   </style>
@@ -116,13 +118,16 @@
       <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Dukaan Admin & POS Mode</span>
     </div>
 
+    <!-- Right Header Controls -->
     <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
       <button id="toggleModeBtn" class="btn btn-amber" onclick="toggleAppMode()">
         🛍️ Customer Catalog Dekhein
       </button>
 
+      <!-- Admin Specific Buttons -->
       <span id="adminNavGroup" style="display:inline-flex; gap:6px; flex-wrap:wrap;">
         <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
+        <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
         <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
         <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders</button>
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
@@ -147,16 +152,23 @@
         <small id="dTotalTagValue" style="color:#64748b; font-weight:bold;">Tag Value: ₹0</small>
       </div>
 
+      <!-- TOTAL BIKRI CARD (WITH CASH & UPI BREAKDOWN) -->
+      <div class="stat-card" style="border-left: 4px solid #10b981; cursor:pointer;" onclick="openSalesReportModal()" title="Click karke poori report dekhein">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <small style="color:#10b981; font-weight:700;">TOTAL BIKRI (SALES)</small>
+          <span style="font-size:10px; background:#dcfce7; color:#15803d; padding:2px 5px; border-radius:4px; font-weight:bold;">Report</span>
+        </div>
+        <div class="stat-num" id="dTotalSalesVal" style="color:#10b981;">₹0</div>
+        <div style="display:flex; gap:8px; margin-top:4px; font-size:11px; font-weight:bold;">
+          <span style="color:#059669;">💵 Cash: <span id="dSalesCash">₹0</span></span>
+          <span style="color:#2563eb;">📱 UPI: <span id="dSalesUpi">₹0</span></span>
+        </div>
+      </div>
+
       <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">ONLINE ORDERS (PENDING)</small>
         <div class="stat-num" id="dPendingOrders" style="color:#f59e0b;">0</div>
         <small style="color:#64748b; font-size:11px;">Pending orders</small>
-      </div>
-
-      <div class="stat-card">
-        <small style="color:#64748b; font-weight:700;">AAJ KI KUL BIKRI</small>
-        <div class="stat-num" id="dTodaySales" style="color:#10b981;">₹0</div>
-        <small id="dTodayPairs" style="color:#64748b;">0 Items Beche</small>
       </div>
 
       <div class="stat-card" style="border-left: 4px solid #ef4444;">
@@ -236,7 +248,105 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- A. PIN CHANGE MODAL -->
+  <!-- A. TOTAL BIKRI REPORT MODAL (CASH, UPI & EXCEL DOWNLOAD) -->
+  <div id="salesReportModal" class="modal">
+    <div class="modal-box" style="max-width:750px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
+        <div>
+          <h3 style="font-size:17px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:6px;">
+            📊 Dukaan Bikri & Payment Report
+          </h3>
+          <p style="font-size:11px; color:#64748b;">Daily aur Monthly bikri, Cash aur UPI hisaab check karein aur Excel download karein.</p>
+        </div>
+        <button class="btn btn-slate" onclick="closeSalesReportModal()">✕</button>
+      </div>
+
+      <!-- Report Filters & Date Range -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;" class="no-print">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-indigo" id="repPeriodToday" onclick="setReportPeriod('today')">📅 Aaj (Daily)</button>
+          <button class="btn btn-slate" id="repPeriodMonth" onclick="setReportPeriod('month')">🗓️ Is Mahine (Monthly)</button>
+          <button class="btn btn-slate" id="repPeriodAll" onclick="setReportPeriod('all')">Sabhi (All Time)</button>
+        </div>
+
+        <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
+          <input type="date" id="reportStartDate" class="form-control" style="font-size:11px; padding:5px 8px; width:auto;" onchange="calculateSalesReport()">
+          <span style="font-size:11px; font-weight:bold;">se</span>
+          <input type="date" id="reportEndDate" class="form-control" style="font-size:11px; padding:5px 8px; width:auto;" onchange="calculateSalesReport()">
+        </div>
+      </div>
+
+      <!-- Report Printable Area -->
+      <div id="reportPrintArea">
+        <div style="margin-bottom:10px;">
+          <h4 style="font-size:16px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS - SALES STATEMENT</h4>
+          <p id="reportPeriodText" style="font-size:12px; color:#64748b; margin:2px 0; font-weight:bold;">Period: Today</p>
+        </div>
+
+        <!-- 4 Quick Cards in Report -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:14px;">
+          <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#065f46; display:block;">KUL BIKRI (TOTAL)</small>
+            <b id="repTotalAmount" style="font-size:18px; color:#059669;">₹0</b>
+            <small id="repTotalPairs" style="font-size:10px; color:#065f46; display:block;">0 Items Sold</small>
+          </div>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#1e40af; display:block;">💵 CASH BIKRI</small>
+            <b id="repCashAmount" style="font-size:18px; color:#2563eb;">₹0</b>
+            <small id="repCashPercent" style="font-size:10px; color:#1e40af; display:block;">0% of total</small>
+          </div>
+
+          <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#6b21a8; display:block;">📱 UPI / QR BIKRI</small>
+            <b id="repUpiAmount" style="font-size:18px; color:#9333ea;">₹0</b>
+            <small id="repUpiPercent" style="font-size:10px; color:#6b21a8; display:block;">0% of total</small>
+          </div>
+
+          <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#9a3412; display:block;">📈 KUL MUNAFA (PROFIT)</small>
+            <b id="repProfitAmount" style="font-size:18px; color:#ea580c;">₹0</b>
+            <small style="font-size:10px; color:#9a3412; display:block;">Estimated</small>
+          </div>
+        </div>
+
+        <!-- Sales Records Table -->
+        <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+          <table>
+            <thead>
+              <tr style="background:#f1f5f9;">
+                <th style="padding:8px 6px;">Bill & Date</th>
+                <th style="padding:8px 6px;">Customer</th>
+                <th style="padding:8px 6px;">Item, Size & Color</th>
+                <th style="padding:8px 6px;">Payment</th>
+                <th style="padding:8px 6px; text-align:right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action & Download Buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;" class="no-print">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-green" onclick="downloadSalesCSV('daily')" title="Download Daily Report as Excel">
+            📥 Daily Excel (CSV)
+          </button>
+          <button class="btn btn-blue" onclick="downloadSalesCSV('monthly')" title="Download Monthly Report as Excel">
+            📥 Monthly Excel (CSV)
+          </button>
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-slate" onclick="window.print()">🖨️ Print Sheet</button>
+          <button class="btn btn-slate" onclick="closeSalesReportModal()">Band Karein</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. PIN CHANGE MODAL -->
   <div id="pinChangeModal" class="modal">
     <div class="modal-box" style="max-width:380px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -264,7 +374,7 @@
     </div>
   </div>
 
-  <!-- B. ADMIN LOGIN PIN MODAL -->
+  <!-- C. ADMIN LOGIN PIN MODAL -->
   <div id="adminLoginModal" class="modal">
     <div class="modal-box" style="max-width:360px; text-align:center;">
       <div style="font-size:35px; margin-bottom:8px;">🔒</div>
@@ -282,7 +392,7 @@
     </div>
   </div>
 
-  <!-- C. ADD / EDIT ITEM MODAL -->
+  <!-- D. ADD / EDIT ITEM MODAL -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -393,7 +503,7 @@
     </div>
   </div>
 
-  <!-- D. CHECK MODAL (WITH DIRECT BECHEIN BUTTON) -->
+  <!-- E. CHECK MODAL (WITH DIRECT BECHEIN BUTTON) -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="max-width:500px; padding:22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
@@ -426,7 +536,7 @@
     </div>
   </div>
 
-  <!-- E. SMART BIKRI CHECKOUT MODAL (WITH BILL PRINT & SAVE) -->
+  <!-- F. SMART BIKRI CHECKOUT MODAL -->
   <div id="saleModal" class="modal">
     <div class="modal-box" style="max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -459,16 +569,16 @@
         </div>
 
         <div class="form-group">
-          <label>Payment Mode:</label>
+          <label>Payment Mode (Kaise Paise Aaye):</label>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
             <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="Cash" checked> Cash
+              <input type="radio" name="salePayMode" value="Cash" checked> 💵 Cash
             </label>
             <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="UPI / QR"> UPI / QR
+              <input type="radio" name="salePayMode" value="UPI"> 📱 UPI
             </label>
             <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="Udhaar"> Udhaar
+              <input type="radio" name="salePayMode" value="Udhaar"> 📋 Udhaar
             </label>
           </div>
         </div>
@@ -496,7 +606,7 @@
     </div>
   </div>
 
-  <!-- F. THERMAL RECEIPT MODAL -->
+  <!-- G. THERMAL RECEIPT MODAL -->
   <div id="receiptModal" class="modal">
     <div class="modal-box" style="max-width:350px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
@@ -552,7 +662,7 @@
     </div>
   </div>
 
-  <!-- G. CAMERA SCANNER MODAL -->
+  <!-- H. CAMERA SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -609,6 +719,9 @@
     let currentSellingColor = null;
     let currentSellingSize = null;
 
+    // Report active filter variables
+    let currentReportPeriod = 'today';
+
     function initLiveSync() {
       db.ref('admin_settings/pin').on('value', (snap) => {
         if (snap.val()) {
@@ -626,12 +739,167 @@
         const data = snapshot.val();
         salesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
+        if (document.getElementById('salesReportModal').style.display === 'flex') {
+          calculateSalesReport();
+        }
       });
       db.ref('customer_orders').on('value', (snapshot) => {
         const data = snapshot.val();
         onlineOrders = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
       });
+    }
+
+    // ==================== BIKRI REPORT & DOWNLOAD SYSTEM ====================
+    function openSalesReportModal() {
+      setReportPeriod('today');
+      document.getElementById('salesReportModal').style.display = 'flex';
+    }
+
+    function closeSalesReportModal() {
+      document.getElementById('salesReportModal').style.display = 'none';
+    }
+
+    function setReportPeriod(period) {
+      currentReportPeriod = period;
+      const today = new Date().toISOString().slice(0, 10);
+
+      document.getElementById('repPeriodToday').className = period === 'today' ? 'btn btn-indigo' : 'btn btn-slate';
+      document.getElementById('repPeriodMonth').className = period === 'month' ? 'btn btn-indigo' : 'btn btn-slate';
+      document.getElementById('repPeriodAll').className = period === 'all' ? 'btn btn-indigo' : 'btn btn-slate';
+
+      if (period === 'today') {
+        document.getElementById('reportStartDate').value = today;
+        document.getElementById('reportEndDate').value = today;
+        document.getElementById('reportPeriodText').innerText = `Period: Aaj Ki Report (${today})`;
+      } else if (period === 'month') {
+        const firstDay = new Date().toISOString().slice(0, 7) + '-01';
+        document.getElementById('reportStartDate').value = firstDay;
+        document.getElementById('reportEndDate').value = today;
+        document.getElementById('reportPeriodText').innerText = `Period: Is Mahine Ki Report (${firstDay} se ${today})`;
+      } else {
+        document.getElementById('reportStartDate').value = '';
+        document.getElementById('reportEndDate').value = '';
+        document.getElementById('reportPeriodText').innerText = `Period: All Time (Pura Records)`;
+      }
+
+      calculateSalesReport();
+    }
+
+    function calculateSalesReport() {
+      const sDate = document.getElementById('reportStartDate').value;
+      const eDate = document.getElementById('reportEndDate').value;
+
+      let filteredSales = salesHistory.filter(s => {
+        if (!s.date) return false;
+        const itemDate = s.date.slice(0, 10);
+        if (sDate && itemDate < sDate) return false;
+        if (eDate && itemDate > eDate) return false;
+        return true;
+      });
+
+      // Sort by newest first
+      filteredSales.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      let totalSales = 0;
+      let cashTotal = 0;
+      let upiTotal = 0;
+      let profitTotal = 0;
+      let totalItems = filteredSales.length;
+
+      let tableHtml = '';
+
+      filteredSales.forEach(s => {
+        const amt = Number(s.sellPrice) || 0;
+        const profit = Number(s.profit) || 0;
+        const mode = (s.payMode || 'Cash').toUpperCase();
+
+        totalSales += amt;
+        profitTotal += profit;
+
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          upiTotal += amt;
+        } else {
+          cashTotal += amt;
+        }
+
+        const dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+
+        tableHtml += `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:6px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
+            <td style="padding:6px;"><b>${s.customer || 'Walk-in'}</b><br><small style="color:#64748b;">${s.phone || ''}</small></td>
+            <td style="padding:6px;"><b>${s.name || 'Shoe'}</b><br><small style="color:#4f46e5;">Sz: ${s.size} • ${s.color||''}</small></td>
+            <td style="padding:6px;"><span class="cat-chip" style="${mode.includes('UPI')?'background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;':'background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;'}">${mode}</span></td>
+            <td style="padding:6px; text-align:right;"><b style="color:#10b981; font-size:14px;">₹${amt}</b></td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('repTotalAmount').innerText = "₹" + totalSales.toLocaleString('en-IN');
+      document.getElementById('repTotalPairs').innerText = `${totalItems} Items Beche`;
+      document.getElementById('repCashAmount').innerText = "₹" + cashTotal.toLocaleString('en-IN');
+      document.getElementById('repUpiAmount').innerText = "₹" + upiTotal.toLocaleString('en-IN');
+      document.getElementById('repProfitAmount').innerText = "₹" + profitTotal.toLocaleString('en-IN');
+
+      const cashPercent = totalSales > 0 ? Math.round((cashTotal / totalSales) * 100) : 0;
+      const upiPercent = totalSales > 0 ? Math.round((upiTotal / totalSales) * 100) : 0;
+      document.getElementById('repCashPercent').innerText = `${cashPercent}% of total`;
+      document.getElementById('repUpiPercent').innerText = `${upiPercent}% of total`;
+
+      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
+    }
+
+    // EXCEL / CSV REPORT DOWNLOADER
+    function downloadSalesCSV(type) {
+      let filtered = [];
+      const today = new Date().toISOString().slice(0, 10);
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      if (type === 'daily') {
+        filtered = salesHistory.filter(s => s.date && s.date.startsWith(today));
+      } else if (type === 'monthly') {
+        filtered = salesHistory.filter(s => s.date && s.date.startsWith(currentMonth));
+      } else {
+        filtered = [...salesHistory];
+      }
+
+      if (filtered.length === 0) {
+        alert("Download karne ke liye is samay koi bikri data nahi mila!");
+        return;
+      }
+
+      // CSV Header
+      let csvContent = "\uFEFFBill No,Date & Time,Customer,Phone,Item Name,Brand,Color,Size,Cost Price,Tag Price,Sell Price,Profit,Payment Mode\n";
+
+      filtered.forEach(s => {
+        const dateClean = s.date ? new Date(s.date).toLocaleString('en-IN').replace(/,/g, '') : '';
+        const row = [
+          s.billNo || 'DN-Bill',
+          `"${dateClean}"`,
+          `"${(s.customer || 'Walk-in').replace(/"/g, '""')}"`,
+          `"${s.phone || ''}"`,
+          `"${(s.name || '').replace(/"/g, '""')}"`,
+          `"${(s.brand || '').replace(/"/g, '""')}"`,
+          `"${s.color || ''}"`,
+          `"${s.size || ''}"`,
+          s.costPrice || 0,
+          s.tagPrice || 0,
+          s.sellPrice || 0,
+          s.profit || 0,
+          `"${s.payMode || 'Cash'}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `DN_Footwear_Sales_${type.toUpperCase()}_${today}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     // ==================== ADMIN PIN SECURITY SYSTEM ====================
@@ -1151,6 +1419,36 @@
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
       document.getElementById('dTotalTagValue').innerText = "Tag Value: ₹" + totalTagValue.toLocaleString('en-IN');
       document.getElementById('dLowStock').innerText = lowStock;
+
+      // Update Sales Totals in Dashboard
+      let allSalesAmt = 0;
+      let allCash = 0;
+      let allUpi = 0;
+      let todaySalesAmt = 0;
+      let todayCount = 0;
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      salesHistory.forEach(s => {
+        const amt = Number(s.sellPrice) || 0;
+        const mode = (s.payMode || 'Cash').toUpperCase();
+        allSalesAmt += amt;
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          allUpi += amt;
+        } else {
+          allCash += amt;
+        }
+
+        if (s.date && s.date.startsWith(todayStr)) {
+          todaySalesAmt += amt;
+          todayCount += 1;
+        }
+      });
+
+      document.getElementById('dTotalSalesVal').innerText = "₹" + allSalesAmt.toLocaleString('en-IN');
+      document.getElementById('dSalesCash').innerText = "₹" + allCash.toLocaleString('en-IN');
+      document.getElementById('dSalesUpi').innerText = "₹" + allUpi.toLocaleString('en-IN');
+      document.getElementById('dTodaySales').innerText = "₹" + todaySalesAmt.toLocaleString('en-IN');
+      document.getElementById('dTodayPairs').innerText = `${todayCount} Items Beche`;
     }
 
     // RENDER CUSTOMER CATALOG
@@ -1365,7 +1663,6 @@
         currentSellingColor = 'General';
         currentSellingSize = '1 Piece';
       } else {
-        // If color not selected, pick first color with stock
         if (!currentSellingColor || !item.colorData[currentSellingColor]) {
           const colors = Object.keys(item.colorData || {});
           for (let c of colors) {
@@ -1381,7 +1678,6 @@
             if (currentSellingColor) break;
           }
         } else {
-          // Color selected, check size
           const sizes = item.colorData[currentSellingColor].sizes || {};
           if (!currentSellingSize || !sizes[currentSellingSize] || sizes[currentSellingSize] <= 0) {
             for (let s in sizes) {
