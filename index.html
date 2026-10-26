@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear - Stock, Custom Sizes & Low Stock Alerts</title>
+  <title>DN Footwear - Stock POS & Customer Online Store</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -14,30 +14,35 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #1e293b; padding-bottom: 60px; }
-    header { background: #1e1b4b; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; }
-    .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 70px; }
+    header { background: #1e1b4b; color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
     .btn:active { transform: scale(0.97); }
     .btn-amber { background: #f59e0b; color: #000; }
     .btn-green { background: #10b981; color: #fff; }
+    .btn-wa { background: #25d366; color: #fff; }
     .btn-blue { background: #2563eb; color: #fff; }
     .btn-indigo { background: #4f46e5; color: #fff; }
     .btn-red { background: #ef4444; color: #fff; }
     .btn-slate { background: #e2e8f0; color: #334155; }
     
-    .container { max-width: 1180px; margin: 20px auto; padding: 0 15px; }
+    .container { max-width: 1180px; margin: 18px auto; padding: 0 15px; }
     .sync-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .sync-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; transition: 0.2s; }
-    .stat-card-clickable { cursor: pointer; }
-    .stat-card-clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239,68,68,0.15); border-color: #ef4444; }
+    .stat-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0; }
     .stat-num { font-size: 22px; font-weight: 800; margin-top: 4px; color: #0f172a; }
 
     .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+
+    /* Customer Catalog Cards */
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 15px; }
+    .shoe-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+    .shoe-card-img { width: 100%; height: 200px; object-fit: cover; background: #f1f5f9; }
+    .shoe-card-body { padding: 14px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
     th { background: #f8fafc; padding: 12px 10px; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #475569; text-align: left; }
@@ -50,7 +55,7 @@
     .size-low { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
     .size-out { background: #fee2e2; color: #991b1b; text-decoration: line-through; border: 1px solid #fecaca; }
 
-    .gender-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+    .gender-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
     .chip-men { background: #e0e7ff; color: #3730a3; }
     .chip-ladies { background: #fce7f3; color: #9d174d; }
     .chip-kids { background: #fef3c7; color: #92400e; }
@@ -65,34 +70,43 @@
 
     @media print {
       body * { visibility: hidden; }
-      #thermalBillArea, #thermalBillArea *, #reorderPrintArea, #reorderPrintArea * { visibility: visible; }
+      #thermalBillArea, #thermalBillArea * { visibility: visible; }
       #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
-      #reorderPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; }
       .no-print { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- TOP HEADER -->
   <header>
     <div>
       <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
         DN Footwear & Sports
         <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
       </h2>
-      <span style="font-size:11px; opacity:0.8;">Customized Sizes, Kids & Ladies Stock System</span>
+      <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Dukaan Admin & POS Mode</span>
     </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Dabba Scan (Check)</button>
-      <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
-      <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock Inward (+)</button>
-      <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Footwear Jodein</button>
+
+    <!-- Mode Switcher & Admin Action Buttons -->
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <!-- Customer View Toggle Button -->
+      <button id="toggleModeBtn" class="btn btn-amber" onclick="toggleAppMode()">
+        🛍️ Customer Catalog Dekhein
+      </button>
+
+      <!-- Admin Specific Action Buttons -->
+      <span id="adminNavGroup" style="display:inline-flex; gap:6px;">
+        <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
+        <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
+        <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Footwear</button>
+      </span>
     </div>
   </header>
 
-  <div class="container">
-    <!-- STATS (Clickable Kam Stock Card) -->
+  <!-- ==================== 1. OWNER / ADMIN VIEW ==================== -->
+  <div id="adminViewSection" class="container">
+    <!-- DASHBOARD -->
     <div class="stats-grid">
       <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">KUL FOOTWEAR PAIRS</small>
@@ -104,42 +118,35 @@
         <div class="stat-num" id="dTotalCost" style="color:#2563eb;">₹0</div>
       </div>
       <div class="stat-card">
-        <small style="color:#64748b; font-weight:700;">AAJ KI KUL BIKRI (SALES)</small>
+        <small style="color:#64748b; font-weight:700;">AAJ KI KUL BIKRI</small>
         <div class="stat-num" id="dTodaySales" style="color:#10b981;">₹0</div>
         <small id="dTodayPairs" style="color:#64748b;">0 Pairs Beche</small>
       </div>
-      <div class="stat-card stat-card-clickable" onclick="toggleLowStockFilter()" style="border-left: 4px solid #ef4444;" title="Kam stock wale dekhne ke liye click karein">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <small style="color:#ef4444; font-weight:700;">KAM STOCK WARNING (≤ 3)</small>
-          <span style="font-size:10px; background:#fee2e2; color:#ef4444; padding:2px 5px; border-radius:4px; font-weight:bold;">Filter</span>
-        </div>
+      <div class="stat-card" style="border-left: 4px solid #ef4444;">
+        <small style="color:#ef4444; font-weight:700;">KAM STOCK WARNING (≤ 3)</small>
         <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
-        <small style="color:#64748b; font-size:11px;">Naya maal mangwane ke liye click karein</small>
+        <small style="color:#64748b; font-size:11px;">Restock jald karein</small>
       </div>
     </div>
 
     <!-- FILTER BAR -->
     <div class="filter-bar">
-      <input type="text" id="searchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, barcode ya color..." class="search-box">
+      <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search shoe, brand, color, size..." class="search-box">
       
-      <select id="genderFilter" onchange="renderApp()" class="form-control" style="width:auto;">
+      <select id="adminGenderFilter" onchange="renderApp()" class="form-control" style="width:auto;">
         <option value="ALL">Sabhi (Men, Ladies, Kids)</option>
         <option value="Men">Men (Gents)</option>
-        <option value="Ladies">Ladies (Women)</option>
+        <option value="Ladies">Ladies</option>
         <option value="Kids">Kids (Bachhe)</option>
       </select>
 
-      <!-- STOCK LEVEL FILTER -->
-      <select id="stockLevelFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold; border-color:#cbd5e1;">
-        <option value="ALL">Sabhi Stock (All)</option>
-        <option value="LOW" style="color:#ea580c; font-weight:bold;">⚠️ Kam Stock (≤ 3 Pairs)</option>
-        <option value="OUT" style="color:#dc2626; font-weight:bold;">🚨 Bilkul Khatam (0 Stock)</option>
+      <select id="adminStockLevelFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
+        <option value="ALL">Sabhi Stock</option>
+        <option value="LOW">⚠️ Kam Stock (≤ 3)</option>
+        <option value="OUT">🚨 Khatam (0 Stock)</option>
       </select>
 
-      <button class="btn btn-red" onclick="openReorderModal()" style="font-size:12px;" title="Naya maal order karne ke liye list dekhein">
-        📋 Reorder List (Kam Stock)
-      </button>
-
+      <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Store Link Copy</button>
       <button class="btn btn-slate" onclick="backupJSON()">💾 Backup</button>
     </div>
 
@@ -151,7 +158,7 @@
             <th>Photo & Name</th>
             <th>Brand & Color</th>
             <th>Type</th>
-            <th>Available Sizes (Stock Status)</th>
+            <th>Sizes (Stock Status)</th>
             <th>Kul Stock</th>
             <th>Tag Rate</th>
             <th style="text-align:right;">Actions</th>
@@ -162,7 +169,62 @@
     </div>
   </div>
 
-  <!-- 1. ADD / EDIT MODAL -->
+  <!-- ==================== 2. CUSTOMER ORDER VIEW ==================== -->
+  <div id="customerViewSection" class="container" style="display:none;">
+    <!-- Customer Banner -->
+    <div style="background:linear-gradient(135deg, #1e1b4b, #312e81); color:white; padding:16px 20px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:3px;">🛍️ DN Footwear Online Store</h3>
+        <p style="font-size:12px; opacity:0.9;">Yahan sirf wahi joote aur sizes dikhenge jo dukaan me abhi stock me uplabdh hain.</p>
+      </div>
+      <button class="btn btn-amber" onclick="switchAppMode('admin')">🔒 Admin Login</button>
+    </div>
+
+    <!-- Customer Filter Bar -->
+    <div class="filter-bar">
+      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, color..." class="search-box">
+      <select id="custGenderFilter" onchange="renderApp()" class="form-control" style="width:auto;">
+        <option value="ALL">Sabhi Categories</option>
+        <option value="Men">Men (Gents)</option>
+        <option value="Ladies">Ladies</option>
+        <option value="Kids">Kids (Bachhe)</option>
+      </select>
+    </div>
+
+    <!-- Customer Catalog Cards Grid -->
+    <div id="customerCatalogGrid" class="catalog-grid"></div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. WHATSAPP ORDER POPUP MODAL -->
+  <div id="waOrderModal" class="modal">
+    <div class="modal-box" style="max-width:400px; text-align:center;">
+      <img id="waShoeImg" src="" style="width:140px; height:140px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
+      <h3 id="waShoeName" style="font-size:16px; font-weight:bold; margin-bottom:2px;">Campus Rodeo</h3>
+      <div id="waShoePrice" style="font-size:18px; font-weight:800; color:#10b981; margin-bottom:12px;">₹899</div>
+
+      <div style="text-align:left; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+        <div class="form-group">
+          <label>Kaunsa Size Chahiye? (Sirf Available Sizes): *</label>
+          <select id="waSelectedSize" class="form-control" style="font-weight:bold; font-size:14px; color:#1e1b4b;"></select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Aapka Naam (Customer Name):</label>
+          <input type="text" id="waCustName" placeholder="Apna naam likhein..." class="form-control">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button class="btn btn-wa" onclick="sendWhatsAppOrderNow()" style="justify-content:center; padding:10px; font-size:14px;">
+          📲 Order Bhejein
+        </button>
+        <button class="btn btn-slate" onclick="closeWaModal()" style="justify-content:center;">Band Karein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ADD / EDIT FOOTWEAR MODAL -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -209,18 +271,18 @@
           </div>
         </div>
 
-        <!-- GENDER & PRESET SIZE SELECTION -->
+        <!-- GENDER & PRESET SIZES -->
         <div class="form-group" style="background:#eef2ff; padding:10px; border-radius:8px; border:1px solid #c7d2fe;">
-          <label style="color:#3730a3;">Kiske Liye Hai (Select Gender & Sizes):</label>
+          <label style="color:#3730a3;">Kiske Liye Hai (Select Gender):</label>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
             <label style="border:1px solid #c7d2fe; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer; background:white;">
-              <input type="radio" name="fGender" value="Men" checked onchange="changeSizePreset('Men')"> Men (Gents: 6-11)
+              <input type="radio" name="fGender" value="Men" checked onchange="changeSizePreset('Men')"> Men (6-11)
             </label>
             <label style="border:1px solid #c7d2fe; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer; background:white;">
               <input type="radio" name="fGender" value="Ladies" onchange="changeSizePreset('Ladies')"> Ladies (3-8)
             </label>
             <label style="border:1px solid #c7d2fe; padding:6px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer; background:white;">
-              <input type="radio" name="fGender" value="Kids" onchange="changeSizePreset('Kids')"> Kids (Bachhe: 1-13)
+              <input type="radio" name="fGender" value="Kids" onchange="changeSizePreset('Kids')"> Kids (1-13)
             </label>
           </div>
         </div>
@@ -241,7 +303,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <label style="margin:0; font-size:12px; font-weight:800; color:#0f172a;">Size-wise Stock & Barcodes:</label>
             <div style="display:flex; gap:6px;">
-              <button type="button" onclick="promptCustomSize()" class="btn btn-blue" style="padding:3px 8px; font-size:11px;">+ Custom Size Jodein</button>
+              <button type="button" onclick="promptCustomSize()" class="btn btn-blue" style="padding:3px 8px; font-size:11px;">+ Custom Size</button>
               <button type="button" onclick="autoGenerateAllBarcodes()" style="background:none; border:none; color:#4f46e5; font-size:11px; font-weight:bold; cursor:pointer;">Auto Barcode</button>
             </div>
           </div>
@@ -265,12 +327,12 @@
     </div>
   </div>
 
-  <!-- 2. QUICK SIZE CHECK POPUP MODAL -->
+  <!-- 3. CHECK CARD POPUP -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="text-align:center; max-width:420px;">
       <img id="chkImg" src="" style="width:130px; height:130px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
       <h3 id="chkTitle" style="font-size:16px; margin-bottom:2px;">Campus Rodeo</h3>
-      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Type: Men • Color: Black</div>
+      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Color: Black</div>
       <div id="chkPrice" style="font-size:16px; font-weight:800; color:#10b981; margin-bottom:12px;">₹999</div>
 
       <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
@@ -281,37 +343,6 @@
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
         <button class="btn btn-green" onclick="openSaleCheckout(activePopupItem, activeHighlightedSize)" style="justify-content:center;">🛒 Bechein</button>
         <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center;">Band Karein</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. REORDER LIST MODAL (KAM STOCK SUMMARY LIST) -->
-  <div id="reorderModal" class="modal">
-    <div class="modal-box" style="max-width:550px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
-        <h3 style="font-size:16px; font-weight:800; color:#dc2626; display:flex; align-items:center; gap:6px;">
-          ⚠️ Kam Stock & Reorder List
-        </h3>
-        <button class="btn btn-slate" onclick="closeReorderModal()">✕</button>
-      </div>
-
-      <div id="reorderPrintArea">
-        <div style="margin-bottom:12px;">
-          <h4 style="font-size:16px; font-weight:900; margin:0;">DN FOOTWEAR - PURCHASE REORDER SHEET</h4>
-          <p style="font-size:11px; color:#64748b; margin:2px 0;">Ye wo models aur sizes hain jinme stock kam ya khatam ho gaya hai:</p>
-        </div>
-
-        <div id="reorderListContent" style="max-height:55vh; overflow-y:auto;">
-          <!-- Dynamically filled table -->
-        </div>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; border-top:1px solid #e2e8f0; padding-top:10px;" class="no-print">
-        <span id="reorderTotalCount" style="font-size:12px; font-weight:bold; color:#dc2626;">0 items need restock</span>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-blue" onclick="window.print()">🖨️ Print Sheet</button>
-          <button class="btn btn-slate" onclick="closeReorderModal()">Band Karein</button>
-        </div>
       </div>
     </div>
   </div>
@@ -442,7 +473,7 @@
     </div>
   </div>
 
-  <!-- 6. CAMERA BARCODE SCANNER MODAL -->
+  <!-- 6. SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -458,7 +489,10 @@
   </div>
 
   <script>
-    // FIREBASE CONFIG
+    // SHOP CONFIG
+    const SHOP_WHATSAPP_NUMBER = "918209452284";
+    const ADMIN_SECURITY_PIN = "1234"; // Admin Mode ke liye PIN
+
     const firebaseConfig = {
       apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
       authDomain: "dn-stock.firebaseapp.com",
@@ -482,6 +516,7 @@
     let activeFormSizes = [...GENDER_PRESETS['Men']];
     let items = [];
     let salesHistory = [];
+    let currentAppMode = 'admin'; // 'admin' | 'customer'
 
     let scannerObj = null;
     let currentScanAction = 'check';
@@ -492,8 +527,8 @@
 
     let currentSellingItem = null;
     let currentSellingSize = null;
+    let currentWaItem = null;
 
-    // REALTIME LIVE DATABASE SYNC
     function initLiveSync() {
       db.ref('footwear_stock').on('value', (snapshot) => {
         const data = snapshot.val();
@@ -517,20 +552,72 @@
       db.ref('footwear_stock/' + id).remove();
     }
 
-    function toggleLowStockFilter() {
-      const select = document.getElementById('stockLevelFilter');
-      select.value = (select.value === 'LOW') ? 'ALL' : 'LOW';
+    // MODE SWITCHING (ADMIN / CUSTOMER)
+    function toggleAppMode() {
+      if (currentAppMode === 'admin') {
+        switchAppMode('customer');
+      } else {
+        switchAppMode('admin');
+      }
+    }
+
+    function switchAppMode(mode) {
+      if (mode === 'admin') {
+        const pin = prompt("Admin Mode ke liye 4-digit PIN daalein (Default: 1234):", "");
+        if (pin !== ADMIN_SECURITY_PIN) {
+          alert("Galat PIN! Sirf dukaan ke malik access kar sakte hain.");
+          return;
+        }
+      }
+
+      currentAppMode = mode;
+      window.location.hash = (mode === 'customer') ? 'store' : '';
+
+      document.getElementById('adminViewSection').style.display = (mode === 'admin') ? 'block' : 'none';
+      document.getElementById('customerViewSection').style.display = (mode === 'customer') ? 'block' : 'none';
+      document.getElementById('adminNavGroup').style.display = (mode === 'admin') ? 'inline-flex' : 'none';
+
+      const toggleBtn = document.getElementById('toggleModeBtn');
+      const subtitle = document.getElementById('appModeSubtitle');
+
+      if (mode === 'customer') {
+        toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
+        toggleBtn.className = 'btn btn-indigo';
+        subtitle.innerText = 'Customer Online Store (Sirf In-Stock Joote)';
+      } else {
+        toggleBtn.innerText = '🛍️ Customer Catalog Dekhein';
+        toggleBtn.className = 'btn btn-amber';
+        subtitle.innerText = 'Dukaan Admin & POS Mode';
+      }
+
       renderApp();
     }
 
+    function copyCustomerStoreLink() {
+      const url = window.location.origin + window.location.pathname + '#store';
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Customer Online Store Link Copy Ho Gaya! Aap ise WhatsApp par share kar sakte hain:\n" + url);
+      }).catch(() => {
+        prompt("Customer Store Link copy karein:", url);
+      });
+    }
+
     function renderApp() {
-      const tbody = document.getElementById('inventoryRows');
-      const search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
-      const genderFlt = document.getElementById('genderFilter').value;
-      const stockLevelFlt = document.getElementById('stockLevelFilter').value;
+      if (currentAppMode === 'admin') {
+        renderAdminTable();
+      } else {
+        renderCustomerCatalog();
+      }
+    }
+
+    // 1. ADMIN TABLE RENDER
+    function renderAdminTable() {
+      const search = (document.getElementById('adminSearchFilter').value || '').toLowerCase().trim();
+      const genderFlt = document.getElementById('adminGenderFilter').value;
+      const stockLevelFlt = document.getElementById('adminStockLevelFilter').value;
 
       let totalPairs = 0, totalCost = 0, lowStock = 0;
-      let html = '';
+      let tableHtml = '';
 
       items.forEach(it => {
         const itGender = it.gender || 'Men';
@@ -540,12 +627,10 @@
         totalPairs += p;
         totalCost += (p * (it.cost || 0));
         
-        // Low Stock calculation (<= 3 pairs)
         const isLow = (p <= 3);
         const isOut = (p === 0);
         if (isLow) lowStock++;
 
-        // Apply Stock Level Filter
         if (stockLevelFlt === 'LOW' && !isLow) return;
         if (stockLevelFlt === 'OUT' && !isOut) return;
 
@@ -564,14 +649,14 @@
           let badgeClass = 'size-in';
           if (q === 0) badgeClass = 'size-out';
           else if (q <= 2) badgeClass = 'size-low';
-          return `<span class="size-badge ${badgeClass}" title="Size ${s}: ${q} pairs">${s}:${q}</span>`;
+          return `<span class="size-badge ${badgeClass}">${s}:${q}</span>`;
         }).join('');
 
         let chipClass = 'chip-men';
         if (itGender === 'Ladies') chipClass = 'chip-ladies';
         if (itGender === 'Kids') chipClass = 'chip-kids';
 
-        html += `<tr>
+        tableHtml += `<tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
               <img src="${it.photo || 'https://via.placeholder.com/50'}" class="shoe-img">
@@ -596,7 +681,7 @@
         </tr>`;
       });
 
-      tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Filter ke mutabiq koi footwear nahi mila.</td></tr>';
+      document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Filter ke hisab se koi footwear nahi mila.</td></tr>';
       document.getElementById('dTotalPairs').innerText = totalPairs;
       document.getElementById('dTotalModels').innerText = items.length + " Models";
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
@@ -615,53 +700,140 @@
       document.getElementById('dTodayPairs').innerText = todayPairsSold + " Pairs Beche";
     }
 
-    // ==================== LOW STOCK REORDER MODAL ====================
-    function openReorderModal() {
-      const container = document.getElementById('reorderListContent');
-      let lowItemsCount = 0;
-      let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">' +
-                 '<thead><tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1;">' +
-                 '<th style="padding:8px; text-align:left;">Shoe Name & Brand</th>' +
-                 '<th style="padding:8px; text-align:center;">Type</th>' +
-                 '<th style="padding:8px; text-align:left;">Kaunse Sizes Kam / 0 Hain</th>' +
-                 '<th style="padding:8px; text-align:right;">Kul Bacha</th>' +
-                 '</tr></thead><tbody>';
+    // 2. CUSTOMER CATALOG RENDER (SIRF STOCK WALE DIKHENGE)
+    function renderCustomerCatalog() {
+      const search = (document.getElementById('custSearchFilter').value || '').toLowerCase().trim();
+      const genderFlt = document.getElementById('custGenderFilter').value;
+      const grid = document.getElementById('customerCatalogGrid');
+
+      let cardsHtml = '';
+      let availableItemsCount = 0;
 
       items.forEach(it => {
-        const totalP = Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
-        const lowSizes = [];
+        const itGender = it.gender || 'Men';
+        if (genderFlt !== 'ALL' && itGender !== genderFlt) return;
 
+        // Calculate total in-stock pairs
+        const totalStock = Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
+
+        // AGAR TOTAL STOCK 0 HAI TOH CUSTOMER KO BILKUL NAHI DIKHEGA
+        if (totalStock <= 0) return;
+
+        const matchSearch = it.name.toLowerCase().includes(search) || 
+                          it.brand.toLowerCase().includes(search) || 
+                          (it.color && it.color.toLowerCase().includes(search));
+
+        if (!matchSearch) return;
+
+        // Filter only sizes that are > 0 in stock
+        const inStockSizes = [];
         Object.keys(it.sizes || {}).forEach(sz => {
-          const qty = it.sizes[sz] || 0;
-          if (qty <= 1) {
-            lowSizes.push(`<b style="${qty === 0 ? 'color:#dc2626;' : 'color:#ea580c;'}">Sz ${sz} (${qty})</b>`);
-          }
+          const qty = Number(it.sizes[sz]) || 0;
+          if (qty > 0) inStockSizes.push(sz);
         });
 
-        if (totalP <= 3 || lowSizes.length > 0) {
-          lowItemsCount++;
-          html += `<tr style="border-bottom:1px solid #e2e8f0;">
-            <td style="padding:8px;"><b>${it.name}</b><br><small style="color:#64748b;">${it.brand} • ${it.color||''}</small></td>
-            <td style="padding:8px; text-align:center;"><small>${it.gender||'Men'}</small></td>
-            <td style="padding:8px;">${lowSizes.join(', ') || 'Sabhi sizes low'}</td>
-            <td style="padding:8px; text-align:right;"><b style="${totalP <= 2 ? 'color:#dc2626;' : 'color:#ea580c;'}">${totalP} Pairs</b></td>
-          </tr>`;
+        // Agar koi size in stock nahi bacha toh mat dikhao
+        if (inStockSizes.length === 0) return;
+
+        availableItemsCount++;
+
+        let chipClass = 'chip-men';
+        if (itGender === 'Ladies') chipClass = 'chip-ladies';
+        if (itGender === 'Kids') chipClass = 'chip-kids';
+
+        const sizeBadgesHtml = inStockSizes.map(sz => 
+          `<span style="display:inline-block; background:#dcfce7; color:#166534; font-size:11px; font-weight:800; padding:2px 7px; border-radius:4px; border:1px solid #86efac; margin:1px;">Size ${sz}</span>`
+        ).join(' ');
+
+        cardsHtml += `
+          <div class="shoe-card">
+            <img src="${it.photo || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80'}" class="shoe-card-img" alt="${it.name}">
+            <div class="shoe-card-body">
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span class="gender-chip ${chipClass}">${itGender}</span>
+                  <span style="font-size:11px; font-weight:bold; color:#10b981;">✓ In Stock</span>
+                </div>
+                <h4 style="font-size:15px; font-weight:bold; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
+                <p style="font-size:12px; color:#64748b; margin-bottom:8px;">${it.brand} • Rang: ${it.color||'Standard'}</p>
+                <div style="margin-bottom:12px;">
+                  <small style="display:block; font-size:10px; font-weight:bold; color:#475569; margin-bottom:3px;">AVAILABLE SIZES:</small>
+                  ${sizeBadgesHtml}
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:19px; font-weight:900; color:#10b981; margin-bottom:10px;">₹${it.price}</div>
+                <button class="btn btn-wa" style="width:100%; justify-content:center; padding:10px; font-size:13px;" onclick="openWhatsAppOrderModal('${it.id}')">
+                  📲 WhatsApp Order Karein
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8; font-size:14px;">Abhi koi footwear stock me uplabdh nahi hai.</div>';
+    }
+
+    // WHATSAPP ORDER POPUP (CUSTOMER SIDE)
+    function openWhatsAppOrderModal(id) {
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+      currentWaItem = it;
+
+      document.getElementById('waShoeImg').src = it.photo || 'https://via.placeholder.com/140';
+      document.getElementById('waShoeName').innerText = `${it.name} (${it.brand})`;
+      document.getElementById('waShoePrice').innerText = `Rate: ₹${it.price}`;
+
+      // Populate only available sizes (> 0 stock)
+      const sizeSelect = document.getElementById('waSelectedSize');
+      sizeSelect.innerHTML = '';
+
+      let hasAvailableSize = false;
+      Object.keys(it.sizes || {}).forEach(sz => {
+        const q = it.sizes[sz] || 0;
+        if (q > 0) {
+          hasAvailableSize = true;
+          const opt = document.createElement('option');
+          opt.value = sz;
+          opt.innerText = `Size ${sz} (Stock Me Hai)`;
+          sizeSelect.appendChild(opt);
         }
       });
 
-      html += '</tbody></table>';
-
-      if (lowItemsCount === 0) {
-        html = '<div style="text-align:center; padding:30px; color:#10b981; font-weight:bold;">Badhiya! Sabhi joote paryapt stock me hain. Koi bhi item kam nahi hai.</div>';
+      if (!hasAvailableSize) {
+        alert("Maaf kijiye, yeh footwear abhi out of stock ho chuka hai!");
+        return;
       }
 
-      container.innerHTML = html;
-      document.getElementById('reorderTotalCount').innerText = `${lowItemsCount} Models me stock kam hai`;
-      document.getElementById('reorderModal').style.display = 'flex';
+      document.getElementById('waOrderModal').style.display = 'flex';
     }
 
-    function closeReorderModal() {
-      document.getElementById('reorderModal').style.display = 'none';
+    function closeWaModal() {
+      document.getElementById('waOrderModal').style.display = 'none';
+    }
+
+    function sendWhatsAppOrderNow() {
+      if (!currentWaItem) return;
+
+      const size = document.getElementById('waSelectedSize').value;
+      const custName = document.getElementById('waCustName').value.trim() || 'Grahak';
+
+      const text = `*NAMASTE DN FOOTWEAR!* 👞\nMujhe ye joota order karna hai:\n\n` +
+                   `📌 *Item:* ${currentWaItem.name}\n` +
+                   `🏷️ *Brand:* ${currentWaItem.brand}\n` +
+                   `🎨 *Color:* ${currentWaItem.color || 'Standard'}\n` +
+                   `👟 *Size:* ${size}\n` +
+                   `💰 *Rate:* ₹${currentWaItem.price}\n\n` +
+                   `👤 *Grahak Ka Naam:* ${custName}\n\n` +
+                   `Kripya confirm karein ki ye piece pack kab tak hoga? Dhanyawad!`;
+
+      const encodedText = encodeURIComponent(text);
+      const waUrl = `https://wa.me/${SHOP_WHATSAPP_NUMBER}?text=${encodedText}`;
+
+      window.open(waUrl, '_blank');
+      closeWaModal();
     }
 
     // FORM SIZES HANDLING
@@ -684,7 +856,7 @@
     }
 
     function removeFormSize(sz) {
-      if (confirm(`Kya aap Size [${sz}] ko is list se hatana chahte hain?`)) {
+      if (confirm(`Kya aap Size [${sz}] ko hatana chahte hain?`)) {
         activeFormSizes = activeFormSizes.filter(s => String(s) !== String(sz));
         buildSizeBarcodeInputs();
       }
@@ -793,7 +965,7 @@
 
       saveItemToCloud(itemObj);
       closeShoeModal();
-      alert("Footwear Cloud par save ho gaya! Sabhi devices me update ho gaya hai.");
+      alert("Footwear Cloud par save ho gaya!");
     }
 
     function editShoe(id) {
@@ -952,7 +1124,7 @@
       if (shouldPrint) {
         showReceipt(saleRecord, nowStr);
       } else {
-        alert(`Bikri Safal! ₹${finalPrice} me becha gaya. Stock update ho gaya hai.`);
+        alert(`Bikri Safal! ₹${finalPrice} me becha gaya.`);
       }
     }
 
@@ -1039,7 +1211,7 @@
       }
 
       if (!matchedItem) {
-        alert(`Barcode [${code.trim()}] kisi bhi jootey ke size se match nahi hua!`);
+        alert(`Barcode [${code.trim()}] match nahi hua!`);
         return;
       }
 
@@ -1070,6 +1242,17 @@
     }
 
     window.onload = function() {
+      // Check URL Hash for customer link
+      if (window.location.hash === '#store' || window.location.hash === '#catalog') {
+        currentAppMode = 'customer';
+        document.getElementById('adminViewSection').style.display = 'none';
+        document.getElementById('customerViewSection').style.display = 'block';
+        document.getElementById('adminNavGroup').style.display = 'none';
+        document.getElementById('toggleModeBtn').innerText = '🔒 Admin Login';
+        document.getElementById('toggleModeBtn').className = 'btn btn-indigo';
+        document.getElementById('appModeSubtitle').innerText = 'Customer Online Store';
+      }
+
       initLiveSync();
     };
   </script>
