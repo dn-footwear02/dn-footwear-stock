@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear - Stock POS & Customer Online Store</title>
+  <title>DN Footwear & Sports - Stock POS & Customer Store</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -14,9 +14,9 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #1e293b; padding-bottom: 70px; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 75px; }
     header { background: #1e1b4b; color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-    .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
+    .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; text-decoration: none; }
     .btn:active { transform: scale(0.97); }
     .btn-amber { background: #f59e0b; color: #000; }
     .btn-green { background: #10b981; color: #fff; }
@@ -38,11 +38,32 @@
     .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
-    /* Customer Catalog Cards */
-    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 15px; }
-    .shoe-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
-    .shoe-card-img { width: 100%; height: 200px; object-fit: cover; background: #f1f5f9; }
+    /* Custom Slider */
+    .slider-wrapper { position: relative; width: 100%; height: 230px; border-radius: 14px; overflow: hidden; background: #0f172a; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; align-items: center; justify-content: center; }
+    .slider-slide.active { opacity: 1; }
+    .slider-img { width: 100%; height: 100%; object-fit: cover; }
+    .slider-caption { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 25px 20px 10px; }
+    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 16px; z-index: 10; display: flex; align-items: center; justify-content: center; }
+    .slider-btn-prev { left: 10px; }
+    .slider-btn-next { right: 10px; }
+
+    /* Customer Calling Header Bar */
+    .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Catalog Cards */
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+    .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .main-card-img { width: 100%; height: 220px; object-fit: cover; background: #f1f5f9; cursor: pointer; }
+    .thumb-tray { display: flex; gap: 6px; padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; overflow-x: auto; }
+    .thumb-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 2px solid transparent; cursor: pointer; shrink-0; }
+    .thumb-img.active { border-color: #4f46e5; }
     .shoe-card-body { padding: 14px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+
+    .color-chip-btn { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; margin: 2px; background: white; transition: 0.15s; }
+    .color-chip-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; box-shadow: 0 0 0 1px #4f46e5; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
     th { background: #f8fafc; padding: 12px 10px; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #475569; text-align: left; }
@@ -61,7 +82,7 @@
     .chip-kids { background: #fef3c7; color: #92400e; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
-    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+    .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
     .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
@@ -90,13 +111,12 @@
 
     <!-- Mode Switcher & Admin Action Buttons -->
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-      <!-- Customer View Toggle Button -->
       <button id="toggleModeBtn" class="btn btn-amber" onclick="toggleAppMode()">
         🛍️ Customer Catalog Dekhein
       </button>
 
-      <!-- Admin Specific Action Buttons -->
       <span id="adminNavGroup" style="display:inline-flex; gap:6px;">
+        <button class="btn btn-slate" onclick="openSliderManagerModal()">🖼️ Slider Manage</button>
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
         <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
         <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Footwear</button>
@@ -156,7 +176,7 @@
         <thead>
           <tr>
             <th>Photo & Name</th>
-            <th>Brand & Color</th>
+            <th>Brand & Colors</th>
             <th>Type</th>
             <th>Sizes (Stock Status)</th>
             <th>Kul Stock</th>
@@ -171,22 +191,42 @@
 
   <!-- ==================== 2. CUSTOMER ORDER VIEW ==================== -->
   <div id="customerViewSection" class="container" style="display:none;">
-    <!-- Customer Banner -->
-    <div style="background:linear-gradient(135deg, #1e1b4b, #312e81); color:white; padding:16px 20px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-      <div>
-        <h3 style="font-size:18px; font-weight:800; margin-bottom:3px;">🛍️ DN Footwear Online Store</h3>
-        <p style="font-size:12px; opacity:0.9;">Yahan sirf wahi joote aur sizes dikhenge jo dukaan me abhi stock me uplabdh hain.</p>
+    
+    <!-- TOP CUSTOMIZABLE SLIDING BANNER -->
+    <div class="slider-wrapper" id="customerSliderWrapper">
+      <div id="sliderSlidesContainer">
+        <!-- Dynamically injected slides -->
       </div>
-      <button class="btn btn-amber" onclick="switchAppMode('admin')">🔒 Admin Login</button>
+      <button class="slider-btn slider-btn-prev" onclick="prevSlide()">❮</button>
+      <button class="slider-btn slider-btn-next" onclick="nextSlide()">❯</button>
+    </div>
+
+    <!-- DIRECT CALLING & WHATSAPP BAR -->
+    <div class="contact-bar">
+      <div>
+        <h4 style="font-size:15px; font-weight:800; color:#1e1b4b;">📞 Sampark Karein & Order Book Karein:</h4>
+        <p style="font-size:11px; color:#64748b;">Siriyari, Pali (Rajasthan) • Fast Delivery Available</p>
+      </div>
+      <div class="call-btn-group">
+        <a href="tel:8209452284" class="btn btn-indigo" style="font-size:12px;">
+          📞 Dashrath Singh (8209452284)
+        </a>
+        <a href="tel:9636422794" class="btn btn-blue" style="font-size:12px;">
+          📞 Surendra Singh (9636422794)
+        </a>
+        <a href="https://wa.me/917733909735" target="_blank" class="btn btn-wa" style="font-size:12px;">
+          💬 WhatsApp (7733909735)
+        </a>
+      </div>
     </div>
 
     <!-- Customer Filter Bar -->
     <div class="filter-bar">
-      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search shoe name, brand, color..." class="search-box">
+      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
       <select id="custGenderFilter" onchange="renderApp()" class="form-control" style="width:auto;">
-        <option value="ALL">Sabhi Categories</option>
+        <option value="ALL">Sabhi Footwear</option>
         <option value="Men">Men (Gents)</option>
-        <option value="Ladies">Ladies</option>
+        <option value="Ladies">Ladies (Women)</option>
         <option value="Kids">Kids (Bachhe)</option>
       </select>
     </div>
@@ -199,14 +239,18 @@
 
   <!-- 1. WHATSAPP ORDER POPUP MODAL -->
   <div id="waOrderModal" class="modal">
-    <div class="modal-box" style="max-width:400px; text-align:center;">
-      <img id="waShoeImg" src="" style="width:140px; height:140px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
+    <div class="modal-box" style="max-width:420px; text-align:center;">
+      <img id="waShoeImg" src="" style="width:150px; height:150px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
       <h3 id="waShoeName" style="font-size:16px; font-weight:bold; margin-bottom:2px;">Campus Rodeo</h3>
-      <div id="waShoePrice" style="font-size:18px; font-weight:800; color:#10b981; margin-bottom:12px;">₹899</div>
+      <div id="waShoePrice" style="font-size:19px; font-weight:800; color:#10b981; margin-bottom:12px;">₹899</div>
 
       <div style="text-align:left; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
         <div class="form-group">
-          <label>Kaunsa Size Chahiye? (Sirf Available Sizes): *</label>
+          <label>Kaunsa Rang (Color) Chahiye? *</label>
+          <div id="waColorOptionsGroup" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;"></div>
+        </div>
+        <div class="form-group">
+          <label>Kaunsa Size Chahiye? (Sirf Available): *</label>
           <select id="waSelectedSize" class="form-control" style="font-weight:bold; font-size:14px; color:#1e1b4b;"></select>
         </div>
         <div class="form-group" style="margin-bottom:0;">
@@ -224,7 +268,7 @@
     </div>
   </div>
 
-  <!-- 2. ADD / EDIT FOOTWEAR MODAL -->
+  <!-- 2. ADD / EDIT FOOTWEAR MODAL (WITH 3 PHOTOS & MULTI-COLORS) -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -234,11 +278,25 @@
       <form id="shoeForm" onsubmit="submitShoeForm(event)">
         <input type="hidden" id="fId">
 
+        <!-- 3 PHOTO UPLOAD SECTION -->
         <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-          <label>Shoe Photo (Camera / Gallery):</label>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <img id="fImgPreview" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80" style="width:55px; height:55px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
-            <input type="file" accept="image/*" onchange="previewUploadImage(this)" class="form-control">
+          <label>Shoe Photos (2 se 3 Photos Upload Karein):</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; text-align:center;">
+            <div>
+              <img id="fImgPreview1" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80" style="width:100%; height:75px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:4px;">
+              <small style="display:block; font-size:10px; font-weight:bold; margin-bottom:2px;">Photo 1 (Main)</small>
+              <input type="file" accept="image/*" onchange="previewUploadImageMulti(this, 1)" class="form-control" style="font-size:10px; padding:3px;">
+            </div>
+            <div>
+              <img id="fImgPreview2" src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=120&q=80" style="width:100%; height:75px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:4px;">
+              <small style="display:block; font-size:10px; font-weight:bold; margin-bottom:2px;">Photo 2 (Side/Angle)</small>
+              <input type="file" accept="image/*" onchange="previewUploadImageMulti(this, 2)" class="form-control" style="font-size:10px; padding:3px;">
+            </div>
+            <div>
+              <img id="fImgPreview3" src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=120&q=80" style="width:100%; height:75px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:4px;">
+              <small style="display:block; font-size:10px; font-weight:bold; margin-bottom:2px;">Photo 3 (Sole/Box)</small>
+              <input type="file" accept="image/*" onchange="previewUploadImageMulti(this, 3)" class="form-control" style="font-size:10px; padding:3px;">
+            </div>
           </div>
         </div>
 
@@ -255,8 +313,9 @@
 
         <div class="row">
           <div class="form-group">
-            <label>Color (Rang) *</label>
-            <input type="text" id="fColor" required placeholder="e.g. Black / White" class="form-control">
+            <label>Available Colors (Comma lga kar likhein) *</label>
+            <input type="text" id="fColorsList" required placeholder="e.g. Black, White, Navy Blue" class="form-control">
+            <small style="color:#64748b; font-size:10px;">Customer inhi colors par click karke dekhega.</small>
           </div>
           <div class="form-group">
             <label>Category (Item Type)</label>
@@ -271,7 +330,7 @@
           </div>
         </div>
 
-        <!-- GENDER & PRESET SIZES -->
+        <!-- GENDER SELECTION -->
         <div class="form-group" style="background:#eef2ff; padding:10px; border-radius:8px; border:1px solid #c7d2fe;">
           <label style="color:#3730a3;">Kiske Liye Hai (Select Gender):</label>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
@@ -327,12 +386,37 @@
     </div>
   </div>
 
-  <!-- 3. CHECK CARD POPUP -->
+  <!-- 3. SLIDER BANNER MANAGER MODAL (ADMIN ONLY) -->
+  <div id="sliderManagerModal" class="modal">
+    <div class="modal-box" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800;">🖼️ Slider Banners Manage Karein</h3>
+        <button class="btn btn-slate" onclick="closeSliderManagerModal()">✕</button>
+      </div>
+
+      <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Naya Banner Upload Karein:</label>
+        <input type="file" accept="image/*" onchange="uploadSliderImage(this)" class="form-control" style="margin-bottom:6px;">
+        <input type="text" id="newBannerCaption" placeholder="Banner Title / Offer (e.g. Navratri Special 20% Off)" class="form-control" style="font-size:12px;">
+      </div>
+
+      <h4 style="font-size:13px; font-weight:bold; margin-bottom:8px;">Current Active Banners:</h4>
+      <div id="sliderBannersList" style="max-height:40vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+        <!-- List of existing slides -->
+      </div>
+
+      <div style="margin-top:14px; text-align:right;">
+        <button class="btn btn-slate" onclick="closeSliderManagerModal()">Band Karein</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CHECK CARD POPUP -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="text-align:center; max-width:420px;">
       <img id="chkImg" src="" style="width:130px; height:130px; object-fit:cover; border-radius:10px; margin:0 auto 10px; display:block; border:1px solid #cbd5e1;">
       <h3 id="chkTitle" style="font-size:16px; margin-bottom:2px;">Campus Rodeo</h3>
-      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Color: Black</div>
+      <div id="chkMeta" style="font-size:12px; color:#64748b; margin-bottom:4px;">Campus • Type: Men</div>
       <div id="chkPrice" style="font-size:16px; font-weight:800; color:#10b981; margin-bottom:12px;">₹999</div>
 
       <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
@@ -347,7 +431,7 @@
     </div>
   </div>
 
-  <!-- 4. SMART BIKRI CHECKOUT MODAL -->
+  <!-- 5. SMART BIKRI CHECKOUT MODAL -->
   <div id="saleModal" class="modal">
     <div class="modal-box" style="max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -416,7 +500,7 @@
     </div>
   </div>
 
-  <!-- 5. THERMAL RECEIPT MODAL -->
+  <!-- 6. THERMAL RECEIPT MODAL -->
   <div id="receiptModal" class="modal">
     <div class="modal-box" style="max-width:350px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
@@ -427,7 +511,7 @@
       <div id="thermalBillArea" style="background:#fff; border:1px dashed #cbd5e1; padding:12px; border-radius:6px; font-family:monospace; font-size:12px; color:#000;">
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
           <h3 style="font-size:15px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS</h3>
-          <p style="font-size:10px; margin:2px 0;">Bus Stand Road, Siriyari</p>
+          <p style="font-size:10px; margin:2px 0;">Near Bus Stand, Siriyari (Pali)</p>
           <p style="font-size:10px; margin:0;">Mo: 8209452284, 9636422794</p>
         </div>
 
@@ -473,7 +557,7 @@
     </div>
   </div>
 
-  <!-- 6. SCANNER MODAL -->
+  <!-- 7. SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -489,9 +573,11 @@
   </div>
 
   <script>
-    // SHOP CONFIG
-    const SHOP_WHATSAPP_NUMBER = "918209452284";
-    const ADMIN_SECURITY_PIN = "1234"; // Admin Mode ke liye PIN
+    // ==========================================
+    // DEDICATED PHONE NUMBERS & FIREBASE
+    // ==========================================
+    const WHATSAPP_ORDER_NUMBER = "917733909735"; // WhatsApp Order Number
+    const ADMIN_SECURITY_PIN = "1234";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
@@ -516,20 +602,42 @@
     let activeFormSizes = [...GENDER_PRESETS['Men']];
     let items = [];
     let salesHistory = [];
-    let currentAppMode = 'admin'; // 'admin' | 'customer'
+    let sliderBanners = [];
+    let currentSlideIdx = 0;
+    let sliderInterval = null;
+    let currentAppMode = 'admin';
 
     let scannerObj = null;
     let currentScanAction = 'check';
     let targetScanSize = null;
-    let uploadedPhotoData = '';
+    
+    // Multi photos holding array for form
+    let formUploadedPhotos = ['', '', ''];
+    
     let activePopupItem = null;
     let activeHighlightedSize = null;
-
     let currentSellingItem = null;
     let currentSellingSize = null;
+
     let currentWaItem = null;
+    let currentWaSelectedColor = '';
+
+    // DEFAULT BANNERS IF CLOUD IS EMPTY
+    const DEFAULT_SLIDES = [
+      {
+        id: "b1",
+        img: "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=1200&q=80",
+        caption: "DN Footwear & Sports - Best Quality Shoes in Siriyari"
+      },
+      {
+        id: "b2",
+        img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
+        caption: "Running & Casual Shoes - Special Discount on Cash Memo"
+      }
+    ];
 
     function initLiveSync() {
+      // Stock
       db.ref('footwear_stock').on('value', (snapshot) => {
         const data = snapshot.val();
         items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -537,10 +645,18 @@
         renderApp();
       });
 
+      // Sales
       db.ref('footwear_sales').on('value', (snapshot) => {
         const data = snapshot.val();
         salesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
+      });
+
+      // Slider Banners
+      db.ref('slider_banners').on('value', (snapshot) => {
+        const data = snapshot.val();
+        sliderBanners = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : DEFAULT_SLIDES;
+        renderSliderSlides();
       });
     }
 
@@ -552,13 +668,109 @@
       db.ref('footwear_stock/' + id).remove();
     }
 
-    // MODE SWITCHING (ADMIN / CUSTOMER)
-    function toggleAppMode() {
-      if (currentAppMode === 'admin') {
-        switchAppMode('customer');
-      } else {
-        switchAppMode('admin');
+    // SLIDER LOGIC
+    function renderSliderSlides() {
+      const container = document.getElementById('sliderSlidesContainer');
+      if (!sliderBanners || sliderBanners.length === 0) {
+        sliderBanners = DEFAULT_SLIDES;
       }
+
+      let html = '';
+      sliderBanners.forEach((slide, idx) => {
+        html += `
+          <div class="slider-slide ${idx === 0 ? 'active' : ''}" id="slide_${idx}">
+            <img src="${slide.img}" class="slider-img" alt="Banner">
+            <div class="slider-caption">
+              <h3 style="font-size:16px; font-weight:800;">${slide.caption || ''}</h3>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+      currentSlideIdx = 0;
+
+      if (sliderInterval) clearInterval(sliderInterval);
+      sliderInterval = setInterval(nextSlide, 4500);
+    }
+
+    function showSlide(idx) {
+      const slides = document.querySelectorAll('.slider-slide');
+      if (slides.length === 0) return;
+      slides.forEach(s => s.classList.remove('active'));
+      currentSlideIdx = (idx + slides.length) % slides.length;
+      slides[currentSlideIdx].classList.add('active');
+    }
+
+    function nextSlide() { showSlide(currentSlideIdx + 1); }
+    function prevSlide() { showSlide(currentSlideIdx - 1); }
+
+    // SLIDER MANAGER (ADMIN)
+    function openSliderManagerModal() {
+      renderBannersListAdmin();
+      document.getElementById('sliderManagerModal').style.display = 'flex';
+    }
+
+    function closeSliderManagerModal() {
+      document.getElementById('sliderManagerModal').style.display = 'none';
+    }
+
+    function renderBannersListAdmin() {
+      const container = document.getElementById('sliderBannersList');
+      let html = '';
+      sliderBanners.forEach(b => {
+        html += `
+          <div style="display:flex; gap:10px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px;">
+            <img src="${b.img}" style="width:70px; height:45px; object-fit:cover; border-radius:4px;">
+            <div style="flex:1; font-size:12px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              ${b.caption || 'Banner'}
+            </div>
+            <button class="btn btn-red" style="padding:3px 8px; font-size:11px;" onclick="deleteBanner('${b.id}')">🗑️</button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function uploadSliderImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX = 900;
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+            else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const base64 = canvas.toDataURL('image/jpeg', 0.8);
+
+            const caption = document.getElementById('newBannerCaption').value.trim() || 'DN Footwear Offer';
+            const newBanner = { id: 'banner_' + Date.now(), img: base64, caption: caption };
+            db.ref('slider_banners/' + newBanner.id).set(newBanner);
+
+            document.getElementById('newBannerCaption').value = '';
+            input.value = '';
+            alert("Naya Banner Cloud Par Save Ho Gaya!");
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function deleteBanner(id) {
+      if (confirm("Kya aap sach me is banner ko hatana chahte hain?")) {
+        db.ref('slider_banners/' + id).remove();
+      }
+    }
+
+    // MODE SWITCHING
+    function toggleAppMode() {
+      if (currentAppMode === 'admin') switchAppMode('customer');
+      else switchAppMode('admin');
     }
 
     function switchAppMode(mode) {
@@ -584,6 +796,7 @@
         toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
         toggleBtn.className = 'btn btn-indigo';
         subtitle.innerText = 'Customer Online Store (Sirf In-Stock Joote)';
+        renderSliderSlides();
       } else {
         toggleBtn.innerText = '🛍️ Customer Catalog Dekhein';
         toggleBtn.className = 'btn btn-amber';
@@ -596,21 +809,18 @@
     function copyCustomerStoreLink() {
       const url = window.location.origin + window.location.pathname + '#store';
       navigator.clipboard.writeText(url).then(() => {
-        alert("Customer Online Store Link Copy Ho Gaya! Aap ise WhatsApp par share kar sakte hain:\n" + url);
+        alert("Customer Online Store Link Copy Ho Gaya! WhatsApp par share karein:\n" + url);
       }).catch(() => {
         prompt("Customer Store Link copy karein:", url);
       });
     }
 
     function renderApp() {
-      if (currentAppMode === 'admin') {
-        renderAdminTable();
-      } else {
-        renderCustomerCatalog();
-      }
+      if (currentAppMode === 'admin') renderAdminTable();
+      else renderCustomerCatalog();
     }
 
-    // 1. ADMIN TABLE RENDER
+    // ADMIN TABLE
     function renderAdminTable() {
       const search = (document.getElementById('adminSearchFilter').value || '').toLowerCase().trim();
       const genderFlt = document.getElementById('adminGenderFilter').value;
@@ -639,7 +849,7 @@
         const matchSearch = it.name.toLowerCase().includes(search) || 
                           it.brand.toLowerCase().includes(search) || 
                           allBarcodesStr.includes(search) ||
-                          (it.color && it.color.toLowerCase().includes(search));
+                          (it.colors && it.colors.join(' ').toLowerCase().includes(search));
 
         if (!matchSearch) return;
 
@@ -656,10 +866,13 @@
         if (itGender === 'Ladies') chipClass = 'chip-ladies';
         if (itGender === 'Kids') chipClass = 'chip-kids';
 
+        const mainImg = (it.photos && it.photos[0]) ? it.photos[0] : (it.photo || 'https://via.placeholder.com/50');
+        const colorDisplay = (it.colors && it.colors.length > 0) ? it.colors.join(', ') : (it.color || 'Standard');
+
         tableHtml += `<tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-              <img src="${it.photo || 'https://via.placeholder.com/50'}" class="shoe-img">
+              <img src="${mainImg}" class="shoe-img">
               <div>
                 <b>${it.name}</b>
                 ${isLow ? '<span style="font-size:9px; background:#fee2e2; color:#dc2626; padding:1px 4px; border-radius:3px; font-weight:bold; margin-left:4px;">Kam Stock</span>' : ''}
@@ -667,7 +880,7 @@
               </div>
             </div>
           </td>
-          <td><b>${it.brand}</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ${it.color || 'Standard'}</small></td>
+          <td><b>${it.brand}</b><br><small style="color:#4f46e5; font-weight:bold;">🎨 ${colorDisplay}</small></td>
           <td><span class="gender-chip ${chipClass}">${itGender}</span></td>
           <td>${sizeBadges}</td>
           <td><b style="${isLow ? 'color:#ef4444;' : 'color:#0f172a;'}">${p} Pairs</b></td>
@@ -688,8 +901,7 @@
       document.getElementById('dLowStock').innerText = lowStock;
 
       const today = new Date().toISOString().slice(0, 10);
-      let todaySalesAmount = 0;
-      let todayPairsSold = 0;
+      let todaySalesAmount = 0, todayPairsSold = 0;
       salesHistory.forEach(s => {
         if (s.date && s.date.startsWith(today)) {
           todaySalesAmount += Number(s.sellPrice) || 0;
@@ -700,42 +912,34 @@
       document.getElementById('dTodayPairs').innerText = todayPairsSold + " Pairs Beche";
     }
 
-    // 2. CUSTOMER CATALOG RENDER (SIRF STOCK WALE DIKHENGE)
+    // CUSTOMER CATALOG WITH MULTI-PHOTO & INTERACTIVE COLORS
     function renderCustomerCatalog() {
       const search = (document.getElementById('custSearchFilter').value || '').toLowerCase().trim();
       const genderFlt = document.getElementById('custGenderFilter').value;
       const grid = document.getElementById('customerCatalogGrid');
 
       let cardsHtml = '';
-      let availableItemsCount = 0;
 
       items.forEach(it => {
         const itGender = it.gender || 'Men';
         if (genderFlt !== 'ALL' && itGender !== genderFlt) return;
 
-        // Calculate total in-stock pairs
         const totalStock = Object.values(it.sizes || {}).reduce((a, b) => a + Number(b), 0);
+        if (totalStock <= 0) return; // SIRF IN-STOCK DIKHEGA
 
-        // AGAR TOTAL STOCK 0 HAI TOH CUSTOMER KO BILKUL NAHI DIKHEGA
-        if (totalStock <= 0) return;
-
+        const colorsArr = it.colors && it.colors.length > 0 ? it.colors : (it.color ? [it.color] : ['Standard']);
         const matchSearch = it.name.toLowerCase().includes(search) || 
                           it.brand.toLowerCase().includes(search) || 
-                          (it.color && it.color.toLowerCase().includes(search));
+                          colorsArr.join(' ').toLowerCase().includes(search);
 
         if (!matchSearch) return;
 
-        // Filter only sizes that are > 0 in stock
+        // In-stock sizes
         const inStockSizes = [];
         Object.keys(it.sizes || {}).forEach(sz => {
-          const qty = Number(it.sizes[sz]) || 0;
-          if (qty > 0) inStockSizes.push(sz);
+          if (Number(it.sizes[sz]) > 0) inStockSizes.push(sz);
         });
-
-        // Agar koi size in stock nahi bacha toh mat dikhao
         if (inStockSizes.length === 0) return;
-
-        availableItemsCount++;
 
         let chipClass = 'chip-men';
         if (itGender === 'Ladies') chipClass = 'chip-ladies';
@@ -745,17 +949,48 @@
           `<span style="display:inline-block; background:#dcfce7; color:#166534; font-size:11px; font-weight:800; padding:2px 7px; border-radius:4px; border:1px solid #86efac; margin:1px;">Size ${sz}</span>`
         ).join(' ');
 
+        // Multi photos list (up to 3)
+        const photoList = (it.photos && it.photos.length > 0) ? it.photos : [it.photo || 'https://via.placeholder.com/300'];
+        const mainCardImgId = `card_main_img_${it.id}`;
+
+        // Thumbnails row
+        let thumbsHtml = '';
+        if (photoList.length > 1) {
+          thumbsHtml = `<div class="thumb-tray">` + photoList.map((p, pIdx) => `
+            <img src="${p}" class="thumb-img ${pIdx === 0 ? 'active' : ''}" onclick="swapCardImage('${mainCardImgId}', '${p}', this)">
+          `).join('') + `</div>`;
+        }
+
+        // Color selector chips
+        const colorsHtml = colorsArr.map((col, cIdx) => `
+          <button type="button" class="color-chip-btn ${cIdx === 0 ? 'active' : ''}" onclick="selectCardColor(this, '${it.id}', '${col}')">
+            ● ${col}
+          </button>
+        `).join('');
+
         cardsHtml += `
           <div class="shoe-card">
-            <img src="${it.photo || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80'}" class="shoe-card-img" alt="${it.name}">
+            <div>
+              <img id="${mainCardImgId}" src="${photoList[0]}" class="main-card-img" alt="${it.name}">
+              ${thumbsHtml}
+            </div>
+
             <div class="shoe-card-body">
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                   <span class="gender-chip ${chipClass}">${itGender}</span>
-                  <span style="font-size:11px; font-weight:bold; color:#10b981;">✓ In Stock</span>
+                  <span style="font-size:11px; font-weight:bold; color:#10b981;">✓ In Stock Uplabdh</span>
                 </div>
                 <h4 style="font-size:15px; font-weight:bold; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
-                <p style="font-size:12px; color:#64748b; margin-bottom:8px;">${it.brand} • Rang: ${it.color||'Standard'}</p>
+                <p style="font-size:12px; color:#64748b; margin-bottom:6px;">${it.brand} • <span id="color_label_${it.id}">Rang: ${colorsArr[0]}</span></p>
+
+                <!-- Color selector chips -->
+                <div style="margin-bottom:8px;">
+                  <small style="display:block; font-size:10px; font-weight:bold; color:#475569; margin-bottom:3px;">RANG (CLICK KARKE BADLEIN):</small>
+                  ${colorsHtml}
+                </div>
+
+                <!-- Sizes -->
                 <div style="margin-bottom:12px;">
                   <small style="display:block; font-size:10px; font-weight:bold; color:#475569; margin-bottom:3px;">AVAILABLE SIZES:</small>
                   ${sizeBadgesHtml}
@@ -763,8 +998,8 @@
               </div>
 
               <div>
-                <div style="font-size:19px; font-weight:900; color:#10b981; margin-bottom:10px;">₹${it.price}</div>
-                <button class="btn btn-wa" style="width:100%; justify-content:center; padding:10px; font-size:13px;" onclick="openWhatsAppOrderModal('${it.id}')">
+                <div style="font-size:20px; font-weight:900; color:#10b981; margin-bottom:10px;">₹${it.price}</div>
+                <button class="btn btn-wa" style="width:100%; justify-content:center; padding:11px; font-size:13px;" onclick="openWhatsAppOrderModal('${it.id}')">
                   📲 WhatsApp Order Karein
                 </button>
               </div>
@@ -776,15 +1011,40 @@
       grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8; font-size:14px;">Abhi koi footwear stock me uplabdh nahi hai.</div>';
     }
 
+    function swapCardImage(imgElementId, newSrc, thumbElem) {
+      document.getElementById(imgElementId).src = newSrc;
+      const parent = thumbElem.parentElement;
+      parent.querySelectorAll('.thumb-img').forEach(t => t.classList.remove('active'));
+      thumbElem.classList.add('active');
+    }
+
+    function selectCardColor(btnElem, itemId, colorName) {
+      const parent = btnElem.parentElement;
+      parent.querySelectorAll('.color-chip-btn').forEach(b => b.classList.remove('active'));
+      btnElem.classList.add('active');
+      document.getElementById(`color_label_${itemId}`).innerText = `Rang: ${colorName}`;
+    }
+
     // WHATSAPP ORDER POPUP (CUSTOMER SIDE)
     function openWhatsAppOrderModal(id) {
       const it = items.find(x => x.id === id);
       if (!it) return;
       currentWaItem = it;
 
-      document.getElementById('waShoeImg').src = it.photo || 'https://via.placeholder.com/140';
+      const mainImg = (it.photos && it.photos[0]) ? it.photos[0] : (it.photo || 'https://via.placeholder.com/140');
+      document.getElementById('waShoeImg').src = mainImg;
       document.getElementById('waShoeName').innerText = `${it.name} (${it.brand})`;
       document.getElementById('waShoePrice').innerText = `Rate: ₹${it.price}`;
+
+      // Colors
+      const colorsArr = it.colors && it.colors.length > 0 ? it.colors : (it.color ? [it.color] : ['Standard']);
+      currentWaSelectedColor = colorsArr[0];
+      const colorGroup = document.getElementById('waColorOptionsGroup');
+      colorGroup.innerHTML = colorsArr.map((c, idx) => `
+        <button type="button" class="color-chip-btn ${idx === 0 ? 'active' : ''}" onclick="pickWaModalColor(this, '${c}')">
+          ● ${c}
+        </button>
+      `).join('');
 
       // Populate only available sizes (> 0 stock)
       const sizeSelect = document.getElementById('waSelectedSize');
@@ -810,6 +1070,12 @@
       document.getElementById('waOrderModal').style.display = 'flex';
     }
 
+    function pickWaModalColor(btn, color) {
+      btn.parentElement.querySelectorAll('.color-chip-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentWaSelectedColor = color;
+    }
+
     function closeWaModal() {
       document.getElementById('waOrderModal').style.display = 'none';
     }
@@ -823,17 +1089,43 @@
       const text = `*NAMASTE DN FOOTWEAR!* 👞\nMujhe ye joota order karna hai:\n\n` +
                    `📌 *Item:* ${currentWaItem.name}\n` +
                    `🏷️ *Brand:* ${currentWaItem.brand}\n` +
-                   `🎨 *Color:* ${currentWaItem.color || 'Standard'}\n` +
+                   `🎨 *Selected Color:* ${currentWaSelectedColor || 'Standard'}\n` +
                    `👟 *Size:* ${size}\n` +
                    `💰 *Rate:* ₹${currentWaItem.price}\n\n` +
                    `👤 *Grahak Ka Naam:* ${custName}\n\n` +
                    `Kripya confirm karein ki ye piece pack kab tak hoga? Dhanyawad!`;
 
       const encodedText = encodeURIComponent(text);
-      const waUrl = `https://wa.me/${SHOP_WHATSAPP_NUMBER}?text=${encodedText}`;
+      const waUrl = `https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodedText}`;
 
       window.open(waUrl, '_blank');
       closeWaModal();
+    }
+
+    // FORM PHOTO PREVIEWS (UP TO 3 PHOTOS)
+    function previewUploadImageMulti(input, slotIdx) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX = 400;
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+            else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const base64 = canvas.toDataURL('image/jpeg', 0.7);
+
+            formUploadedPhotos[slotIdx - 1] = base64;
+            document.getElementById(`fImgPreview${slotIdx}`).src = base64;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
     }
 
     // FORM SIZES HANDLING
@@ -898,10 +1190,13 @@
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
-      uploadedPhotoData = '';
-      document.getElementById('fImgPreview').src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80";
-      document.getElementById('shoeModalTitle').innerText = "Naya Footwear Jodein";
+      formUploadedPhotos = ['', '', ''];
       
+      document.getElementById('fImgPreview1').src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80";
+      document.getElementById('fImgPreview2').src = "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=120&q=80";
+      document.getElementById('fImgPreview3').src = "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=120&q=80";
+
+      document.getElementById('shoeModalTitle').innerText = "Naya Footwear Jodein";
       document.querySelector('input[name="fGender"][value="Men"]').checked = true;
       activeFormSizes = [...GENDER_PRESETS['Men']];
       buildSizeBarcodeInputs();
@@ -912,35 +1207,16 @@
       document.getElementById('shoeModal').style.display = 'none';
     }
 
-    function previewUploadImage(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX = 300;
-            let w = img.width, h = img.height;
-            if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
-            else { if (h > MAX) { w *= MAX / h; h = MAX; } }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            uploadedPhotoData = canvas.toDataURL('image/jpeg', 0.7);
-            document.getElementById('fImgPreview').src = uploadedPhotoData;
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
     function submitShoeForm(e) {
       e.preventDefault();
       const id = document.getElementById('fId').value || ('shoe_' + Date.now());
       const name = document.getElementById('fName').value.trim();
       const brand = document.getElementById('fBrand').value.trim();
-      const color = document.getElementById('fColor').value.trim();
+      
+      // Parse colors list
+      const rawColors = document.getElementById('fColorsList').value;
+      const colors = rawColors.split(',').map(c => c.trim()).filter(c => c.length > 0);
+
       const category = document.getElementById('fCategory').value;
       const gender = document.querySelector('input[name="fGender"]:checked').value;
       const cost = Number(document.getElementById('fCost').value) || 0;
@@ -957,9 +1233,23 @@
       });
 
       const existing = items.find(x => x.id === id);
+      
+      // Filter out empty photos
+      let finalPhotos = formUploadedPhotos.filter(p => p && p.length > 0);
+      if (finalPhotos.length === 0 && existing && existing.photos) {
+        finalPhotos = existing.photos;
+      }
+      if (finalPhotos.length === 0 && existing && existing.photo) {
+        finalPhotos = [existing.photo];
+      }
+      if (finalPhotos.length === 0) {
+        finalPhotos = ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80'];
+      }
+
       const itemObj = {
-        id, name, brand, color, category, gender, cost, price,
-        photo: uploadedPhotoData || (existing ? existing.photo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80'),
+        id, name, brand, colors, category, gender, cost, price,
+        photos: finalPhotos,
+        photo: finalPhotos[0],
         sizes, barcodes
       };
 
@@ -975,7 +1265,8 @@
       document.getElementById('fId').value = it.id;
       document.getElementById('fName').value = it.name;
       document.getElementById('fBrand').value = it.brand;
-      document.getElementById('fColor').value = it.color || '';
+      
+      document.getElementById('fColorsList').value = it.colors ? it.colors.join(', ') : (it.color || '');
       document.getElementById('fCategory').value = it.category;
       document.getElementById('fCost').value = it.cost;
       document.getElementById('fPrice').value = it.price;
@@ -987,10 +1278,15 @@
       activeFormSizes = Object.keys(it.sizes || {});
       if (activeFormSizes.length === 0) activeFormSizes = [...(GENDER_PRESETS[itGender] || GENDER_PRESETS['Men'])];
 
-      uploadedPhotoData = it.photo || '';
-      document.getElementById('fImgPreview').src = it.photo || 'https://via.placeholder.com/50';
-      document.getElementById('shoeModalTitle').innerText = "Footwear Edit Karein";
+      // Photos
+      const existingPhotos = it.photos || (it.photo ? [it.photo] : []);
+      formUploadedPhotos = [existingPhotos[0] || '', existingPhotos[1] || '', existingPhotos[2] || ''];
 
+      document.getElementById('fImgPreview1').src = formUploadedPhotos[0] || 'https://via.placeholder.com/60';
+      document.getElementById('fImgPreview2').src = formUploadedPhotos[1] || 'https://via.placeholder.com/60';
+      document.getElementById('fImgPreview3').src = formUploadedPhotos[2] || 'https://via.placeholder.com/60';
+
+      document.getElementById('shoeModalTitle').innerText = "Footwear Edit Karein";
       buildSizeBarcodeInputs(it.sizes, it.barcodes);
       document.getElementById('shoeModal').style.display = 'flex';
     }
@@ -1010,9 +1306,11 @@
       activePopupItem = it;
       activeHighlightedSize = highlightSize;
 
-      document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/120';
+      const mainImg = (it.photos && it.photos[0]) ? it.photos[0] : (it.photo || 'https://via.placeholder.com/120');
+      document.getElementById('chkImg').src = mainImg;
       document.getElementById('chkTitle').innerText = it.name;
-      document.getElementById('chkMeta').innerText = `${it.brand} • Type: ${it.gender || 'Men'} • Color: ${it.color || 'Standard'}`;
+      const cStr = it.colors ? it.colors.join(', ') : (it.color || 'Standard');
+      document.getElementById('chkMeta').innerText = `${it.brand} • Type: ${it.gender || 'Men'} • Colors: ${cStr}`;
       document.getElementById('chkPrice').innerText = `Rate: ₹${it.price}`;
 
       let html = '';
@@ -1061,7 +1359,8 @@
       currentSellingItem = item;
       currentSellingSize = sellSize;
 
-      document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
+      const mainImg = (item.photos && item.photos[0]) ? item.photos[0] : (item.photo || 'https://via.placeholder.com/60');
+      document.getElementById('saleImg').src = mainImg;
       document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
       document.getElementById('saleSizeBadge').innerText = `Size: ${sellSize}`;
       document.getElementById('saleStockRem').innerText = `Stock: ${item.sizes[sellSize]} Pairs`;
@@ -1234,15 +1533,14 @@
     }
 
     function backupJSON() {
-      const blob = new Blob([JSON.stringify({ stock: items, sales: salesHistory }, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify({ stock: items, sales: salesHistory, banners: sliderBanners }, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "DN_Footwear_LiveStock_Backup.json";
+      a.download = "DN_Footwear_FullBackup.json";
       a.click();
     }
 
     window.onload = function() {
-      // Check URL Hash for customer link
       if (window.location.hash === '#store' || window.location.hash === '#catalog') {
         currentAppMode = 'customer';
         document.getElementById('adminViewSection').style.display = 'none';
