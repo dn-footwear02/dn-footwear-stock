@@ -1988,7 +1988,7 @@
       }
     }
 
-    function renderColorBlocks() {
+    function renderColorBlocks() 
       .color-photo-item { position: relative; border: 1.5px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 95px; background: #f8fafc; display: flex; flex-direction: column; justify-content: space-between; }
     .color-photo-item img { width: 100%; height: 68px; object-fit: contain; }
     .color-photo-item video { width: 100%; height: 68px; object-fit: cover; }
@@ -1996,7 +1996,6 @@
     .photo-order-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 2px 4px; font-size: 10px; color: white; }
     .photo-order-btn { background: #334155; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 10px; line-height: 1; }
     .photo-order-btn:hover { background: #4f46e5; }
-    
     .color-photo-del { position: absolute; top: 2px; right: 2px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
     .main-photo-indicator { position: absolute; top: 2px; left: 2px; background: #10b981; color: white; font-size: 9px; font-weight: bold; padding: 1px 4px; border-radius: 3px; z-index: 5; }
      
@@ -2023,8 +2022,7 @@
               ${isMain ? `<span class="main-photo-indicator">#1 MAIN</span>` : `<span style="position:absolute; top:2px; left:2px; background:#0f172a; color:#fff; font-size:9px; padding:1px 4px; border-radius:3px; z-index:5;">#${idx+1}</span>`}
               <button type="button" class="color-photo-del" onclick="deleteColorBlockPhoto('${col}', ${idx})" title="Hatao">✕</button>
               <img src="${p}">
-              
-              <div class="photo-order-bar">
+               <div class="photo-order-bar">
                 <button type="button" class="photo-order-btn" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} onclick="moveColorBlockPhoto('${col}', ${idx}, -1)" title="Pehle Laayein">◀</button>
                 <span>No. ${idx + 1}</span>
                 <button type="button" class="photo-order-btn" ${idx === pArr.length - 1 ? 'disabled style="opacity:0.3;"' : ''} onclick="moveColorBlockPhoto('${col}', ${idx}, 1)" title="Baad me Karein">▶</button>
@@ -2037,10 +2035,8 @@
       if (!colorDataMap[colorName] || !colorDataMap[colorName].photos) return;
       const photos = colorDataMap[colorName].photos;
       const newIndex = index + direction;
-
-      if (newIndex < 0 || newIndex >= photos.length) return;
-
-      const temp = photos[index];
+if (newIndex < 0 || newIndex >= photos.length) return;
+  const temp = photos[index];
       photos[index] = photos[newIndex];
       photos[newIndex] = temp;
 
