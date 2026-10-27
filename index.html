@@ -120,11 +120,9 @@
     </div>
 
     <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-      <button id="toggleModeBtn" class="btn btn-indigo" onclick="toggleAppMode()">
-        🔒 Admin Mode (Dukaan Login)
-      </button>
-
+      <!-- Admin Controls (Sirf Admin Login ke baad dikhega) -->
       <span id="adminNavGroup" style="display:none; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-amber" onclick="switchAppMode('customer')">🛍️ Customer View</button>
         <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
         <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
         <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
@@ -221,7 +219,8 @@
         <option value="Purse">Purse / Wallet</option>
       </select>
 
-      <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Store Link Copy</button>
+      <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Customer Link Copy</button>
+      <button class="btn btn-slate" onclick="copyAdminLink()">🔐 Admin Link Copy</button>
       <button class="btn btn-slate" onclick="backupJSON()">💾 Backup</button>
     </div>
 
@@ -242,7 +241,7 @@
       </table>
     </div>
 
-    <!-- ==================== UNLIMITED SLIDE PHOTO & VIDEO MANAGER ==================== -->
+    <!-- UNLIMITED SLIDE PHOTO & VIDEO MANAGER -->
     <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
         <div>
@@ -264,7 +263,7 @@
       </div>
     </div>
 
-    <!-- ==================== MANUAL CONTACT DETAILS MANAGER ==================== -->
+    <!-- MANUAL CONTACT DETAILS MANAGER -->
     <div style="background:#ffffff; margin-top:16px; padding:18px; border-radius:12px; border:1px solid #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:4px;">📞 Customer Catalog Contact Details Badlein</h3>
       <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Store page par dikhne wale mobile number aur WhatsApp details yahan se manually change karein:</p>
@@ -816,22 +815,26 @@
       initBannerSync();
     }
 
+    // ==================== SEPARATE URL LOGIC ====================
     function checkURLAndSetMode() {
-      currentAppMode = 'customer';
-      document.getElementById('adminViewSection').style.display = 'none';
-      document.getElementById('customerViewSection').style.display = 'block';
-      document.getElementById('adminNavGroup').style.display = 'none';
+      const hash = window.location.hash.toLowerCase();
       
-      const toggleBtn = document.getElementById('toggleModeBtn');
-      const subtitle = document.getElementById('appModeSubtitle');
-      if (toggleBtn) {
-        toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
-        toggleBtn.className = 'btn btn-indigo';
+      // Sirf '#admin' hash hone par hi login modal popup hoga
+      if (hash === '#admin') {
+        openAdminLoginModal();
+      } else {
+        // Customer Catalog view enforce karein
+        currentAppMode = 'customer';
+        document.getElementById('adminViewSection').style.display = 'none';
+        document.getElementById('customerViewSection').style.display = 'block';
+        document.getElementById('adminNavGroup').style.display = 'none';
+        
+        const subtitle = document.getElementById('appModeSubtitle');
+        if (subtitle) subtitle.innerText = 'Customer Online Store';
+        
+        renderCustomerSlider();
+        renderCustomerCatalog();
       }
-      if (subtitle) subtitle.innerText = 'Customer Online Store';
-      
-      renderCustomerSlider();
-      renderCustomerCatalog();
     }
 
     // ==================== MANUAL CONTACT DETAILS LOGIC ====================
@@ -1297,14 +1300,6 @@
     }
 
     // ==================== MODE SWITCHING WITH 6-DIGIT PIN ====================
-    function toggleAppMode() {
-      if (currentAppMode === 'admin') {
-        switchAppMode('customer');
-      } else {
-        openAdminLoginModal();
-      }
-    }
-
     function openAdminLoginModal() {
       document.getElementById('adminLoginPinInput').value = '';
       document.getElementById('adminLoginModal').style.display = 'flex';
@@ -1313,13 +1308,16 @@
 
     function closeAdminLoginModal() {
       document.getElementById('adminLoginModal').style.display = 'none';
+      // Agar login cancel karein toh normal URL par revert ho jaye
+      window.location.hash = '';
+      switchAppMode('customer');
     }
 
     function verifyAdminPinSubmit(e) {
       e.preventDefault();
       const entered = document.getElementById('adminLoginPinInput').value.trim();
       if (entered === adminSecurityPin) {
-        closeAdminLoginModal();
+        document.getElementById('adminLoginModal').style.display = 'none';
         switchAppMode('admin');
       } else {
         alert("Galat 6-Digit PIN! Sirf dukaan ke admin ko access ki anumati hai.");
@@ -1330,25 +1328,27 @@
     function switchAppMode(mode) {
       currentAppMode = mode;
 
-      document.getElementById('adminViewSection').style.display = (mode === 'admin') ? 'block' : 'none';
-      document.getElementById('customerViewSection').style.display = (mode === 'customer') ? 'block' : 'none';
-      document.getElementById('adminNavGroup').style.display = (mode === 'admin') ? 'inline-flex' : 'none';
-      
-      const toggleBtn = document.getElementById('toggleModeBtn');
-      const subtitle = document.getElementById('appModeSubtitle');
-
-      if (mode === 'customer') {
-        toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
-        toggleBtn.className = 'btn btn-indigo';
-        subtitle.innerText = 'Customer Online Store';
-        renderCustomerSlider();
-        renderCustomerCatalog();
-      } else {
-        toggleBtn.innerText = '🛍️ Customer Catalog Dekhein';
-        toggleBtn.className = 'btn btn-amber';
-        subtitle.innerText = 'Dukaan Admin & POS Mode';
+      if (mode === 'admin') {
+        document.getElementById('adminViewSection').style.display = 'block';
+        document.getElementById('customerViewSection').style.display = 'none';
+        document.getElementById('adminNavGroup').style.display = 'inline-flex';
+        
+        const subtitle = document.getElementById('appModeSubtitle');
+        if (subtitle) subtitle.innerText = 'Dukaan Admin & POS Mode';
+        
         renderAdminSlideThumbs();
         renderAdminTable();
+      } else {
+        window.location.hash = '';
+        document.getElementById('adminViewSection').style.display = 'none';
+        document.getElementById('customerViewSection').style.display = 'block';
+        document.getElementById('adminNavGroup').style.display = 'none';
+        
+        const subtitle = document.getElementById('appModeSubtitle');
+        if (subtitle) subtitle.innerText = 'Customer Online Store';
+        
+        renderCustomerSlider();
+        renderCustomerCatalog();
       }
     }
 
@@ -2259,6 +2259,11 @@
       navigator.clipboard.writeText(url).then(() => alert("Customer Store Link Copy Ho Gaya:\n" + url));
     }
 
+    function copyAdminLink() {
+      const url = window.location.origin + window.location.pathname + '#admin';
+      navigator.clipboard.writeText(url).then(() => alert("Secret Admin Link Copy Ho Gaya:\n" + url));
+    }
+
     function backupJSON() {
       const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
@@ -2266,6 +2271,9 @@
       a.download = "DN_Stock_Backup.json";
       a.click();
     }
+
+    // Hash change detector & Page Load
+    window.addEventListener('hashchange', checkURLAndSetMode);
 
     window.onload = function() {
       checkURLAndSetMode();
