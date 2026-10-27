@@ -1565,16 +1565,7 @@
     }
 
     // ==================== ONLINE ORDERS ADMIN PANEL ====================
-    function openOrdersPanelModal() {
-      renderOnlineOrdersTable();
-      document.getElementById('ordersPanelModal').style.display = 'flex';
-    }
-
-    function closeOrdersPanelModal() {
-      document.getElementById('ordersPanelModal').style.display = 'none';
-    }
-
-    function renderOnlineOrdersTable() {
+   function renderOnlineOrdersTable() {
       const tbody = document.getElementById('onlineOrdersTableBody');
       if (!tbody) return;
 
@@ -1592,17 +1583,24 @@
           <div>● <b>${i.name}</b> (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
         `).join('');
 
-        const isDelivered = (o.status === 'Delivered');
+        const curStatus = o.status || 'Ordered';
 
         return `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
             <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
             <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
-            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
+            <td>
+              <select onchange="db.ref('customer_orders/${o.orderId}/status').set(this.value)" class="form-control" style="font-size:11px; padding:3px; font-weight:bold;">
+                <option value="Ordered" ${curStatus==='Ordered'?'selected':''}>📦 Ordered</option>
+                <option value="Confirmed" ${curStatus==='Confirmed'?'selected':''}>✅ Confirmed</option>
+                <option value="Packed" ${curStatus==='Packed'?'selected':''}>🎁 Packed</option>
+                <option value="Delivered" ${curStatus==='Delivered'?'selected':''}>🎉 Delivered</option>
+                <option value="Cancelled" ${curStatus==='Cancelled'?'selected':''}>❌ Cancelled (Cancelled by Customer/Admin)</option>
+              </select>
+            </td>
             <td style="text-align:right;">
-              ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="db.ref('customer_orders/${o.orderId}').remove()">🗑️ Delete</button>
             </td>
           </tr>
         `;
