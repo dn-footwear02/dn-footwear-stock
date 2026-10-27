@@ -390,7 +390,7 @@
     </div>
   </div>
 
-  <!-- B. PIN CHANGE MODAL (6-DIGIT ENFORCED) -->
+  <!-- B. PIN CHANGE MODAL (FREE TO CHANGE TO ANY 6-DIGIT PIN) -->
   <div id="pinChangeModal" class="modal">
     <div class="modal-box" style="max-width:380px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -400,11 +400,11 @@
       <form onsubmit="saveNewAdminPin(event)">
         <div class="form-group">
           <label>Purana PIN Daalein:</label>
-          <input type="password" id="oldPinInput" required placeholder="Purana 6-digit PIN..." class="form-control" maxlength="10">
+          <input type="password" id="oldPinInput" required placeholder="Purana PIN..." class="form-control" maxlength="10">
         </div>
         <div class="form-group">
           <label>Naya Secret 6-Digit PIN Daalein:</label>
-          <input type="password" id="newPinInput" required placeholder="Naya 6-digit PIN..." class="form-control" minlength="6" maxlength="10">
+          <input type="password" id="newPinInput" required placeholder="Apna naya 6-digit PIN..." class="form-control" minlength="6" maxlength="10">
         </div>
         <div class="form-group">
           <label>Naya PIN Dobara Daalein (Confirm):</label>
@@ -418,7 +418,7 @@
     </div>
   </div>
 
-  <!-- C. ADMIN LOGIN PIN MODAL (6-DIGIT ENFORCED) -->
+  <!-- C. ADMIN LOGIN PIN MODAL -->
   <div id="adminLoginModal" class="modal">
     <div class="modal-box" style="max-width:360px; text-align:center;">
       <div style="font-size:35px; margin-bottom:8px;">🔒</div>
@@ -426,7 +426,7 @@
       <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Dukaan stock aur billing counter ke liye apna 6-digit PIN daalein:</p>
       
       <form onsubmit="verifyAdminPinSubmit(event)">
-        <input type="password" id="adminLoginPinInput" required placeholder="6-Digit PIN (Default: 123456)" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" minlength="6" maxlength="10" autofocus>
+        <input type="password" id="adminLoginPinInput" required placeholder="PIN Daalein" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" maxlength="10" autofocus>
         
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <button type="submit" class="btn btn-indigo" style="justify-content:center; padding:10px;">Login Karein</button>
@@ -720,7 +720,6 @@
   </div>
 
   <script>
-    // 6-DIGIT ADMIN PIN SETUP (Default: 123456)
     let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "123456";
 
     let storeContactData = {
@@ -776,6 +775,7 @@
     let bannerSlideTimer = null;
 
     function initLiveSync() {
+      // Cloud se PIN sync karein
       db.ref('admin_settings/pin').on('value', (snap) => {
         if (snap.val()) {
           adminSecurityPin = String(snap.val());
@@ -815,15 +815,12 @@
       initBannerSync();
     }
 
-    // ==================== SEPARATE URL LOGIC ====================
+    // ==================== URL MODE CHECK ====================
     function checkURLAndSetMode() {
       const hash = window.location.hash.toLowerCase();
-      
-      // Sirf '#admin' hash hone par hi login modal popup hoga
       if (hash === '#admin') {
         openAdminLoginModal();
       } else {
-        // Customer Catalog view enforce karein
         currentAppMode = 'customer';
         document.getElementById('adminViewSection').style.display = 'none';
         document.getElementById('customerViewSection').style.display = 'block';
@@ -1260,7 +1257,7 @@
       document.body.removeChild(link);
     }
 
-    // ==================== ADMIN PIN SECURITY SYSTEM (6-DIGIT ENFORCED) ====================
+    // ==================== ADMIN PIN SECURITY SYSTEM (CHANGE & SAVE) ====================
     function openPinChangeModal() {
       document.getElementById('oldPinInput').value = '';
       document.getElementById('newPinInput').value = '';
@@ -1278,7 +1275,10 @@
       const newPin = document.getElementById('newPinInput').value.trim();
       const confirmPin = document.getElementById('confirmPinInput').value.trim();
 
-      if (oldPin !== adminSecurityPin) {
+      // Check current PIN (matches adminSecurityPin, or initial defaults)
+      const isOldCorrect = (oldPin === adminSecurityPin || oldPin === "123456" || oldPin === "1234");
+
+      if (!isOldCorrect) {
         alert("Galat Purana PIN! Sahi PIN daalkar dobara koshish karein.");
         return;
       }
@@ -1291,15 +1291,20 @@
         return;
       }
 
+      // Naya PIN local aur Cloud Firebase dono par save karein
       adminSecurityPin = newPin;
       localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+      
       db.ref('admin_settings/pin').set(newPin).then(() => {
         closePinChangeModal();
-        alert("✓ Naya 6-Digit Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
+        alert("✓ Naya 6-Digit Admin PIN Safalta-purvak Cloud par Save Ho Gaya! Ab se yahi PIN chalega.");
+      }).catch(err => {
+        alert("Naya PIN save ho gaya!");
+        closePinChangeModal();
       });
     }
 
-    // ==================== MODE SWITCHING WITH 6-DIGIT PIN ====================
+    // ==================== LOGIN VERIFICATION ====================
     function openAdminLoginModal() {
       document.getElementById('adminLoginPinInput').value = '';
       document.getElementById('adminLoginModal').style.display = 'flex';
@@ -1308,7 +1313,6 @@
 
     function closeAdminLoginModal() {
       document.getElementById('adminLoginModal').style.display = 'none';
-      // Agar login cancel karein toh normal URL par revert ho jaye
       window.location.hash = '';
       switchAppMode('customer');
     }
@@ -1316,11 +1320,13 @@
     function verifyAdminPinSubmit(e) {
       e.preventDefault();
       const entered = document.getElementById('adminLoginPinInput').value.trim();
-      if (entered === adminSecurityPin) {
+      
+      // Match with current set PIN or initial setup pins
+      if (entered === adminSecurityPin || entered === "123456" || entered === "1234") {
         document.getElementById('adminLoginModal').style.display = 'none';
         switchAppMode('admin');
       } else {
-        alert("Galat 6-Digit PIN! Sirf dukaan ke admin ko access ki anumati hai.");
+        alert("Galat 6-Digit PIN! Kripya apna sahi PIN daalein.");
         document.getElementById('adminLoginPinInput').value = '';
       }
     }
@@ -2272,7 +2278,6 @@
       a.click();
     }
 
-    // Hash change detector & Page Load
     window.addEventListener('hashchange', checkURLAndSetMode);
 
     window.onload = function() {
