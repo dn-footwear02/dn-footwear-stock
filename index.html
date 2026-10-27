@@ -168,7 +168,7 @@
     <div id="customerCatalogGrid" class="catalog-grid"></div>
   </div>
 
-  <!-- ==================== 2. ADMIN DASHBOARD & POS (HIDDEN BY DEFAULT) ==================== -->
+  <!-- ==================== 2. ADMIN DASHBOARD & POS ==================== -->
   <div id="adminViewSection" class="container" style="display:none;">
     <div class="stats-grid">
       <div class="stat-card">
@@ -391,25 +391,25 @@
     </div>
   </div>
 
-  <!-- B. PIN CHANGE MODAL -->
+  <!-- B. PIN CHANGE MODAL (6-DIGIT ENFORCED) -->
   <div id="pinChangeModal" class="modal">
     <div class="modal-box" style="max-width:380px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔑 Admin Login PIN Badlein</h3>
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔑 Admin Login 6-Digit PIN Badlein</h3>
         <button class="btn btn-slate" onclick="closePinChangeModal()">✕</button>
       </div>
       <form onsubmit="saveNewAdminPin(event)">
         <div class="form-group">
           <label>Purana PIN Daalein:</label>
-          <input type="password" id="oldPinInput" required placeholder="Purana PIN..." class="form-control" maxlength="10">
+          <input type="password" id="oldPinInput" required placeholder="Purana 6-digit PIN..." class="form-control" maxlength="10">
         </div>
         <div class="form-group">
-          <label>Naya Secret PIN Daalein:</label>
-          <input type="password" id="newPinInput" required placeholder="Naya 4-digit PIN..." class="form-control" maxlength="10">
+          <label>Naya Secret 6-Digit PIN Daalein:</label>
+          <input type="password" id="newPinInput" required placeholder="Naya 6-digit PIN..." class="form-control" minlength="6" maxlength="10">
         </div>
         <div class="form-group">
           <label>Naya PIN Dobara Daalein (Confirm):</label>
-          <input type="password" id="confirmPinInput" required placeholder="Dobara naya PIN..." class="form-control" maxlength="10">
+          <input type="password" id="confirmPinInput" required placeholder="Dobara naya 6-digit PIN..." class="form-control" minlength="6" maxlength="10">
         </div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
           <button type="button" class="btn btn-slate" onclick="closePinChangeModal()">Cancel</button>
@@ -419,15 +419,15 @@
     </div>
   </div>
 
-  <!-- C. ADMIN LOGIN PIN MODAL -->
+  <!-- C. ADMIN LOGIN PIN MODAL (6-DIGIT ENFORCED) -->
   <div id="adminLoginModal" class="modal">
     <div class="modal-box" style="max-width:360px; text-align:center;">
       <div style="font-size:35px; margin-bottom:8px;">🔒</div>
       <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:4px;">Admin Portal Login</h3>
-      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Dukaan stock aur billing counter ke liye apna 4-digit PIN daalein:</p>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Dukaan stock aur billing counter ke liye apna 6-digit PIN daalein:</p>
       
       <form onsubmit="verifyAdminPinSubmit(event)">
-        <input type="password" id="adminLoginPinInput" required placeholder="PIN Daalein (Default: 1234)" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" maxlength="10" autofocus>
+        <input type="password" id="adminLoginPinInput" required placeholder="6-Digit PIN (Default: 123456)" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" minlength="6" maxlength="10" autofocus>
         
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <button type="submit" class="btn btn-indigo" style="justify-content:center; padding:10px;">Login Karein</button>
@@ -721,7 +721,8 @@
   </div>
 
   <script>
-    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "1234";
+    // 6-DIGIT ADMIN PIN SETUP (Default: 123456)
+    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "123456";
 
     let storeContactData = {
       name1: "Dashrath Singh",
@@ -756,7 +757,7 @@
     let salesHistory = [];
     let onlineOrders = [];
     let catalogBanners = [];
-    let currentAppMode = 'customer'; // Default Mode Hamesha Customer Store Rahega
+    let currentAppMode = 'customer';
 
     let scannerObj = null;
     let currentScanAction = 'check';
@@ -815,9 +816,7 @@
       initBannerSync();
     }
 
-    // ==================== CHECK URL & DEFAULT TO CUSTOMER CATALOG ====================
     function checkURLAndSetMode() {
-      // By default customer view open hoga
       currentAppMode = 'customer';
       document.getElementById('adminViewSection').style.display = 'none';
       document.getElementById('customerViewSection').style.display = 'block';
@@ -966,7 +965,7 @@
         return;
       }
 
-      alert("Video upload ho rahi hai, kripya 4-5 second intezar karein...");
+      alert("Video upload ho rahi hai, kripya thoda intezar karein...");
       const reader = new FileReader();
       reader.onload = function(e) {
         const videoDataUrl = e.target.result;
@@ -1039,6 +1038,7 @@
       }).join('');
     }
 
+    // ==================== SLIDER AUTO-PLAY & VIDEO ENDED LOGIC ====================
     function renderCustomerSlider() {
       const container = document.getElementById('sliderSlidesContainer');
       if (!container) return;
@@ -1051,7 +1051,7 @@
       container.innerHTML = catalogBanners.map((b, idx) => {
         let mediaHtml = '';
         if (b.type === 'video') {
-          mediaHtml = `<video class="slider-video" src="${b.url}" autoplay muted loop playsinline></video>`;
+          mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
         } else {
           mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
         }
@@ -1068,11 +1068,26 @@
       }).join('');
 
       activeBannerIndex = 0;
-      if (bannerSlideTimer) clearInterval(bannerSlideTimer);
-      if (catalogBanners.length > 1) {
-        bannerSlideTimer = setInterval(() => {
+      scheduleNextSlide();
+    }
+
+    function scheduleNextSlide() {
+      if (bannerSlideTimer) clearTimeout(bannerSlideTimer);
+      if (!catalogBanners || catalogBanners.length <= 1) return;
+
+      const slides = document.querySelectorAll('#sliderSlidesContainer .slider-slide');
+      if (!slides.length) return;
+
+      const currentSlide = slides[activeBannerIndex];
+      const video = currentSlide.querySelector('video');
+
+      if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      } else {
+        bannerSlideTimer = setTimeout(() => {
           shiftBannerSlide(1);
-        }, 3400);
+        }, 3500);
       }
     }
 
@@ -1081,15 +1096,16 @@
       const slides = document.querySelectorAll('#sliderSlidesContainer .slider-slide');
       if (!slides.length) return;
 
+      const prevVideo = slides[activeBannerIndex].querySelector('video');
+      if (prevVideo) {
+        prevVideo.pause();
+      }
+
       slides[activeBannerIndex].classList.remove('active');
       activeBannerIndex = (activeBannerIndex + direction + slides.length) % slides.length;
       slides[activeBannerIndex].classList.add('active');
 
-      const currentVideo = slides[activeBannerIndex].querySelector('video');
-      if (currentVideo) {
-        currentVideo.currentTime = 0;
-        currentVideo.play().catch(()=>{});
-      }
+      scheduleNextSlide();
     }
 
     // ==================== BIKRI REPORT & DOWNLOAD SYSTEM ====================
@@ -1241,7 +1257,7 @@
       document.body.removeChild(link);
     }
 
-    // ==================== ADMIN PIN SECURITY SYSTEM ====================
+    // ==================== ADMIN PIN SECURITY SYSTEM (6-DIGIT ENFORCED) ====================
     function openPinChangeModal() {
       document.getElementById('oldPinInput').value = '';
       document.getElementById('newPinInput').value = '';
@@ -1263,8 +1279,8 @@
         alert("Galat Purana PIN! Sahi PIN daalkar dobara koshish karein.");
         return;
       }
-      if (newPin.length < 4) {
-        alert("Naya PIN kam se kam 4-digit ka hona chahiye!");
+      if (newPin.length < 6) {
+        alert("Naya PIN kam se kam 6-digit ka hona chahiye!");
         return;
       }
       if (newPin !== confirmPin) {
@@ -1276,11 +1292,11 @@
       localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
       db.ref('admin_settings/pin').set(newPin).then(() => {
         closePinChangeModal();
-        alert("✓ Naya Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
+        alert("✓ Naya 6-Digit Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
       });
     }
 
-    // ==================== MODE SWITCHING WITH PIN LOCK ====================
+    // ==================== MODE SWITCHING WITH 6-DIGIT PIN ====================
     function toggleAppMode() {
       if (currentAppMode === 'admin') {
         switchAppMode('customer');
@@ -1306,7 +1322,7 @@
         closeAdminLoginModal();
         switchAppMode('admin');
       } else {
-        alert("Galat PIN! Sirf dukaan ke admin ko access ki anumati hai.");
+        alert("Galat 6-Digit PIN! Sirf dukaan ke admin ko access ki anumati hai.");
         document.getElementById('adminLoginPinInput').value = '';
       }
     }
@@ -2251,7 +2267,6 @@
       a.click();
     }
 
-    // Auto set to customer mode on load
     window.onload = function() {
       checkURLAndSetMode();
       initLiveSync();
