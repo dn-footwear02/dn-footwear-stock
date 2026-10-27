@@ -620,6 +620,19 @@
   </div>
 
   <!-- ADD / EDIT ITEM MODAL -->
+        <div id="kidsPricingSection" style="display:none; background:#ecfdf5; border:1.5px solid #10b981; border-radius:8px; padding:12px; margin-bottom:12px;">
+          <b style="font-size:13px; color:#047857; display:block; margin-bottom:6px;">🧒 Kids Dual Rates (Alag-Alag Set Ka Rate):</b>
+          <div class="row">
+            <div>
+              <label style="font-size:11px; font-weight:bold; color:#065f46;">Size 11, 12, 13, 1 Ka Rate (₹): *</label>
+              <input type="number" id="fKidsPrice11_1" placeholder="e.g. 399" class="form-control" style="font-weight:bold; color:#059669;">
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:bold; color:#065f46;">Size 2, 3, 4, 5 Ka Rate (₹): *</label>
+              <input type="number" id="fKidsPrice2_5" placeholder="e.g. 499" class="form-control" style="font-weight:bold; color:#059669;">
+            </div>
+          </div>
+        </div>
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -628,7 +641,14 @@
       </div>
       <form id="shoeForm" onsubmit="submitShoeForm(event)">
         <input type="hidden" id="fId">
-
+        const isKids = category.includes('Kids');
+       let kidsPricingObj = null;
+       if (isKids) {
+        const p11 = Number(document.getElementById('fKidsPrice11_1').value) || 0;
+        const p25 = Number(document.getElementById('fKidsPrice2_5').value) || 0;
+        kidsPricingObj = { price11_1: p11, price2_5: p25 };
+        price = p11;
+      }
         <div class="form-group" style="background:#e0e7ff; padding:10px; border-radius:8px; border:1px solid #c7d2fe;">
           <label style="color:#1e1b4b; font-weight:800;">Item Ka Type Chunein:</label>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
@@ -666,10 +686,27 @@
                 <option value="Ladies Shoes">👠 Ladies Shoes</option>
                 <option value="Ladies Chappal">👡 Ladies Chappal & Sandals</option>
               </optgroup>
-              <optgroup label="🧒 Kids (Bachho Ke)">
-                <option value="Kids Shoes">👟 Kids Shoes</option>
-                <option value="Kids Chappal">🩴 Kids Chappal & Sandals</option>
-              </optgroup>
+        function handleCategorySelection(catVal) {
+      const genderSelect = document.getElementById('fGenderSelect');
+      const kidsBox = document.getElementById('kidsPricingSection');
+      const normPriceGrp = document.getElementById('normalPriceGroup');
+      if (catVal.includes('Kids')) {
+        genderSelect.value = 'Kids';
+        if (kidsBox) kidsBox.style.display = 'block';
+      } else {
+        if (kidsBox) kidsBox.style.display = 'none';
+      }
+      changePresetGender(genderSelect.value);
+    }
+             function getItemPriceForSize(it, size) {
+      const isKids = it.category && it.category.includes('Kids');
+      if (isKids && it.kidsPricing) {
+        const sNum = parseInt(size, 10);
+        if ([11, 12, 13, 1].includes(sNum)) return Number(it.kidsPricing.price11_1) || Number(it.price) || 0;
+        if ([2, 3, 4, 5].includes(sNum)) return Number(it.kidsPricing.price2_5) || Number(it.price) || 0;
+      }
+      return Number(it.price) || 0;
+    }
               <optgroup label="🎒 Accessories">
                 <option value="Socks">🧦 Socks</option>
                 <option value="Chasma">👓 Chasma</option>
