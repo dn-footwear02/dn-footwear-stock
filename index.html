@@ -1295,7 +1295,7 @@
     }
 
     // ==================== SLIDER AUTO-PLAY & VIDEO ENDED LOGIC ====================
-    function renderCustomerSlider() {
+  function renderCustomerSlider() {
       const container = document.getElementById('sliderSlidesContainer');
       if (!container) return;
 
@@ -1307,6 +1307,7 @@
       container.innerHTML = catalogBanners.map((b, idx) => {
         let mediaHtml = '';
         if (b.type === 'video') {
+          // Yahan muted, playsinline aur onended zaroori hai mobile ke liye
           mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
         } else {
           mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
@@ -1317,7 +1318,6 @@
             ${mediaHtml}
             <div class="slider-caption">
               <h3 style="font-size:16px; font-weight:800;">DN Footwear & Sports Siriyari</h3>
-              <p style="font-size:11px; opacity:0.85;">Quality Footwear at Wholesale & Best Rates</p>
             </div>
           </div>
         `;
@@ -1326,7 +1326,7 @@
       activeBannerIndex = 0;
       scheduleNextSlide();
     }
-
+    
     function scheduleNextSlide() {
       if (bannerSlideTimer) clearTimeout(bannerSlideTimer);
       if (!catalogBanners || catalogBanners.length <= 1) return;
