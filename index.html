@@ -1307,7 +1307,6 @@
       container.innerHTML = catalogBanners.map((b, idx) => {
         let mediaHtml = '';
         if (b.type === 'video') {
-          // Yahan muted, playsinline aur onended zaroori hai mobile ke liye
           mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
         } else {
           mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
