@@ -970,22 +970,22 @@
     let activeBannerIndex = 0;
     let bannerSlideTimer = null;
 
-      // SYNC CUSTOM DELIVERY LOCATIONS & TOGGLE SETTING
-    db.ref('delivery_settings/locations').on('value', (snap) => {
-      if (snap.val()) {
-        allowedDeliveryLocations = String(snap.val());
-      }
-      const inputArea = document.getElementById('admDeliveryLocationsInput');
-      if (inputArea) inputArea.value = allowedDeliveryLocations;
-    });
+    function initLiveSync() {
+      db.ref('admin_settings/pin').on('value', (snap) => {
+        if (snap.val()) {
+          adminSecurityPin = String(snap.val());
+          localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+        }
+      });
 
-    db.ref('delivery_settings/show_checker').on('value', (snap) => {
-      showDeliveryCheckerOnStore = snap.val() !== false;
-      const chk = document.getElementById('admToggleDeliveryChecker');
-      if (chk) chk.checked = showDeliveryCheckerOnStore;
-      const box = document.getElementById('deliveryCheckerContainer');
-      if (box) box.style.display = showDeliveryCheckerOnStore ? 'flex' : 'none';
-    });
+      // SYNC CUSTOM DELIVERY LOCATIONS
+      db.ref('delivery_settings/locations').on('value', (snap) => {
+        if (snap.val()) {
+          allowedDeliveryLocations = String(snap.val());
+        }
+        const inputArea = document.getElementById('admDeliveryLocationsInput');
+        if (inputArea) inputArea.value = allowedDeliveryLocations;
+      });
 
       db.ref('store_contacts').on('value', (snap) => {
         const val = snap.val();
@@ -1592,24 +1592,17 @@
           <div>● <b>${i.name}</b> (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
         `).join('');
 
-        const curStatus = o.status || 'Ordered';
+        const isDelivered = (o.status === 'Delivered');
 
         return `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
             <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
             <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
-            <td>
-              <select onchange="db.ref('customer_orders/${o.orderId}/status').set(this.value)" class="form-control" style="font-size:11px; padding:3px; font-weight:bold;">
-                <option value="Ordered" ${curStatus==='Ordered'?'selected':''}>📦 Ordered</option>
-                <option value="Confirmed" ${curStatus==='Confirmed'?'selected':''}>✅ Confirmed</option>
-                <option value="Packed" ${curStatus==='Packed'?'selected':''}>🎁 Packed</option>
-                <option value="Delivered" ${curStatus==='Delivered'?'selected':''}>🎉 Delivered</option>
-                <option value="Cancelled" ${curStatus==='Cancelled'?'selected':''}>❌ Cancelled (Cancelled by Customer/Admin)</option>
-              </select>
-            </td>
+            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
             <td style="text-align:right;">
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="db.ref('customer_orders/${o.orderId}').remove()">🗑️ Delete</button>
+              ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
             </td>
           </tr>
         `;
