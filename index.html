@@ -39,7 +39,7 @@
     .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
-    /* SLIDER */
+    /* SLIDER FIX FOR MOBILE AUTOPLAY */
     .slider-wrapper { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #0f172a; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     .ratio-21-9 { aspect-ratio: 21 / 9; max-height: 320px; }
     .slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; align-items: center; justify-content: center; background:#000; }
@@ -227,13 +227,13 @@
       <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
     </div>
 
-    <!-- DELIVERY CHECKER -->
+    <!-- DELIVERY CHECKER (OPTIONAL TOGGLEABLE) -->
     <div class="delivery-check-box" id="deliveryCheckerContainer">
       <div>
         <h4 style="font-size:14px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
           📍 Delivery Pata Check Karein:
         </h4>
-        <small style="font-size:11px; color:#64748b;">Apna Gaon / Shahar ya Pincode daal kar check karein.</small>
+        <small style="font-size:11px; color:#64748b;">Apna Gaon / Shahar ya Pincode daal kar check karein delivery uplabdh hai ya nahi.</small>
       </div>
       
       <div class="delivery-input-group">
@@ -392,11 +392,11 @@
     </div>
 
     <!-- UNLIMITED SLIDE PHOTO & VIDEO MANAGER -->
-    <div style="background:#ffffff; margin-top:20px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1;">
+    <div style="background:#ffffff; margin-top:20px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
         <div>
           <h3 style="font-size:16px; font-weight:800; color:#1e1b4b;">📸 Unlimited Customer Catalog Banner Slides</h3>
-          <p style="font-size:12px; color:#64748b;">Jitni chahe utni Photos aur Promo Videos (Reels) upload karein.</p>
+          <p style="font-size:12px; color:#64748b; margin-top:2px;">Jitni chahe utni Photos aur Promo Videos (Reels) upload karein.</p>
         </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <input type="file" id="unlimitedSlideInput" accept="image/*" multiple style="display:none;" onchange="handleUnlimitedSlideUpload(event)">
@@ -408,35 +408,41 @@
           <button class="btn btn-red" onclick="deleteAllCatalogBanners()">Delete All</button>
         </div>
       </div>
-      <div id="adminSlideThumbsList" style="display:flex; gap:10px; overflow-x:auto; padding:6px 0; min-height:65px; align-items:center;"></div>
+      <div id="adminSlideThumbsList" style="display:flex; gap:10px; overflow-x:auto; padding:6px 0; min-height:65px; align-items:center;">
+        <span style="font-size:12px; color:#94a3b8;">Loading slides...</span>
+      </div>
     </div>
 
     <!-- MANUAL CONTACT DETAILS MANAGER -->
-    <div style="background:#ffffff; margin-top:16px; padding:18px; border-radius:12px; border:1px solid #cbd5e1;">
-      <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:12px;">📞 Customer Catalog Contact Details Badlein</h3>
+    <div style="background:#ffffff; margin-top:16px; padding:18px; border-radius:12px; border:1px solid #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+      <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:4px;">📞 Customer Catalog Contact Details Badlein</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Store page par dikhne wale mobile number aur WhatsApp details yahan se manually change karein:</p>
+      
       <form onsubmit="saveCustomContactDetails(event)">
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:14px;">
           <div>
-            <label style="font-size:11px; font-weight:bold;">Contact 1:</label>
-            <input type="text" id="admContact1Name" placeholder="Dashrath Singh" class="form-control" style="margin-bottom:4px;">
-            <input type="tel" id="admContact1Phone" placeholder="8209452284" class="form-control">
+            <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Contact 1 (Name & Mobile):</label>
+            <input type="text" id="admContact1Name" placeholder="Dashrath Singh" class="form-control" style="margin-bottom:6px;">
+            <input type="tel" id="admContact1Phone" placeholder="8209452284" class="form-control" maxlength="15">
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">Contact 2:</label>
-            <input type="text" id="admContact2Name" placeholder="Surendra Singh" class="form-control" style="margin-bottom:4px;">
-            <input type="tel" id="admContact2Phone" placeholder="9636422794" class="form-control">
+            <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Contact 2 (Name & Mobile):</label>
+            <input type="text" id="admContact2Name" placeholder="Surendra Singh" class="form-control" style="margin-bottom:6px;">
+            <input type="tel" id="admContact2Phone" placeholder="9636422794" class="form-control" maxlength="15">
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">WhatsApp Order Number:</label>
-            <input type="tel" id="admWhatsappNumber" placeholder="917733909735" class="form-control" style="margin-bottom:4px;">
-            <input type="text" id="admStoreAddress" placeholder="Address..." class="form-control">
+            <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">WhatsApp Order Number (Bina +91 ke):</label>
+            <input type="tel" id="admWhatsappNumber" placeholder="917733909735" class="form-control" style="font-weight:bold; color:#059669;">
+            <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin:6px 0 4px 0;">Dukaan Pata / Tagline:</label>
+            <input type="text" id="admStoreAddress" placeholder="Near Bus Stand, Siriyari (Pali)" class="form-control">
           </div>
         </div>
         <div style="text-align:right;">
-          <button type="submit" class="btn btn-green">💾 Contact Details Save Karein</button>
+          <button type="submit" class="btn btn-green" style="padding:9px 18px; font-size:13px;">💾 Contact Details Save Karein</button>
         </div>
       </form>
     </div>
+
   </div>
 
   <!-- ==================== MODALS ==================== -->
@@ -445,22 +451,22 @@
   <div id="cartModal" class="modal">
     <div class="modal-box" style="max-width:520px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:17px; font-weight:800;">🛒 Aapka Shopping Cart</h3>
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">🛒 Aapka Shopping Cart</h3>
         <button class="btn btn-slate" onclick="closeCartCheckoutModal()">✕</button>
       </div>
 
       <div id="cartItemsListContainer" style="max-height:45vh; overflow-y:auto; margin-bottom:14px;"></div>
 
       <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;">
-        <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800;">
-          <span>Kul Raashi:</span>
+        <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800; color:#0f172a;">
+          <span>Kul Raashi (Total Amount):</span>
           <span style="color:#10b981;" id="modalCartTotal">₹0</span>
         </div>
       </div>
 
       <form onsubmit="placeCompleteWhatsAppOrder(event)">
         <div class="form-group">
-          <label>Aapka Naam *</label>
+          <label>Aapka Naam (Customer Name) *</label>
           <input type="text" id="cartCustName" required placeholder="e.g. Ramesh Singh" class="form-control">
         </div>
         <div class="row">
@@ -469,13 +475,16 @@
             <input type="tel" id="cartCustPhone" required placeholder="Mobile no..." class="form-control">
           </div>
           <div class="form-group">
-            <label>Delivery Pata (Gaon / Pincode) *</label>
-            <input type="text" id="cartCustAddress" required placeholder="e.g. Siriyari, 306021" class="form-control">
+            <label>Gaon / Shahar (Delivery Pata) *</label>
+            <input type="text" id="cartCustAddress" required placeholder="e.g. Siriyari, Pali" class="form-control">
           </div>
         </div>
-        <button type="submit" class="btn btn-wa" style="width:100%; justify-content:center; padding:12px; font-size:14px; margin-top:8px;">
-          📲 Sabhi Items WhatsApp Par Order Karein
-        </button>
+
+        <div style="display:grid; grid-template-columns:1fr; gap:8px; margin-top:10px;">
+          <button type="submit" class="btn btn-wa" style="justify-content:center; padding:12px; font-size:14px;">
+            📲 Sabhi Items WhatsApp Par Order Karein
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -484,15 +493,16 @@
   <div id="ordersPanelModal" class="modal">
     <div class="modal-box" style="max-width:850px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:17px; font-weight:800;">📦 Grahako Ke Online Orders & Status Tracker</h3>
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">📦 Grahako Ke Online Orders & Status Tracker</h3>
         <button class="btn btn-slate" onclick="closeOrdersPanelModal()">✕</button>
       </div>
+
       <div style="max-height:55vh; overflow-y:auto;">
         <table>
           <thead>
             <tr>
               <th>Order ID & Date</th>
-              <th>Customer</th>
+              <th>Customer & Phone</th>
               <th>Items & Details</th>
               <th>Status (Update Karein)</th>
               <th style="text-align:right;">Action</th>
@@ -507,41 +517,85 @@
   <!-- BIKRI REPORT MODAL -->
   <div id="salesReportModal" class="modal">
     <div class="modal-box" style="max-width:750px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;" class="no-print">
-        <h3 style="font-size:17px; font-weight:900;">📊 Dukaan Bikri & Payment Report</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
+        <div>
+          <h3 style="font-size:17px; font-weight:900; color:#0f172a;">📊 Dukaan Bikri & Payment Report</h3>
+          <p style="font-size:11px; color:#64748b;">Daily aur Monthly bikri, Cash aur UPI hisaab check karein.</p>
+        </div>
         <button class="btn btn-slate" onclick="closeSalesReportModal()">✕</button>
       </div>
-      <div style="display:flex; gap:8px; margin-bottom:14px;" class="no-print">
-        <button class="btn btn-indigo" id="repPeriodToday" onclick="setReportPeriod('today')">📅 Aaj</button>
-        <button class="btn btn-slate" id="repPeriodMonth" onclick="setReportPeriod('month')">🗓️ Mahina</button>
-        <button class="btn btn-slate" id="repPeriodAll" onclick="setReportPeriod('all')">Sabhi</button>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;" class="no-print">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-indigo" id="repPeriodToday" onclick="setReportPeriod('today')">📅 Aaj (Daily)</button>
+          <button class="btn btn-slate" id="repPeriodMonth" onclick="setReportPeriod('month')">🗓️ Is Mahine (Monthly)</button>
+          <button class="btn btn-slate" id="repPeriodAll" onclick="setReportPeriod('all')">Sabhi (All Time)</button>
+        </div>
+
+        <div style="display:flex; gap:6px; align-items:center; margin-left:auto;">
+          <input type="date" id="reportStartDate" class="form-control" style="font-size:11px; padding:5px 8px; width:auto;" onchange="calculateSalesReport()">
+          <span style="font-size:11px; font-weight:bold;">se</span>
+          <input type="date" id="reportEndDate" class="form-control" style="font-size:11px; padding:5px 8px; width:auto;" onchange="calculateSalesReport()">
+        </div>
       </div>
+
       <div id="reportPrintArea">
+        <div style="margin-bottom:10px;">
+          <h4 style="font-size:16px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS - SALES STATEMENT</h4>
+          <p id="reportPeriodText" style="font-size:12px; color:#64748b; margin:2px 0; font-weight:bold;">Period: Today</p>
+        </div>
+
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:14px;">
-          <div style="background:#ecfdf5; padding:10px; border-radius:8px; text-align:center;">
-            <small style="font-size:10px; font-weight:bold; color:#065f46;">TOTAL BIKRI</small>
-            <b id="repTotalAmount" style="font-size:18px; color:#059669; display:block;">₹0</b>
+          <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#065f46; display:block;">KUL BIKRI (TOTAL)</small>
+            <b id="repTotalAmount" style="font-size:18px; color:#059669;">₹0</b>
+            <small id="repTotalPairs" style="font-size:10px; color:#065f46; display:block;">0 Items Sold</small>
           </div>
-          <div style="background:#eff6ff; padding:10px; border-radius:8px; text-align:center;">
-            <small style="font-size:10px; font-weight:bold; color:#1e40af;">CASH</small>
-            <b id="repCashAmount" style="font-size:18px; color:#2563eb; display:block;">₹0</b>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#1e40af; display:block;">💵 CASH BIKRI</small>
+            <b id="repCashAmount" style="font-size:18px; color:#2563eb;">₹0</b>
+            <small id="repCashPercent" style="font-size:10px; color:#1e40af; display:block;">0% of total</small>
           </div>
-          <div style="background:#faf5ff; padding:10px; border-radius:8px; text-align:center;">
-            <small style="font-size:10px; font-weight:bold; color:#6b21a8;">UPI / QR</small>
-            <b id="repUpiAmount" style="font-size:18px; color:#9333ea; display:block;">₹0</b>
+
+          <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#6b21a8; display:block;">📱 UPI / QR BIKRI</small>
+            <b id="repUpiAmount" style="font-size:18px; color:#9333ea;">₹0</b>
+            <small id="repUpiPercent" style="font-size:10px; color:#6b21a8; display:block;">0% of total</small>
+          </div>
+
+          <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:10px; text-align:center;">
+            <small style="font-size:10px; font-weight:bold; color:#9a3412; display:block;">📈 KUL MUNAFA (PROFIT)</small>
+            <b id="repProfitAmount" style="font-size:18px; color:#ea580c;">₹0</b>
+            <small style="font-size:10px; color:#9a3412; display:block;">Estimated</small>
           </div>
         </div>
-        <div style="max-height:40vh; overflow-y:auto;">
+
+        <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
           <table>
             <thead>
-              <tr><th>Bill & Date</th><th>Customer</th><th>Item</th><th>Payment</th><th style="text-align:right;">Amount</th></tr>
+              <tr style="background:#f1f5f9;">
+                <th style="padding:8px 6px;">Bill & Date</th>
+                <th style="padding:8px 6px;">Customer</th>
+                <th style="padding:8px 6px;">Item, Size & Color</th>
+                <th style="padding:8px 6px;">Payment</th>
+                <th style="padding:8px 6px; text-align:right;">Amount</th>
+              </tr>
             </thead>
             <tbody id="reportTableBody"></tbody>
           </table>
         </div>
       </div>
-      <div style="text-align:right; margin-top:14px;" class="no-print">
-        <button class="btn btn-slate" onclick="closeSalesReportModal()">Band Karein</button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;" class="no-print">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-green" onclick="downloadSalesCSV('daily')">📥 Daily Excel (CSV)</button>
+          <button class="btn btn-blue" onclick="downloadSalesCSV('monthly')">📥 Monthly Excel (CSV)</button>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-slate" onclick="window.print()">🖨️ Print Sheet</button>
+          <button class="btn btn-slate" onclick="closeSalesReportModal()">Band Karein</button>
+        </div>
       </div>
     </div>
   </div>
@@ -549,14 +603,26 @@
   <!-- PIN CHANGE MODAL -->
   <div id="pinChangeModal" class="modal">
     <div class="modal-box" style="max-width:380px;">
-      <h3 style="font-size:16px; font-weight:800; margin-bottom:12px;">🔑 Admin PIN Badlein</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔑 Admin Login 6-Digit PIN Badlein</h3>
+        <button class="btn btn-slate" onclick="closePinChangeModal()">✕</button>
+      </div>
       <form onsubmit="saveNewAdminPin(event)">
-        <div class="form-group"><label>Purana PIN:</label><input type="password" id="oldPinInput" required class="form-control"></div>
-        <div class="form-group"><label>Naya 6-Digit PIN:</label><input type="password" id="newPinInput" required minlength="6" class="form-control"></div>
-        <div class="form-group"><label>Confirm Naya PIN:</label><input type="password" id="confirmPinInput" required minlength="6" class="form-control"></div>
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+        <div class="form-group">
+          <label>Purana PIN Daalein:</label>
+          <input type="password" id="oldPinInput" required placeholder="Purana PIN..." class="form-control" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Naya Secret 6-Digit PIN Daalein:</label>
+          <input type="password" id="newPinInput" required placeholder="Apna naya 6-digit PIN..." class="form-control" minlength="6" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Naya PIN Dobara Daalein (Confirm):</label>
+          <input type="password" id="confirmPinInput" required placeholder="Dobara naya 6-digit PIN..." class="form-control" minlength="6" maxlength="10">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
           <button type="button" class="btn btn-slate" onclick="closePinChangeModal()">Cancel</button>
-          <button type="submit" class="btn btn-indigo">Save</button>
+          <button type="submit" class="btn btn-indigo">PIN Save Karein</button>
         </div>
       </form>
     </div>
@@ -566,11 +632,14 @@
   <div id="adminLoginModal" class="modal">
     <div class="modal-box" style="max-width:360px; text-align:center;">
       <div style="font-size:35px; margin-bottom:8px;">🔒</div>
-      <h3 style="font-size:17px; font-weight:800; margin-bottom:6px;">Admin Login</h3>
+      <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:4px;">Admin Portal Login</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Dukaan stock aur billing counter ke liye apna 6-digit PIN daalein:</p>
+      
       <form onsubmit="verifyAdminPinSubmit(event)">
         <input type="password" id="adminLoginPinInput" required placeholder="PIN Daalein" class="form-control" style="font-size:18px; text-align:center; letter-spacing:4px; font-weight:800; margin-bottom:14px;" maxlength="10" autofocus>
+        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-          <button type="submit" class="btn btn-indigo" style="justify-content:center;">Login</button>
+          <button type="submit" class="btn btn-indigo" style="justify-content:center; padding:10px;">Login Karein</button>
           <button type="button" class="btn btn-slate" onclick="closeAdminLoginModal()" style="justify-content:center;">Cancel</button>
         </div>
       </form>
@@ -587,26 +656,28 @@
       <form id="shoeForm" onsubmit="submitShoeForm(event)">
         <input type="hidden" id="fId">
 
-        <div class="form-group" style="background:#e0e7ff; padding:10px; border-radius:8px;">
-          <label style="color:#1e1b4b; font-weight:800;">Item Type:</label>
+        <div class="form-group" style="background:#e0e7ff; padding:10px; border-radius:8px; border:1px solid #c7d2fe;">
+          <label style="color:#1e1b4b; font-weight:800;">Item Ka Type Chunein:</label>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
             <label style="background:white; border:2px solid #cbd5e1; padding:8px; border-radius:6px; text-align:center; font-weight:bold; font-size:12px; cursor:pointer;">
-              <input type="radio" name="fItemType" value="footwear" checked onchange="toggleItemTypeForm('footwear')">👟 Footwear
+              <input type="radio" name="fItemType" value="footwear" checked onchange="toggleItemTypeForm('footwear')">
+              👟 Footwear (Shoe / Chappal)
             </label>
             <label style="background:white; border:2px solid #cbd5e1; padding:8px; border-radius:6px; text-align:center; font-weight:bold; font-size:12px; cursor:pointer;">
-              <input type="radio" name="fItemType" value="general" onchange="toggleItemTypeForm('general')">🧦 Accessories
+              <input type="radio" name="fItemType" value="general" onchange="toggleItemTypeForm('general')">
+              🧦 Accessories (Socks, Belt, Purse, Chasma)
             </label>
           </div>
         </div>
 
         <div class="row">
           <div class="form-group">
-            <label>Item Name *</label>
-            <input type="text" id="fName" required placeholder="e.g. Action Kids" class="form-control">
+            <label>Item / Model Name *</label>
+            <input type="text" id="fName" required placeholder="e.g. Campus Rodeo" class="form-control">
           </div>
           <div class="form-group">
-            <label>Brand *</label>
-            <input type="text" id="fBrand" required placeholder="e.g. Action, Campus" class="form-control">
+            <label>Brand / Company *</label>
+            <input type="text" id="fBrand" required placeholder="e.g. Campus, Sparx" class="form-control">
           </div>
         </div>
 
@@ -636,27 +707,27 @@
           </div>
 
           <div class="form-group" id="footwearGenderGroup">
-            <label>Size Preset:</label>
+            <label>Gender / Kiske Liye:</label>
             <select id="fGenderSelect" class="form-control" onchange="changePresetGender(this.value)">
-              <option value="Men">Men (6-11)</option>
-              <option value="Ladies">Ladies (3-8)</option>
-              <option value="Kids">Kids (11-13, 1-5)</option>
+              <option value="Men">Men (Default: 6-11)</option>
+              <option value="Ladies">Ladies (Default: 3-8)</option>
+              <option value="Kids">Kids (Default: 1-13)</option>
             </select>
           </div>
         </div>
 
         <div class="row">
           <div class="form-group">
-            <label>Kharid Cost (₹) *</label>
-            <input type="number" id="fCost" required min="0" placeholder="e.g. 350" class="form-control">
+            <label>Kharid Rate (Cost ₹) *</label>
+            <input type="number" id="fCost" required min="0" placeholder="e.g. 550" class="form-control">
           </div>
           <div class="form-group" id="normalPriceGroup">
-            <label>Bikri Rate (₹) *</label>
-            <input type="number" id="fPrice" min="0" placeholder="e.g. 599" class="form-control" style="font-weight:bold; color:#10b981;">
+            <label>Bikri Rate (Selling Price ₹) *</label>
+            <input type="number" id="fPrice" min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
         </div>
 
-        <!-- KIDS DUAL PRICING SETTING -->
+        <!-- KIDS DUAL PRICING (11-1 & 2-5) -->
         <div id="kidsPricingSection" style="display:none; background:#ecfdf5; border:1.5px solid #10b981; border-radius:8px; padding:12px; margin-bottom:12px;">
           <b style="font-size:13px; color:#047857; display:block; margin-bottom:6px;">🧒 Kids Dual Rates (Alag-Alag Set Ka Rate):</b>
           <div class="row">
@@ -672,29 +743,42 @@
         </div>
 
         <div class="form-group">
-          <label>Original MRP ₹ (Cut-Price):</label>
-          <input type="number" id="fMrpPrice" min="0" placeholder="e.g. 899" class="form-control">
+          <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
+          <input type="number" id="fMrpPrice" min="0" placeholder="e.g. 1499" class="form-control">
         </div>
 
         <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
-          <label style="font-weight:800; color:#0f172a; margin-bottom:6px; display:block;">🎨 Rang, Media & Stock (Re-arrange ◀ ▶):</label>
-          <div style="display:flex; gap:6px; margin-bottom:14px;">
-            <input type="text" id="manualColorInput" placeholder="Naya Rang..." class="form-control">
-            <button type="button" class="btn btn-indigo" onclick="addNewColorBlock()">+ Rang Jodein</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
+              🎨 Rang (Colors) Jodein, Media & Har Size Ka Stock Daalein (Re-arrange ◀ ▶):
+            </label>
           </div>
+
+          <div style="display:flex; gap:6px; margin-bottom:14px;">
+            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein..." class="form-control">
+            <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorBlock()">+ Rang Jodein</button>
+          </div>
+
           <div id="colorBlocksContainer"></div>
         </div>
 
-        <div id="generalItemSection" class="form-group" style="display:none;">
+        <div id="generalItemSection" class="form-group" style="display:none; background:#f1f5f9; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
+          <label style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:6px;">General Item Stock (Socks, Belt, Chasma):</label>
           <div class="row">
-            <div><label>Stock Quantity:</label><input type="number" id="fGeneralQty" min="0" value="10" class="form-control"></div>
-            <div><label>Barcode:</label><input type="text" id="fGeneralBarcode" class="form-control"></div>
+            <div>
+              <label>Kul Quantity (Kitne Piece Stock Me Hain): *</label>
+              <input type="number" id="fGeneralQty" min="0" value="10" class="form-control" style="font-size:16px; font-weight:bold;">
+            </div>
+            <div>
+              <label>Item Barcode:</label>
+              <input type="text" id="fGeneralBarcode" placeholder="Scan ya type karein..." class="form-control">
+            </div>
           </div>
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
           <button type="button" class="btn btn-slate" onclick="closeShoeModal()">Cancel</button>
-          <button type="submit" class="btn btn-indigo" style="padding:10px 18px;">Cloud Par Save Karein</button>
+          <button type="submit" class="btn btn-indigo" style="padding:10px 18px; font-size:14px;">Cloud Par Save Karein</button>
         </div>
       </form>
     </div>
@@ -704,62 +788,100 @@
   <div id="checkModal" class="modal">
     <div class="modal-box" style="max-width:500px; padding:22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
-        <h3 style="font-size:16px; font-weight:800;">🔍 Stock & Size Details</h3>
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔍 Stock & Size Details</h3>
         <button class="btn btn-slate" onclick="closeCheckModal()" style="padding:2px 8px;">✕</button>
       </div>
+
       <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:14px;">
         <img id="chkImg" src="" style="width:130px; height:120px; object-fit:contain; background:#fff; border-radius:10px; border:1px solid #cbd5e1; flex-shrink:0;">
         <div style="flex:1;">
-          <h3 id="chkTitle" style="font-size:17px; font-weight:800;"></h3>
-          <div id="chkBrandCat" style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:6px;"></div>
-          <div style="background:#f1f5f9; padding:8px; border-radius:8px;">
-            <small>TAG RATE:</small><b id="chkPrice" style="font-size:15px; color:#10b981; display:block;"></b>
+          <h3 id="chkTitle" style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:3px;">Campus Rodeo</h3>
+          <div id="chkBrandCat" style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:6px;">Campus • Sports</div>
+          <div style="background:#f1f5f9; padding:8px 10px; border-radius:8px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <div><small style="font-size:10px; color:#64748b;">TAG RATE:</small><b id="chkPrice" style="font-size:15px; color:#10b981; display:block;">₹999</b></div>
+            <div><small style="font-size:10px; color:#64748b;">PURCHASE COST:</small><b id="chkCost" style="font-size:14px; color:#2563eb; display:block;">₹550</b></div>
           </div>
         </div>
       </div>
+
       <div id="chkColorWiseStockContainer" style="max-height:42vh; overflow-y:auto; margin-bottom:14px;"></div>
+
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button class="btn btn-green" onclick="openSaleCheckoutFromCheck()" style="justify-content:center; padding:10px;">🛒 Bechein</button>
-        <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center; padding:10px;">Band Karein</button>
+        <button class="btn btn-green" onclick="openSaleCheckoutFromCheck()" style="justify-content:center; padding:10px; font-size:13px;">
+          🛒 Bechein (Checkout)
+        </button>
+        <button class="btn btn-slate" onclick="closeCheckModal()" style="justify-content:center; padding:10px; font-size:13px;">
+          Band Karein
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- SALE MODAL (WITH OPTIONAL CUSTOMER NAME) -->
+  <!-- SMART BIKRI CHECKOUT MODAL (OPTIONAL CUSTOMER NAME) -->
   <div id="saleModal" class="modal">
     <div class="modal-box" style="max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:16px; font-weight:800;">🛒 Billing Counter</h3>
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Billing Counter</h3>
         <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
       </div>
-      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:14px;">
-        <img id="saleImg" src="" style="width:55px; height:55px; object-fit:contain; background:#fff; border-radius:6px;">
-        <div>
-          <h4 id="saleName" style="font-size:13px; font-weight:bold;"></h4>
-          <span id="saleSizeBadge" style="background:#1e1b4b; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;"></span>
-          <span id="saleColorBadge" style="background:#e0e7ff; color:#3730a3; font-size:10px; padding:2px 6px; border-radius:4px;"></span>
-        </div>
-      </div>
-      <form onsubmit="confirmSaleTransaction(event, false)">
-        <div class="row" style="margin-bottom:12px;">
-          <div><label>Tag Rate:</label><div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569;"></div></div>
-          <div><label>Final Price *</label><input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981;"></div>
-        </div>
-        <div class="form-group">
-          <label>Payment Mode:</label>
-          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
-            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;"><input type="radio" name="salePayMode" value="Cash" checked> 💵 Cash</label>
-            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;"><input type="radio" name="salePayMode" value="UPI"> 📱 UPI</label>
-            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;"><input type="radio" name="salePayMode" value="Udhaar"> 📋 Udhaar</label>
+
+      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+        <img id="saleImg" src="" style="width:60px; height:60px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
+        <div style="flex:1;">
+          <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+            <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Size: 8</span>
+            <span id="saleColorBadge" style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Black</span>
+            <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold;">Stock: 4</span>
           </div>
         </div>
-        <div class="row">
-          <div class="form-group"><label>Customer Name (Optional):</label><input type="text" id="saleCustName" placeholder="Walk-in (Bina naam ke bhi bikri hogi)" class="form-control"></div>
-          <div class="form-group"><label>Mobile No (Optional):</label><input type="tel" id="saleCustPhone" placeholder="Mobile..." class="form-control"></div>
+      </div>
+
+      <form id="saleForm" onsubmit="confirmSaleTransaction(event, false)">
+        <div class="row" style="margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Tag Rate:</label>
+            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:5px;">₹999</div>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
+            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981; border:2px solid #10b981;">
+          </div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
-          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center;">🖨️ Print Bill</button>
-          <button type="submit" class="btn btn-green" style="justify-content:center;">✓ Save Bikri</button>
+
+        <div class="form-group">
+          <label>Payment Mode (Kaise Paise Aaye):</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Cash" checked> 💵 Cash
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="UPI"> 📱 UPI
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Udhaar"> 📋 Udhaar
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="saleCustName" placeholder="Walk-in (Bina naam ke bhi bikri hogi)..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="saleCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center; padding:10px;">
+            🖨️ Save & Print Bill
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:10px;">
+            ✓ Sirf Save Karein
+          </button>
         </div>
       </form>
     </div>
@@ -768,33 +890,69 @@
   <!-- THERMAL RECEIPT MODAL -->
   <div id="receiptModal" class="modal">
     <div class="modal-box" style="max-width:350px;">
-      <div id="thermalBillArea" style="background:#fff; border:1px dashed #cbd5e1; padding:12px; font-family:monospace; font-size:12px; color:#000;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
+        <span style="font-weight:bold; font-size:13px;">Customer Bill Receipt</span>
+        <button class="btn btn-slate" onclick="closeReceiptModal()" style="padding:2px 8px;">✕</button>
+      </div>
+
+      <div id="thermalBillArea" style="background:#fff; border:1px dashed #cbd5e1; padding:12px; border-radius:6px; font-family:monospace; font-size:12px; color:#000;">
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
           <h3 style="font-size:15px; font-weight:900; margin:0;">DN FOOTWEAR & SPORTS</h3>
-          <p style="font-size:10px; margin:2px 0;">Siriyari, Pali • Mo: 8209452284</p>
+          <p style="font-size:10px; margin:2px 0;" id="rStoreAddress">Near Bus Stand, Siriyari (Pali)</p>
+          <p style="font-size:10px; margin:0;" id="rStorePhones">Mo: 8209452284, 9636422794</p>
         </div>
-        <div>Bill No: <b id="rBillNo"></b></div>
-        <div>Customer: <span id="rCust">Walk-in</span></div>
-        <div>Item: <span id="rItemName"></span> (<span id="rItemSize"></span>)</div>
-        <div style="text-align:right; font-size:14px; font-weight:900; margin-top:10px;">TOTAL: <span id="rFinalTotal"></span></div>
+
+        <div style="font-size:11px; margin-bottom:8px; line-height:1.4;">
+          <div>Bill No: <b id="rBillNo">DN-1001</b></div>
+          <div>Date: <span id="rDate">27-10-2026</span></div>
+          <div>Customer: <span id="rCust">Walk-in</span></div>
+          <div>Payment: <b id="rPayMode">Cash</b></div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
+          <thead>
+            <tr>
+              <th style="padding:4px 0; text-align:left; background:transparent;">Item</th>
+              <th style="padding:4px 0; text-align:center; background:transparent;">Sz/Col</th>
+              <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
+              <td style="padding:4px 0; text-align:center;" id="rItemSize">8 / Black</td>
+              <td style="padding:4px 0; text-align:right;" id="rItemRate">₹850</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="text-align:right; margin-bottom:8px;">
+          <div style="font-size:10px; color:#555;">Tag Price: <strike id="rTagPrice">₹999</strike></div>
+          <div style="font-size:14px; font-weight:900;">TOTAL: <span id="rFinalTotal">₹850</span></div>
+        </div>
+
+        <div style="text-align:center; font-size:10px; border-top:1px dashed #000; padding-top:6px;">
+          <p style="margin:0; font-weight:bold;">Dhanyawad! Phir Padharein.</p>
+        </div>
       </div>
+
       <div style="margin-top:12px; display:flex; gap:8px;" class="no-print">
-        <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="window.print()">🖨️ Print</button>
-        <button class="btn btn-slate" style="width:100%; justify-content:center;" onclick="closeReceiptModal()">Band</button>
+        <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="window.print()">🖨️ Print Receipt</button>
+        <button class="btn btn-slate" style="width:100%; justify-content:center;" onclick="closeReceiptModal()">Band Karein</button>
       </div>
     </div>
   </div>
 
-  <!-- SCANNER MODAL -->
+  <!-- CAMERA SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h4 id="scannerTitle" style="margin:0;">Scanner</h4>
+        <h4 id="scannerTitle" style="margin:0; font-size:14px;">Camera Scanner</h4>
         <button class="btn btn-red" onclick="closeScannerModal()">✕</button>
       </div>
       <div id="scannerTarget" style="width:100%; border-radius:8px; overflow:hidden; background:#000;"></div>
       <div style="margin-top:10px; display:flex; gap:6px;">
-        <input type="text" id="manualInput" placeholder="Barcode type karein..." class="form-control" style="background:#1e293b; color:white;">
+        <input type="text" id="manualInput" placeholder="Barcode type karein..." class="form-control" style="background:#1e293b; color:white; border-color:#334155;">
         <button class="btn btn-indigo" onclick="handleManualScan()">Enter</button>
       </div>
     </div>
@@ -804,9 +962,12 @@
     let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "123456";
 
     let storeContactData = {
-      name1: "Dashrath Singh", phone1: "8209452284",
-      name2: "Surendra Singh", phone2: "9636422794",
-      whatsapp: "917733909735", address: "Siriyari, Pali"
+      name1: "Dashrath Singh",
+      phone1: "8209452284",
+      name2: "Surendra Singh",
+      phone2: "9636422794",
+      whatsapp: "917733909735",
+      address: "Near Bus Stand, Siriyari, Pali (Rajasthan) • Fast Delivery Available"
     };
 
     let allowedDeliveryLocations = "Siriyari, 306021, Manda, 306022, Sojat Road, Pali, Marwar Junction, Baniyamali, Dingor, Jojawar";
@@ -819,7 +980,8 @@
       projectId: "dn-stock",
       storageBucket: "dn-stock.firebasestorage.app",
       messagingSenderId: "108722534878",
-      appId: "1:108722534878:web:6db2959ce4132d961b454f"
+      appId: "1:108722534878:web:6db2959ce4132d961b454f",
+      measurementId: "G-DJB9LF6ZDJ"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -831,44 +993,80 @@
       'Kids': [11, 12, 13, 1, 2, 3, 4, 5]
     };
 
-    let items = [], salesHistory = [], onlineOrders = [], catalogBanners = [];
-    let currentAppMode = 'customer', customerCart = [], selectedItemOptions = {};
-    let scannerObj = null, currentScanAction = 'check', targetScanInputId = null;
-    let colorDataMap = {}, activePopupItem = null, activeHighlightedColor = null, activeHighlightedSize = null;
-    let currentSellingItem = null, currentSellingColor = null, currentSellingSize = null;
-    let currentReportPeriod = 'today', activeBannerIndex = 0, bannerSlideTimer = null;
+    let items = [];
+    let salesHistory = [];
+    let onlineOrders = [];
+    let catalogBanners = [];
+    let currentAppMode = 'customer';
+
+    let customerCart = []; 
+    let selectedItemOptions = {}; 
+
+    let scannerObj = null;
+    let currentScanAction = 'check';
+    let targetScanInputId = null;
+
+    let colorDataMap = {};
+    let activePopupItem = null;
+    let activeHighlightedColor = null;
+    let activeHighlightedSize = null;
+
+    let currentSellingItem = null;
+    let currentSellingColor = null;
+    let currentSellingSize = null;
+
+    let currentReportPeriod = 'today';
+    let activeBannerIndex = 0;
+    let bannerSlideTimer = null;
 
     function initLiveSync() {
-      db.ref('admin_settings/pin').on('value', snap => {
-        if (snap.val()) { adminSecurityPin = String(snap.val()); localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin); }
+      db.ref('admin_settings/pin').on('value', (snap) => {
+        if (snap.val()) {
+          adminSecurityPin = String(snap.val());
+          localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+        }
       });
-      db.ref('delivery_settings/locations').on('value', snap => {
-        if (snap.val()) allowedDeliveryLocations = String(snap.val());
+
+      db.ref('delivery_settings/locations').on('value', (snap) => {
+        if (snap.val()) {
+          allowedDeliveryLocations = String(snap.val());
+        }
         const inputArea = document.getElementById('admDeliveryLocationsInput');
         if (inputArea) inputArea.value = allowedDeliveryLocations;
       });
-      db.ref('delivery_settings/show_checker').on('value', snap => {
+
+      db.ref('delivery_settings/show_checker').on('value', (snap) => {
         showDeliveryCheckerOnStore = snap.val() !== false;
         const chk = document.getElementById('admToggleDeliveryChecker');
         if (chk) chk.checked = showDeliveryCheckerOnStore;
         const box = document.getElementById('deliveryCheckerContainer');
         if (box) box.style.display = showDeliveryCheckerOnStore ? 'flex' : 'none';
       });
-      db.ref('store_contacts').on('value', snap => {
-        if (snap.val()) storeContactData = { ...storeContactData, ...snap.val() };
+
+      db.ref('store_contacts').on('value', (snap) => {
+        const val = snap.val();
+        if (val) {
+          storeContactData = { ...storeContactData, ...val };
+        }
         applyContactDetailsToUI();
       });
-      db.ref('footwear_stock').on('value', snapshot => {
+
+      db.ref('footwear_stock').on('value', (snapshot) => {
         const data = snapshot.val();
         items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
       });
-      db.ref('footwear_sales').on('value', snapshot => {
+
+      db.ref('footwear_sales').on('value', (snapshot) => {
         const data = snapshot.val();
         salesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderApp();
+        if (document.getElementById('salesReportModal').style.display === 'flex') {
+          calculateSalesReport();
+        }
       });
-      db.ref('customer_orders').on('value', snapshot => {
+
+      db.ref('customer_orders').on('value', (snapshot) => {
         const data = snapshot.val();
         onlineOrders = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         const pending = onlineOrders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length;
@@ -878,17 +1076,23 @@
         if (pendEl) pendEl.innerText = pending;
         renderOnlineOrdersTable();
       });
+
       initBannerSync();
     }
 
     function checkURLAndSetMode() {
       const hash = window.location.hash.toLowerCase();
-      if (hash === '#admin') openAdminLoginModal();
-      else {
+      if (hash === '#admin') {
+        openAdminLoginModal();
+      } else {
         currentAppMode = 'customer';
         document.getElementById('adminViewSection').style.display = 'none';
         document.getElementById('customerViewSection').style.display = 'block';
         document.getElementById('adminNavGroup').style.display = 'none';
+        
+        const subtitle = document.getElementById('appModeSubtitle');
+        if (subtitle) subtitle.innerText = 'Customer Online Store';
+        
         renderCustomerSlider();
         renderCustomerCatalog();
       }
@@ -919,7 +1123,9 @@
       e.preventDefault();
       const val = document.getElementById('admDeliveryLocationsInput').value.trim();
       allowedDeliveryLocations = val;
-      db.ref('delivery_settings/locations').set(val).then(() => alert("✓ Saved!"));
+      db.ref('delivery_settings/locations').set(val).then(() => {
+        alert("✓ Delivery Locations Save Ho Gayi!");
+      });
     }
 
     function toggleDeliveryCheckerSetting(checked) {
@@ -930,16 +1136,26 @@
     function checkDeliveryAvailability() {
       const input = document.getElementById('custDeliveryCheckInput').value.trim().toLowerCase();
       const badge = document.getElementById('deliveryCheckResultBadge');
-      if (!input) { alert("Pincode ya Gaon likhein!"); return; }
+
+      if (!input) {
+        alert("Kripya apna Gaon ya Pincode likhein!");
+        return;
+      }
+
       const locationList = allowedDeliveryLocations.toLowerCase().split(',').map(s => s.trim());
       const isAvailable = locationList.some(loc => loc.length > 1 && (input.includes(loc) || loc.includes(input)));
+
       badge.style.display = 'inline-block';
       if (isAvailable || !allowedDeliveryLocations) {
-        badge.style.background = '#dcfce7'; badge.style.color = '#15803d';
-        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b>`;
+        badge.style.background = '#dcfce7';
+        badge.style.color = '#15803d';
+        badge.style.border = '1px solid #86efac';
+        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b> [${input.toUpperCase()}]`;
       } else {
-        badge.style.background = '#fee2e2'; badge.style.color = '#991b1b';
-        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai.</b>`;
+        badge.style.background = '#fee2e2';
+        badge.style.color = '#991b1b';
+        badge.style.border = '1px solid #fca5a5';
+        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai:</b> [${input.toUpperCase()}]`;
       }
     }
 
@@ -950,15 +1166,21 @@
       document.getElementById('admContact2Phone').value = storeContactData.phone2 || '';
       document.getElementById('admWhatsappNumber').value = storeContactData.whatsapp || '';
       document.getElementById('admStoreAddress').value = storeContactData.address || '';
+
       const addrEl = document.getElementById('custStoreAddressText');
       if (addrEl) addrEl.innerText = storeContactData.address || '';
+
       const btnBox = document.getElementById('custCallBtnContainer');
       if (btnBox) {
         btnBox.innerHTML = `
-          ${storeContactData.phone1 ? `<a href="tel:${storeContactData.phone1}" class="btn btn-indigo" style="font-size:12px;">📞 ${storeContactData.phone1}</a>` : ''}
-          ${storeContactData.whatsapp ? `<a href="https://wa.me/${storeContactData.whatsapp}" target="_blank" class="btn btn-wa" style="font-size:12px;">💬 WhatsApp</a>` : ''}
+          ${storeContactData.phone1 ? `<a href="tel:${storeContactData.phone1}" class="btn btn-indigo" style="font-size:12px;">📞 ${storeContactData.name1 || 'Contact 1'} (${storeContactData.phone1})</a>` : ''}
+          ${storeContactData.phone2 ? `<a href="tel:${storeContactData.phone2}" class="btn btn-blue" style="font-size:12px;">📞 ${storeContactData.name2 || 'Contact 2'} (${storeContactData.phone2})</a>` : ''}
+          ${storeContactData.whatsapp ? `<a href="https://wa.me/${storeContactData.whatsapp}" target="_blank" class="btn btn-wa" style="font-size:12px;">💬 WhatsApp (${storeContactData.whatsapp})</a>` : ''}
         `;
       }
+
+      const rAddr = document.getElementById('rStoreAddress');
+      if (rAddr) rAddr.innerText = storeContactData.address || 'Near Bus Stand, Siriyari (Pali)';
     }
 
     function saveCustomContactDetails(e) {
@@ -971,28 +1193,49 @@
         whatsapp: document.getElementById('admWhatsappNumber').value.trim().replace(/\D/g, ''),
         address: document.getElementById('admStoreAddress').value.trim()
       };
-      db.ref('store_contacts').set(storeContactData).then(() => alert("✓ Updated!"));
+
+      db.ref('store_contacts').set(storeContactData)
+        .then(() => {
+          applyContactDetailsToUI();
+          alert("✓ Contact details update ho gayi!");
+        });
     }
 
     function initBannerSync() {
       try {
         const local = JSON.parse(localStorage.getItem('dn_banners_cache_media') || '[]');
-        if (local && local.length > 0) { catalogBanners = local; renderAdminSlideThumbs(); renderCustomerSlider(); }
+        if (local && local.length > 0) {
+          catalogBanners = local;
+          renderAdminSlideThumbs();
+          renderCustomerSlider();
+        }
       } catch(e) {}
-      db.ref('catalog_banners_list').on('value', snap => {
+
+      db.ref('catalog_banners_list').on('value', (snap) => {
         const data = snap.val();
-        catalogBanners = data ? Object.keys(data).map(k => ({ id: k, url: data[k].url || data[k].image, type: data[k].type || 'image' })).filter(b => b.url) : [];
+        if (data) {
+          catalogBanners = Object.keys(data).map(k => {
+            const item = data[k];
+            if (typeof item === 'string') return { id: k, url: item, type: 'image' };
+            return { id: k, url: item.url || item.image, type: item.type || 'image' };
+          }).filter(b => b.url);
+        } else {
+          catalogBanners = [];
+        }
         localStorage.setItem('dn_banners_cache_media', JSON.stringify(catalogBanners));
-        renderAdminSlideThumbs(); renderCustomerSlider();
+        renderAdminSlideThumbs();
+        renderCustomerSlider();
       });
     }
 
     function handleUnlimitedSlideUpload(event) {
-      Array.from(event.target.files).forEach(file => {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach(file => {
         const reader = new FileReader();
-        reader.onload = e => {
+        reader.onload = function(e) {
           const img = new Image();
-          img.onload = () => {
+          img.onload = function() {
             const canvas = document.createElement('canvas');
             canvas.width = 800; canvas.height = Math.round((img.height * 800) / img.width);
             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -1008,15 +1251,17 @@
     function handleSlideVideoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      if (file.size > 8 * 1024 * 1024) { alert("Video 8MB se choti ho!"); return; }
+      if (file.size > 8 * 1024 * 1024) { alert("Video 8MB se choti honi chahiye!"); return; }
       const reader = new FileReader();
-      reader.onload = e => db.ref('catalog_banners_list').push({ url: e.target.result, type: 'video', timestamp: Date.now() }).then(() => alert("✓ Video Added!"));
+      reader.onload = function(e) {
+        db.ref('catalog_banners_list').push({ url: e.target.result, type: 'video', timestamp: Date.now() }).then(() => alert("✓ Video Added!"));
+      };
       reader.readAsDataURL(file);
       event.target.value = '';
     }
 
-    function deleteSingleCatalogBanner(id) {
-      if (confirm("Hatana chahte hain?")) db.ref('catalog_banners_list/' + id).remove();
+    function deleteSingleCatalogBanner(bannerId) {
+      if (confirm("Hatana chahte hain?")) db.ref('catalog_banners_list/' + bannerId).remove();
     }
 
     function deleteAllCatalogBanners() {
@@ -1026,9 +1271,12 @@
     function renderAdminSlideThumbs() {
       const box = document.getElementById('adminSlideThumbsList');
       if (!box) return;
-      if (!catalogBanners.length) { box.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Koi slide nahi hai.</span>'; return; }
+      if (!catalogBanners || catalogBanners.length === 0) {
+        box.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Koi slide nahi hai.</span>';
+        return;
+      }
       box.innerHTML = catalogBanners.map(b => `
-        <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#000;">
+        <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid ${b.type==='video'?'#9333ea':'#cbd5e1'}; flex-shrink:0; background:#000;">
           ${b.type==='video'?`<video src="${b.url}" style="width:100%;height:100%;object-fit:cover;"></video>`:`<img src="${b.url}" style="width:100%;height:100%;object-fit:cover;">`}
           <button type="button" onclick="deleteSingleCatalogBanner('${b.id}')" style="position:absolute; top:2px; right:2px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">✕</button>
         </div>
@@ -1038,28 +1286,37 @@
     function renderCustomerSlider() {
       const container = document.getElementById('sliderSlidesContainer');
       if (!container) return;
-      if (!catalogBanners.length) { container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px;">No Banner</div>'; return; }
+      if (!catalogBanners || catalogBanners.length === 0) {
+        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px;">No Banner</div>';
+        return;
+      }
       container.innerHTML = catalogBanners.map((b, idx) => `
         <div class="slider-slide ${idx === 0 ? 'active' : ''}">
           ${b.type==='video'?`<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`:`<img src="${b.url}" class="slider-img">`}
           <div class="slider-caption"><h3 style="font-size:15px; font-weight:800;">DN Footwear & Sports</h3></div>
         </div>
       `).join('');
-      activeBannerIndex = 0; scheduleNextSlide();
+      activeBannerIndex = 0;
+      scheduleNextSlide();
     }
 
     function scheduleNextSlide() {
       if (bannerSlideTimer) clearTimeout(bannerSlideTimer);
-      if (catalogBanners.length <= 1) return;
+      if (!catalogBanners || catalogBanners.length <= 1) return;
       const slides = document.querySelectorAll('#sliderSlidesContainer .slider-slide');
       if (!slides.length) return;
-      const video = slides[activeBannerIndex].querySelector('video');
-      if (video) { video.currentTime = 0; video.play().catch(()=>{}); }
-      else { bannerSlideTimer = setTimeout(() => shiftBannerSlide(1), 3500); }
+      const currentSlide = slides[activeBannerIndex];
+      const video = currentSlide.querySelector('video');
+      if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      } else {
+        bannerSlideTimer = setTimeout(() => shiftBannerSlide(1), 3500);
+      }
     }
 
     function shiftBannerSlide(direction) {
-      if (catalogBanners.length <= 1) return;
+      if (!catalogBanners || catalogBanners.length <= 1) return;
       const slides = document.querySelectorAll('#sliderSlidesContainer .slider-slide');
       if (!slides.length) return;
       const prevVideo = slides[activeBannerIndex].querySelector('video');
@@ -1107,7 +1364,7 @@
 
       if (isFootwear) {
         chosenSize = (selectedItemOptions[itemId] && selectedItemOptions[itemId].size) ? selectedItemOptions[itemId].size : null;
-        if (!chosenSize) { alert("Size chunein!"); return; }
+        if (!chosenSize) { alert("Pehle Size chunein!"); return; }
         const avail = (it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].sizes) ? it.colorData[chosenColor].sizes[chosenSize] : 0;
         if (avail <= 0) { alert("Out of stock!"); return; }
       }
@@ -1257,8 +1514,12 @@
         let priceDisplayText = `₹${realPrice}`;
         if (!activeSize && it.category && it.category.includes('Kids') && it.kidsPricing) priceDisplayText = `₹${it.kidsPricing.price11_1} - ₹${it.kidsPricing.price2_5}`;
 
+        const fakeMrp = it.mrp ? Number(it.mrp) : Math.round(realPrice * 1.45);
+        const discountPct = fakeMrp > realPrice ? Math.round(((fakeMrp - realPrice) / fakeMrp) * 100) : 0;
+
         cardsHtml += `
           <div class="shoe-card">
+            ${discountPct > 0 ? `<div class="discount-badge">${discountPct}% OFF</div>` : ''}
             <div>
               <div class="item-media-box" id="card_media_box_${it.id}">${initialMediaHtml}</div>
               <div class="thumb-tray" id="card_thumb_tray_${it.id}">${thumbsHtml}</div>
@@ -1267,7 +1528,7 @@
               <div>
                 <span style="font-size:10px; font-weight:bold; color:#64748b;">${it.brand}</span>
                 <h4 style="font-size:14px; font-weight:bold; margin-bottom:2px;">${it.name}</h4>
-                <div class="price-row"><span class="current-price" id="card_price_${it.id}">${priceDisplayText}</span></div>
+                <div class="price-row"><span class="current-price" id="card_price_${it.id}">${priceDisplayText}</span>${fakeMrp > realPrice ? `<span class="mrp-cut">₹${fakeMrp}</span>` : ''}</div>
                 ${isFootwear ? `<small style="font-size:10px;">Rang:</small> ${colorsChipsHtml}<div style="margin-top:6px;"><small style="font-size:10px;">Size:</small><div id="sizes_box_${it.id}">${sizeButtonsHtml}</div></div>` : ''}
               </div>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
