@@ -657,16 +657,25 @@
         <div class="row">
           <div class="form-group">
             <label>Category *</label>
-            <select id="fCategorySelect" class="form-control">
-              <option value="Sports/Running">Footwear: Sports & Running</option>
-              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
-              <option value="Formal Shoes">Footwear: Formal Shoes</option>
-              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
-              <option value="Sandals">Footwear: Sandals</option>
-              <option value="Socks">🧦 Socks (Moje)</option>
-              <option value="Chasma">👓 Chasma (Sunglasses)</option>
-              <option value="Belt">👔 Belt</option>
-              <option value="Purse">👛 Purse / Wallet</option>
+       <select id="fCategorySelect" class="form-control" onchange="handleCategorySelection(this.value)">
+              <optgroup label="👨 Men (Gents)">
+                <option value="Men Shoes">👟 Men's Shoes</option>
+                <option value="Men Chappal">🩴 Men's Chappal & Sandals</option>
+              </optgroup>
+              <optgroup label="👩 Ladies">
+                <option value="Ladies Shoes">👠 Ladies Shoes</option>
+                <option value="Ladies Chappal">👡 Ladies Chappal & Sandals</option>
+              </optgroup>
+              <optgroup label="🧒 Kids (Bachho Ke)">
+                <option value="Kids Shoes">👟 Kids Shoes</option>
+                <option value="Kids Chappal">🩴 Kids Chappal & Sandals</option>
+              </optgroup>
+              <optgroup label="🎒 Accessories">
+                <option value="Socks">🧦 Socks</option>
+                <option value="Chasma">👓 Chasma</option>
+                <option value="Belt">👔 Belt</option>
+                <option value="Purse">👛 Purse</option>
+              </optgroup>
             </select>
           </div>
 
@@ -690,7 +699,7 @@
             <input type="number" id="fPrice" required min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
         </div>
-
+    
         <!-- FLIPKART STYLE MRP FIELD -->
         <div class="form-group">
           <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
@@ -970,22 +979,22 @@
     let activeBannerIndex = 0;
     let bannerSlideTimer = null;
 
-    function initLiveSync() {
-      db.ref('admin_settings/pin').on('value', (snap) => {
-        if (snap.val()) {
-          adminSecurityPin = String(snap.val());
-          localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
-        }
-      });
+      // SYNC CUSTOM DELIVERY LOCATIONS & TOGGLE SETTING
+    db.ref('delivery_settings/locations').on('value', (snap) => {
+      if (snap.val()) {
+        allowedDeliveryLocations = String(snap.val());
+      }
+      const inputArea = document.getElementById('admDeliveryLocationsInput');
+      if (inputArea) inputArea.value = allowedDeliveryLocations;
+    });
 
-      // SYNC CUSTOM DELIVERY LOCATIONS
-      db.ref('delivery_settings/locations').on('value', (snap) => {
-        if (snap.val()) {
-          allowedDeliveryLocations = String(snap.val());
-        }
-        const inputArea = document.getElementById('admDeliveryLocationsInput');
-        if (inputArea) inputArea.value = allowedDeliveryLocations;
-      });
+    db.ref('delivery_settings/show_checker').on('value', (snap) => {
+      showDeliveryCheckerOnStore = snap.val() !== false;
+      const chk = document.getElementById('admToggleDeliveryChecker');
+      if (chk) chk.checked = showDeliveryCheckerOnStore;
+      const box = document.getElementById('deliveryCheckerContainer');
+      if (box) box.style.display = showDeliveryCheckerOnStore ? 'flex' : 'none';
+    });
 
       db.ref('store_contacts').on('value', (snap) => {
         const val = snap.val();
@@ -1299,6 +1308,36 @@
       container.innerHTML = catalogBanners.map((b, idx) => {
         let mediaHtml = '';
         if (b.type === 'video') {
+          // Yahan muted, playsinline aur onended zaroori hai mobile ke liye
+          mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
+        } else {
+          mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
+        }
+
+        return `
+          <div class="slider-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+            ${mediaHtml}
+            <div class="slider-caption">
+              <h3 style="font-size:16px; font-weight:800;">DN Footwear & Sports Siriyari</h3>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      activeBannerIndex = 0;
+      scheduleNextSlide();
+    }
+      const container = document.getElementById('sliderSlidesContainer');
+      if (!container) return;
+
+      if (!catalogBanners || catalogBanners.length === 0) {
+        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px; font-weight:bold;">Koi Banner Uplabdh Nahi Hai</div>';
+        return;
+      }
+
+      container.innerHTML = catalogBanners.map((b, idx) => {
+        let mediaHtml = '';
+        if (b.type === 'video') {
           mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
         } else {
           mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
@@ -1592,17 +1631,24 @@
           <div>● <b>${i.name}</b> (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
         `).join('');
 
-        const isDelivered = (o.status === 'Delivered');
+        const curStatus = o.status || 'Ordered';
 
         return `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
             <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
             <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
-            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
+            <td>
+              <select onchange="db.ref('customer_orders/${o.orderId}/status').set(this.value)" class="form-control" style="font-size:11px; padding:3px; font-weight:bold;">
+                <option value="Ordered" ${curStatus==='Ordered'?'selected':''}>📦 Ordered</option>
+                <option value="Confirmed" ${curStatus==='Confirmed'?'selected':''}>✅ Confirmed</option>
+                <option value="Packed" ${curStatus==='Packed'?'selected':''}>🎁 Packed</option>
+                <option value="Delivered" ${curStatus==='Delivered'?'selected':''}>🎉 Delivered</option>
+                <option value="Cancelled" ${curStatus==='Cancelled'?'selected':''}>❌ Cancelled (Cancelled by Customer/Admin)</option>
+              </select>
+            </td>
             <td style="text-align:right;">
-              ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="db.ref('customer_orders/${o.orderId}').remove()">🗑️ Delete</button>
             </td>
           </tr>
         `;
@@ -2666,9 +2712,8 @@
 
       const finalPrice = Number(document.getElementById('saleFinalPrice').value);
       const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
-      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
-      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
-
+    const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
       if (currentSellingItem.itemType === 'general') {
         if ((currentSellingItem.generalQty || 0) <= 0) { alert("Stock khatam hai!"); return; }
         currentSellingItem.generalQty -= 1;
