@@ -657,18 +657,26 @@
         <div class="row">
           <div class="form-group">
             <label>Category *</label>
-            <select id="fCategorySelect" class="form-control">
-              <option value="Sports/Running">Footwear: Sports & Running</option>
-              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
-              <option value="Formal Shoes">Footwear: Formal Shoes</option>
-              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
-              <option value="Sandals">Footwear: Sandals</option>
-              <option value="Socks">🧦 Socks (Moje)</option>
-              <option value="Chasma">👓 Chasma (Sunglasses)</option>
-              <option value="Belt">👔 Belt</option>
-              <option value="Purse">👛 Purse / Wallet</option>
+           <select id="fCategorySelect" class="form-control" onchange="handleCategorySelection(this.value)">
+              <optgroup label="👨 Men (Gents)">
+                <option value="Men Shoes">👟 Men's Shoes</option>
+                <option value="Men Chappal">🩴 Men's Chappal & Sandals</option>
+              </optgroup>
+              <optgroup label="👩 Ladies">
+                <option value="Ladies Shoes">👠 Ladies Shoes</option>
+                <option value="Ladies Chappal">👡 Ladies Chappal & Sandals</option>
+              </optgroup>
+              <optgroup label="🧒 Kids (Bachho Ke)">
+                <option value="Kids Shoes">👟 Kids Shoes</option>
+                <option value="Kids Chappal">🩴 Kids Chappal & Sandals</option>
+              </optgroup>
+              <optgroup label="🎒 Accessories">
+                <option value="Socks">🧦 Socks</option>
+                <option value="Chasma">👓 Chasma</option>
+                <option value="Belt">👔 Belt</option>
+                <option value="Purse">👛 Purse</option>
+              </optgroup>
             </select>
-          </div>
 
           <div class="form-group" id="footwearGenderGroup">
             <label>Gender / Kiske Liye:</label>
@@ -1944,16 +1952,14 @@
       }
     }
 
-  function moveColorBlockPhoto(colorName, index, direction) {
-  if (!colorDataMap[colorName] || !colorDataMap[colorName].photos) return;
-  const photos = colorDataMap[colorName].photos;
-  const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= photos.length) return;
-  const temp = photos[index];
-  photos[index] = photos[newIndex];
-  photos[newIndex] = temp;
-  renderColorBlocks();
-}
+    function renderColorBlocks() {
+      const container = document.getElementById('colorBlocksContainer');
+      const colors = Object.keys(colorDataMap);
+
+      if (colors.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background:white; border-radius:6px; border:1px dashed #cbd5e1;">Pehle upar rang ka naam likhkar "+ Rang Jodein" dabayein!</div>';
+        return;
+      }
 
       let html = '';
       colors.forEach(col => {
@@ -2108,17 +2114,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           colorDataMap[colorName].video = e.target.result;
- function moveColorBlockPhoto(colorName, index, direction) {
-  if (!colorDataMap[colorName] || !colorDataMap[colorName].photos) return;
-  const photos = colorDataMap[colorName].photos;
-  const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= photos.length) return;
-  const temp = photos[index];
-  photos[index] = photos[newIndex];
-  photos[newIndex] = temp;
-  renderColorBlocks();
-}
-
+          renderColorBlocks();
           alert(`[${colorName}] ke liye video attach ho gaya!`);
         };
         reader.readAsDataURL(file);
