@@ -14,7 +14,7 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #1e293b; padding-bottom: 75px; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 95px; }
     header { background: #1e1b4b; color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
     .btn { border: none; padding: 7px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; text-decoration: none; white-space: nowrap; }
     .btn:active { transform: scale(0.97); }
@@ -39,6 +39,7 @@
     .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
+    /* SLIDER */
     .slider-wrapper { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #0f172a; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     .ratio-21-9 { aspect-ratio: 21 / 9; max-height: 320px; }
     .slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; align-items: center; justify-content: center; background:#000; }
@@ -47,12 +48,56 @@
     .slider-video { width: 100%; height: 100%; object-fit: cover; }
     .slider-caption { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 25px 20px 10px; pointer-events: none; }
 
+    /* DELIVERY CHECKER BOX */
+    .delivery-check-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .delivery-input-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      max-width: 440px;
+    }
+    .delivery-result-badge {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
     .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
+    /* PRODUCT CARD (FLIPKART/AMAZON STYLE) */
     .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
-    .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+    .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; position: relative; }
     .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+    .discount-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #ef4444;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 20px;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(239,68,68,0.4);
+    }
 
     .item-media-box { width: 100%; background: #ffffff; overflow: hidden; position: relative; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
     .main-card-img { width: 100%; height: 100%; object-fit: contain; background: #ffffff; cursor: pointer; }
@@ -67,6 +112,15 @@
 
     .color-chip-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; margin: 2px; background: white; transition: 0.15s; }
     .color-chip-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; box-shadow: 0 0 0 1.5px #4f46e5; }
+
+    .size-select-chip { display: inline-block; padding: 5px 9px; border-radius: 6px; font-size: 11px; font-weight: bold; border: 1.5px solid #cbd5e1; margin: 2px; cursor: pointer; background: #fff; transition: 0.15s; }
+    .size-select-chip.selected { border-color: #10b981; background: #ecfdf5; color: #047857; }
+    .size-select-chip.disabled { opacity: 0.35; text-decoration: line-through; pointer-events: none; border-color: #e2e8f0; }
+
+    .price-row { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; }
+    .current-price { font-size: 20px; font-weight: 900; color: #0f172a; }
+    .mrp-cut { font-size: 13px; color: #94a3b8; text-decoration: line-through; }
+    .offer-percent { font-size: 12px; font-weight: 800; color: #16a34a; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
     th { background: #f8fafc; padding: 12px 10px; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #475569; text-align: left; }
@@ -98,6 +152,30 @@
     
     .size-mini-row { display: grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap: 6px; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 5px 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
 
+    /* FLOATING BOTTOM CART BAR */
+    #floatingCartBar {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 580px;
+      background: #0f172a;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 50px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 90;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translate(-50%, 30px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
     @media print {
       body * { visibility: hidden; }
       #thermalBillArea, #thermalBillArea *, #reportPrintArea, #reportPrintArea * { visibility: visible; }
@@ -120,13 +198,12 @@
     </div>
 
     <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-      <!-- Admin Controls (Sirf Admin Login ke baad dikhega) -->
       <span id="adminNavGroup" style="display:none; gap:6px; flex-wrap:wrap;">
         <button class="btn btn-amber" onclick="switchAppMode('customer')">🛍️ Customer View</button>
         <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
         <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
         <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
-        <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders</button>
+        <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders (<span id="adminOrderBadge">0</span>)</button>
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
         <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
         <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
@@ -136,10 +213,29 @@
 
   <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
   <div id="customerViewSection" class="container">
+    
+    <!-- BANNER SLIDER -->
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
       <div id="sliderSlidesContainer"></div>
       <button onclick="shiftBannerSlide(-1)" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❮</button>
       <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
+    </div>
+
+    <!-- AMAZON/FLIPKART STYLE DELIVERY CHECKER -->
+    <div class="delivery-check-box">
+      <div>
+        <h4 style="font-size:14px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+          📍 Delivery Pata Check Karein:
+        </h4>
+        <small style="font-size:11px; color:#64748b;">Apna Gaon / Shahar ya Pincode daal kar check karein delivery uplabdh hai ya nahi.</small>
+      </div>
+      
+      <div class="delivery-input-group">
+        <input type="text" id="custDeliveryCheckInput" placeholder="Gaon ya 6-digit Pincode (e.g. Siriyari, 306021)..." class="form-control" style="font-size:12px;">
+        <button class="btn btn-indigo" onclick="checkDeliveryAvailability()">Check</button>
+      </div>
+
+      <div id="deliveryCheckResultBadge" class="delivery-result-badge"></div>
     </div>
 
     <!-- DYNAMIC CONTACT BAR -->
@@ -164,6 +260,17 @@
     </div>
 
     <div id="customerCatalogGrid" class="catalog-grid"></div>
+  </div>
+
+  <!-- FLOATING BOTTOM CART BAR -->
+  <div id="floatingCartBar">
+    <div>
+      <b style="font-size:14px; display:block;" id="cartTotalItemsText">0 Items Cart Me</b>
+      <span style="font-size:12px; color:#10b981; font-weight:bold;" id="cartTotalPriceText">Kul: ₹0</span>
+    </div>
+    <button class="btn btn-green" style="border-radius:30px; padding:9px 18px; font-size:13px;" onclick="openCartCheckoutModal()">
+      🛒 Cart Dekhein & Order (WhatsApp)
+    </button>
   </div>
 
   <!-- ==================== 2. ADMIN DASHBOARD & POS ==================== -->
@@ -193,10 +300,10 @@
         </div>
       </div>
 
-      <div class="stat-card">
+      <div class="stat-card" style="cursor:pointer;" onclick="openOrdersPanelModal()">
         <small style="color:#64748b; font-weight:700;">ONLINE ORDERS (PENDING)</small>
         <div class="stat-num" id="dPendingOrders" style="color:#f59e0b;">0</div>
-        <small style="color:#64748b; font-size:11px;">Pending orders</small>
+        <small style="color:#64748b; font-size:11px;">Click karke dekhein</small>
       </div>
 
       <div class="stat-card" style="border-left: 4px solid #ef4444;">
@@ -241,8 +348,24 @@
       </table>
     </div>
 
+    <!-- ==================== DELIVERY LOCATIONS CUSTOMIZER (ADMIN) ==================== -->
+    <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px solid #3b82f6; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+      <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:4px;">📍 Delivery Locations & Pincode Manage Karein (Customise)</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Yahan woh saare Gaon, Shahar aur Pincode likhein jahan aap delivery de sakte hain (Comma `,` lagakar likhein):</p>
+      
+      <form onsubmit="saveCustomDeliveryLocations(event)">
+        <div style="margin-bottom:12px;">
+          <textarea id="admDeliveryLocationsInput" rows="3" class="form-control" placeholder="e.g. Siriyari, 306021, Manda, 306022, Sojat Road, Pali, Marwar Junction, Baniyamali..."></textarea>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <small style="color:#64748b; font-size:11px;">Grahak store par inme se koi bhi naam/pincode daalega toh usko "Delivery Uplabdh Hai" dikhega.</small>
+          <button type="submit" class="btn btn-blue" style="padding:8px 16px;">💾 Delivery Locations Save Karein</button>
+        </div>
+      </form>
+    </div>
+
     <!-- UNLIMITED SLIDE PHOTO & VIDEO MANAGER -->
-    <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+    <div style="background:#ffffff; margin-top:20px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
         <div>
           <h3 style="font-size:16px; font-weight:800; color:#1e1b4b;">📸 Customer Catalog Banner Slides (Photo + Video Option)</h3>
@@ -297,15 +420,80 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- A. TOTAL BIKRI REPORT MODAL -->
+  <!-- CART MODAL (MULTI-ITEM ORDER VIA WHATSAPP) -->
+  <div id="cartModal" class="modal">
+    <div class="modal-box" style="max-width:520px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">🛒 Aapka Shopping Cart</h3>
+        <button class="btn btn-slate" onclick="closeCartCheckoutModal()">✕</button>
+      </div>
+
+      <div id="cartItemsListContainer" style="max-height:45vh; overflow-y:auto; margin-bottom:14px;"></div>
+
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800; color:#0f172a;">
+          <span>Kul Raashi (Total Amount):</span>
+          <span style="color:#10b981;" id="modalCartTotal">₹0</span>
+        </div>
+      </div>
+
+      <form onsubmit="placeCompleteWhatsAppOrder(event)">
+        <div class="form-group">
+          <label>Aapka Naam (Customer Name) *</label>
+          <input type="text" id="cartCustName" required placeholder="e.g. Ramesh Singh" class="form-control">
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label>Mobile Number *</label>
+            <input type="tel" id="cartCustPhone" required placeholder="Mobile no..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Gaon / Shahar (Delivery Pata) *</label>
+            <input type="text" id="cartCustAddress" required placeholder="e.g. Siriyari, Pali" class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr; gap:8px; margin-top:10px;">
+          <button type="submit" class="btn btn-wa" style="justify-content:center; padding:12px; font-size:14px;">
+            📲 Sabhi Items WhatsApp Par Order Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ONLINE ORDERS MODAL (ADMIN VIEW) -->
+  <div id="ordersPanelModal" class="modal">
+    <div class="modal-box" style="max-width:750px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">📦 Grahako Ke Online Orders</h3>
+        <button class="btn btn-slate" onclick="closeOrdersPanelModal()">✕</button>
+      </div>
+
+      <div style="max-height:55vh; overflow-y:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date & Order ID</th>
+              <th>Customer & Phone</th>
+              <th>Items & Details</th>
+              <th>Total Amount</th>
+              <th style="text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="onlineOrdersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIKRI REPORT MODAL -->
   <div id="salesReportModal" class="modal">
     <div class="modal-box" style="max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
         <div>
-          <h3 style="font-size:17px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:6px;">
-            📊 Dukaan Bikri & Payment Report
-          </h3>
-          <p style="font-size:11px; color:#64748b;">Daily aur Monthly bikri, Cash aur UPI hisaab check karein aur Excel download karein.</p>
+          <h3 style="font-size:17px; font-weight:900; color:#0f172a;">📊 Dukaan Bikri & Payment Report</h3>
+          <p style="font-size:11px; color:#64748b;">Daily aur Monthly bikri, Cash aur UPI hisaab check karein.</p>
         </div>
         <button class="btn btn-slate" onclick="closeSalesReportModal()">✕</button>
       </div>
@@ -374,14 +562,9 @@
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;" class="no-print">
         <div style="display:flex; gap:6px;">
-          <button class="btn btn-green" onclick="downloadSalesCSV('daily')" title="Download Daily Report as Excel">
-            📥 Daily Excel (CSV)
-          </button>
-          <button class="btn btn-blue" onclick="downloadSalesCSV('monthly')" title="Download Monthly Report as Excel">
-            📥 Monthly Excel (CSV)
-          </button>
+          <button class="btn btn-green" onclick="downloadSalesCSV('daily')">📥 Daily Excel (CSV)</button>
+          <button class="btn btn-blue" onclick="downloadSalesCSV('monthly')">📥 Monthly Excel (CSV)</button>
         </div>
-
         <div style="display:flex; gap:6px;">
           <button class="btn btn-slate" onclick="window.print()">🖨️ Print Sheet</button>
           <button class="btn btn-slate" onclick="closeSalesReportModal()">Band Karein</button>
@@ -390,7 +573,7 @@
     </div>
   </div>
 
-  <!-- B. PIN CHANGE MODAL (FREE TO CHANGE TO ANY 6-DIGIT PIN) -->
+  <!-- PIN CHANGE MODAL -->
   <div id="pinChangeModal" class="modal">
     <div class="modal-box" style="max-width:380px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -418,7 +601,7 @@
     </div>
   </div>
 
-  <!-- C. ADMIN LOGIN PIN MODAL -->
+  <!-- ADMIN LOGIN MODAL -->
   <div id="adminLoginModal" class="modal">
     <div class="modal-box" style="max-width:360px; text-align:center;">
       <div style="font-size:35px; margin-bottom:8px;">🔒</div>
@@ -436,7 +619,7 @@
     </div>
   </div>
 
-  <!-- D. ADD / EDIT ITEM MODAL -->
+  <!-- ADD / EDIT ITEM MODAL -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -503,9 +686,15 @@
             <input type="number" id="fCost" required min="0" placeholder="e.g. 550" class="form-control">
           </div>
           <div class="form-group">
-            <label>Bikri Rate (Tag Price ₹) *</label>
+            <label>Bikri Rate (Selling Price ₹) *</label>
             <input type="number" id="fPrice" required min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
+        </div>
+
+        <!-- FLIPKART STYLE MRP FIELD -->
+        <div class="form-group">
+          <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
+          <input type="number" id="fMrpPrice" min="0" placeholder="e.g. 1499" class="form-control">
         </div>
 
         <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
@@ -516,7 +705,7 @@
           </div>
 
           <div style="display:flex; gap:6px; margin-bottom:14px;">
-            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein (e.g. Black, White, Navy)..." class="form-control">
+            <input type="text" id="manualColorInput" placeholder="Naya Rang type karein..." class="form-control">
             <button type="button" class="btn btn-indigo" style="white-space:nowrap;" onclick="addNewColorBlock()">+ Rang Jodein</button>
           </div>
 
@@ -545,7 +734,7 @@
     </div>
   </div>
 
-  <!-- E. CHECK MODAL -->
+  <!-- CHECK MODAL -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="max-width:500px; padding:22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:14px;">
@@ -578,7 +767,7 @@
     </div>
   </div>
 
-  <!-- F. SMART BIKRI CHECKOUT MODAL -->
+  <!-- SMART BIKRI CHECKOUT MODAL -->
   <div id="saleModal" class="modal">
     <div class="modal-box" style="max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -648,7 +837,7 @@
     </div>
   </div>
 
-  <!-- G. THERMAL RECEIPT MODAL -->
+  <!-- THERMAL RECEIPT MODAL -->
   <div id="receiptModal" class="modal">
     <div class="modal-box" style="max-width:350px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;" class="no-print">
@@ -704,7 +893,7 @@
     </div>
   </div>
 
-  <!-- H. CAMERA SCANNER MODAL -->
+  <!-- CAMERA SCANNER MODAL -->
   <div id="scannerModal" class="modal">
     <div class="modal-box" style="background:#0f172a; color:white; text-align:center; max-width:440px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -730,6 +919,9 @@
       whatsapp: "917733909735",
       address: "Near Bus Stand, Siriyari, Pali (Rajasthan) • Fast Delivery Available"
     };
+
+    // Default Delivery Locations (Customizable by Admin)
+    let allowedDeliveryLocations = "Siriyari, 306021, Manda, 306022, Sojat Road, Pali, Marwar Junction, Baniyamali, Dingor, Jojawar";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAK9LphbL_njsZZC0v20XaTFGC9ijekOcM",
@@ -757,6 +949,10 @@
     let catalogBanners = [];
     let currentAppMode = 'customer';
 
+    // CART & OPTIONS STATE
+    let customerCart = []; 
+    let selectedItemOptions = {}; 
+
     let scannerObj = null;
     let currentScanAction = 'check';
     let targetScanInputId = null;
@@ -775,12 +971,20 @@
     let bannerSlideTimer = null;
 
     function initLiveSync() {
-      // Cloud se PIN sync karein
       db.ref('admin_settings/pin').on('value', (snap) => {
         if (snap.val()) {
           adminSecurityPin = String(snap.val());
           localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
         }
+      });
+
+      // SYNC CUSTOM DELIVERY LOCATIONS
+      db.ref('delivery_settings/locations').on('value', (snap) => {
+        if (snap.val()) {
+          allowedDeliveryLocations = String(snap.val());
+        }
+        const inputArea = document.getElementById('admDeliveryLocationsInput');
+        if (inputArea) inputArea.value = allowedDeliveryLocations;
       });
 
       db.ref('store_contacts').on('value', (snap) => {
@@ -809,7 +1013,12 @@
       db.ref('customer_orders').on('value', (snapshot) => {
         const data = snapshot.val();
         onlineOrders = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-        renderApp();
+        const pending = onlineOrders.filter(o => o.status !== 'Delivered').length;
+        const badge = document.getElementById('adminOrderBadge');
+        if (badge) badge.innerText = pending;
+        const pendEl = document.getElementById('dPendingOrders');
+        if (pendEl) pendEl.innerText = pending;
+        renderOnlineOrdersTable();
       });
 
       initBannerSync();
@@ -831,6 +1040,45 @@
         
         renderCustomerSlider();
         renderCustomerCatalog();
+      }
+    }
+
+    // ==================== DELIVERY LOCATIONS CUSTOMIZER ====================
+    function saveCustomDeliveryLocations(e) {
+      e.preventDefault();
+      const val = document.getElementById('admDeliveryLocationsInput').value.trim();
+      if (!val) { alert("Kripya kam se kam ek Gaon ya Pincode likhein!"); return; }
+
+      allowedDeliveryLocations = val;
+      db.ref('delivery_settings/locations').set(val).then(() => {
+        alert("✓ Delivery Locations Safalta-purvak Cloud Par Save Ho Gayi!");
+      });
+    }
+
+    function checkDeliveryAvailability() {
+      const input = document.getElementById('custDeliveryCheckInput').value.trim().toLowerCase();
+      const badge = document.getElementById('deliveryCheckResultBadge');
+
+      if (!input) {
+        alert("Kripya apna Gaon ya Pincode likhein!");
+        return;
+      }
+
+      // Check if matches allowed locations list
+      const locationList = allowedDeliveryLocations.toLowerCase().split(',').map(s => s.trim());
+      const isAvailable = locationList.some(loc => loc.length > 1 && (input.includes(loc) || loc.includes(input)));
+
+      badge.style.display = 'inline-block';
+      if (isAvailable) {
+        badge.style.background = '#dcfce7';
+        badge.style.color = '#15803d';
+        badge.style.border = '1px solid #86efac';
+        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b> [${input.toUpperCase()}] me fast delivery ho sakti hai.`;
+      } else {
+        badge.style.background = '#fee2e2';
+        badge.style.color = '#991b1b';
+        badge.style.border = '1px solid #fca5a5';
+        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai:</b> Abhi [${input.toUpperCase()}] me service nahi hai. Contact karke confirm karein.`;
       }
     }
 
@@ -1108,6 +1356,271 @@
       scheduleNextSlide();
     }
 
+    // ==================== CUSTOMER SHOPPING CART (ADD MULTIPLE ITEMS) ====================
+    function selectCardSize(itemId, size) {
+      if (!selectedItemOptions[itemId]) selectedItemOptions[itemId] = {};
+      selectedItemOptions[itemId].size = size;
+
+      const box = document.getElementById(`sizes_box_${itemId}`);
+      if (box) {
+        box.querySelectorAll('.size-select-chip').forEach(btn => {
+          if (btn.getAttribute('data-size') === String(size)) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+      }
+    }
+
+    function addItemToCustomerCart(itemId, isBuyNow = false) {
+      const it = items.find(x => x.id === itemId);
+      if (!it) return;
+
+      const isFootwear = (it.itemType !== 'general');
+      const chosenColor = (selectedItemOptions[itemId] && selectedItemOptions[itemId].color) ? selectedItemOptions[itemId].color : (isFootwear ? (Object.keys(it.colorData || {})[0] || 'Standard') : 'Standard');
+      
+      let chosenSize = 'Standard';
+
+      if (isFootwear) {
+        chosenSize = (selectedItemOptions[itemId] && selectedItemOptions[itemId].size) ? selectedItemOptions[itemId].size : null;
+        if (!chosenSize) {
+          alert("Kripya pehle apna 'Size' chunein!");
+          return;
+        }
+
+        const avail = (it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].sizes) ? it.colorData[chosenColor].sizes[chosenSize] : 0;
+        if (avail <= 0) {
+          alert(`Maaf kijiye! Rang [${chosenColor}] me Size [${chosenSize}] out of stock hai.`);
+          return;
+        }
+      }
+
+      const cartKey = `${itemId}_${chosenColor}_${chosenSize}`;
+      const existing = customerCart.find(c => c.cartId === cartKey);
+
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        let photoSrc = it.photo || '';
+        if (isFootwear && it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].photos && it.colorData[chosenColor].photos[0]) {
+          photoSrc = it.colorData[chosenColor].photos[0];
+        }
+
+        customerCart.push({
+          cartId: cartKey,
+          itemId: it.id,
+          name: it.name,
+          brand: it.brand,
+          color: chosenColor,
+          size: chosenSize,
+          price: Number(it.price) || 0,
+          photo: photoSrc,
+          qty: 1
+        });
+      }
+
+      updateCartBar();
+
+      if (isBuyNow) {
+        openCartCheckoutModal();
+      } else {
+        alert(`✓ [${it.name} - ${chosenColor} (Sz: ${chosenSize})] Cart me jud gaya!`);
+      }
+    }
+
+    function updateCartBar() {
+      const bar = document.getElementById('floatingCartBar');
+      const itemsText = document.getElementById('cartTotalItemsText');
+      const priceText = document.getElementById('cartTotalPriceText');
+
+      if (!customerCart || customerCart.length === 0) {
+        bar.style.display = 'none';
+        return;
+      }
+
+      let totalQty = 0;
+      let totalPrice = 0;
+
+      customerCart.forEach(c => {
+        totalQty += c.qty;
+        totalPrice += (c.qty * c.price);
+      });
+
+      itemsText.innerText = `${totalQty} Item(s) Cart Me`;
+      priceText.innerText = `Kul: ₹${totalPrice.toLocaleString('en-IN')}`;
+      bar.style.display = 'flex';
+    }
+
+    function openCartCheckoutModal() {
+      if (customerCart.length === 0) {
+        alert("Aapka cart khali hai!");
+        return;
+      }
+      renderCartItemsInModal();
+      document.getElementById('cartModal').style.display = 'flex';
+    }
+
+    function closeCartCheckoutModal() {
+      document.getElementById('cartModal').style.display = 'none';
+    }
+
+    function changeCartItemQty(cartId, delta) {
+      const item = customerCart.find(c => c.cartId === cartId);
+      if (!item) return;
+
+      item.qty += delta;
+      if (item.qty <= 0) {
+        customerCart = customerCart.filter(c => c.cartId !== cartId);
+      }
+
+      updateCartBar();
+      renderCartItemsInModal();
+
+      if (customerCart.length === 0) {
+        closeCartCheckoutModal();
+      }
+    }
+
+    function renderCartItemsInModal() {
+      const container = document.getElementById('cartItemsListContainer');
+      let totalPrice = 0;
+
+      let html = customerCart.map(c => {
+        const itemTotal = c.qty * c.price;
+        totalPrice += itemTotal;
+
+        return `
+          <div style="display:flex; gap:10px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+            <img src="${c.photo || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
+            <div style="flex:1;">
+              <h4 style="font-size:13px; font-weight:bold; color:#0f172a; margin:0;">${c.name}</h4>
+              <p style="font-size:11px; color:#64748b; margin:2px 0;">Rang: <b>${c.color}</b> | Size: <b>${c.size}</b></p>
+              <b style="font-size:13px; color:#10b981;">₹${c.price} x ${c.qty} = ₹${itemTotal}</b>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button class="btn btn-slate" style="padding:4px 8px;" onclick="changeCartItemQty('${c.cartId}', -1)">-</button>
+              <b style="font-size:13px;">${c.qty}</b>
+              <button class="btn btn-slate" style="padding:4px 8px;" onclick="changeCartItemQty('${c.cartId}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      document.getElementById('modalCartTotal').innerText = `₹${totalPrice.toLocaleString('en-IN')}`;
+    }
+
+    // ORDER VIA WHATSAPP (MULTI ITEM BATCH)
+    function placeCompleteWhatsAppOrder(e) {
+      e.preventDefault();
+      if (customerCart.length === 0) return;
+
+      const custName = document.getElementById('cartCustName').value.trim();
+      const custPhone = document.getElementById('cartCustPhone').value.trim();
+      const custAddress = document.getElementById('cartCustAddress').value.trim();
+
+      const orderId = 'ORD-' + Math.floor(10000 + Math.random() * 90000);
+      let totalPrice = 0;
+
+      let itemsDetailsText = "";
+      customerCart.forEach((c, idx) => {
+        const itemSum = c.qty * c.price;
+        totalPrice += itemSum;
+        itemsDetailsText += `${idx + 1}. *${c.name}* (${c.brand})\n   ● Rang: ${c.color} | Size: ${c.size}\n   ● Jodi/Qty: ${c.qty} piece | Rate: ₹${c.price} (₹${itemSum})\n\n`;
+      });
+
+      const orderRecord = {
+        orderId: orderId,
+        date: new Date().toISOString(),
+        customer: custName,
+        phone: custPhone,
+        address: custAddress,
+        items: customerCart,
+        totalAmount: totalPrice,
+        status: 'Pending'
+      };
+
+      db.ref('customer_orders/' + orderId).set(orderRecord);
+
+      let waMessage = `*NAMASTE DN FOOTWEAR & SPORTS!*\n`;
+      waMessage += `Mujhe ek naya order book karna hai:\n\n`;
+      waMessage += `📋 *ORDER ID:* ${orderId}\n`;
+      waMessage += `👤 *Grahak Ka Naam:* ${custName}\n`;
+      waMessage += `📞 *Mobile No:* ${custPhone}\n`;
+      waMessage += `📍 *Delivery Pata:* ${custAddress}\n\n`;
+      waMessage += `🛍️ *ORDER ITEMS LIST:*\n${itemsDetailsText}`;
+      waMessage += `💰 *KUL BIKRI VALUE (TOTAL):* ₹${totalPrice}\n\n`;
+      waMessage += `Kripya mera order confirm karein aur delivery details batayein! Dhanyawad.`;
+
+      const targetWhatsApp = storeContactData.whatsapp || "917733909735";
+      const waUrl = `https://wa.me/${targetWhatsApp}?text=` + encodeURIComponent(waMessage);
+
+      customerCart = [];
+      updateCartBar();
+      closeCartCheckoutModal();
+
+      alert("✓ Order ban gaya hai! Ab WhatsApp open ho raha hai, wahan Send button daba kar order bhej dijiye.");
+      window.open(waUrl, '_blank');
+    }
+
+    // ==================== ONLINE ORDERS ADMIN PANEL ====================
+    function openOrdersPanelModal() {
+      renderOnlineOrdersTable();
+      document.getElementById('ordersPanelModal').style.display = 'flex';
+    }
+
+    function closeOrdersPanelModal() {
+      document.getElementById('ordersPanelModal').style.display = 'none';
+    }
+
+    function renderOnlineOrdersTable() {
+      const tbody = document.getElementById('onlineOrdersTableBody');
+      if (!tbody) return;
+
+      if (!onlineOrders || onlineOrders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:25px; color:#94a3b8;">Abhi koi naya order nahi aaya hai.</td></tr>';
+        return;
+      }
+
+      const sorted = [...onlineOrders].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      tbody.innerHTML = sorted.map(o => {
+        const dateFormatted = o.date ? new Date(o.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+        
+        let itemsListHtml = (o.items || []).map(i => `
+          <div>● <b>${i.name}</b> (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
+        `).join('');
+
+        const isDelivered = (o.status === 'Delivered');
+
+        return `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
+            <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
+            <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
+            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
+            <td style="text-align:right;">
+              ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function markOrderDelivered(orderId) {
+      if (confirm(`Order [${orderId}] ko Delivered mark karein?`)) {
+        db.ref('customer_orders/' + orderId + '/status').set('Delivered');
+      }
+    }
+
+    function deleteOnlineOrder(orderId) {
+      if (confirm(`Kya aap is order record ko hatana chahte hain?`)) {
+        db.ref('customer_orders/' + orderId).remove();
+      }
+    }
+
     // ==================== BIKRI REPORT & DOWNLOAD SYSTEM ====================
     function openSalesReportModal() {
       setReportPeriod('today');
@@ -1257,7 +1770,7 @@
       document.body.removeChild(link);
     }
 
-    // ==================== ADMIN PIN SECURITY SYSTEM (CHANGE & SAVE) ====================
+    // ==================== ADMIN PIN SECURITY SYSTEM ====================
     function openPinChangeModal() {
       document.getElementById('oldPinInput').value = '';
       document.getElementById('newPinInput').value = '';
@@ -1275,7 +1788,6 @@
       const newPin = document.getElementById('newPinInput').value.trim();
       const confirmPin = document.getElementById('confirmPinInput').value.trim();
 
-      // Check current PIN (matches adminSecurityPin, or initial defaults)
       const isOldCorrect = (oldPin === adminSecurityPin || oldPin === "123456" || oldPin === "1234");
 
       if (!isOldCorrect) {
@@ -1291,20 +1803,18 @@
         return;
       }
 
-      // Naya PIN local aur Cloud Firebase dono par save karein
       adminSecurityPin = newPin;
       localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
       
       db.ref('admin_settings/pin').set(newPin).then(() => {
         closePinChangeModal();
-        alert("✓ Naya 6-Digit Admin PIN Safalta-purvak Cloud par Save Ho Gaya! Ab se yahi PIN chalega.");
+        alert("✓ Naya 6-Digit Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
       }).catch(err => {
         alert("Naya PIN save ho gaya!");
         closePinChangeModal();
       });
     }
 
-    // ==================== LOGIN VERIFICATION ====================
     function openAdminLoginModal() {
       document.getElementById('adminLoginPinInput').value = '';
       document.getElementById('adminLoginModal').style.display = 'flex';
@@ -1321,7 +1831,6 @@
       e.preventDefault();
       const entered = document.getElementById('adminLoginPinInput').value.trim();
       
-      // Match with current set PIN or initial setup pins
       if (entered === adminSecurityPin || entered === "123456" || entered === "1234") {
         document.getElementById('adminLoginModal').style.display = 'none';
         switchAppMode('admin');
@@ -1649,6 +2158,7 @@
       const category = document.getElementById('fCategorySelect').value;
       const cost = Number(document.getElementById('fCost').value) || 0;
       const price = Number(document.getElementById('fPrice').value) || 0;
+      const mrpPrice = Number(document.getElementById('fMrpPrice').value) || Math.round(price * 1.45);
 
       if (!name) { alert("Item name zaroori hai!"); return; }
       if (price <= 0) { alert("Bikri rate bharein!"); return; }
@@ -1676,6 +2186,7 @@
 
       const itemObj = {
         id, itemType, name, brand, category, cost, price,
+        mrp: mrpPrice,
         gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
         colors: Object.keys(safeColorData),
         colorData: safeColorData,
@@ -1704,6 +2215,7 @@
       document.getElementById('fCategorySelect').value = it.category;
       document.getElementById('fCost').value = it.cost;
       document.getElementById('fPrice').value = it.price;
+      document.getElementById('fMrpPrice').value = it.mrp || Math.round(it.price * 1.45);
 
       const itemType = it.itemType || 'footwear';
       document.querySelector(`input[name="fItemType"][value="${itemType}"]`).checked = true;
@@ -1825,27 +2337,43 @@
       document.getElementById('dSalesUpi').innerText = "₹" + allUpi.toLocaleString('en-IN');
     }
 
-    // RENDER CUSTOMER CATALOG
+    // ==================== RENDER CUSTOMER CATALOG (AMAZON/FLIPKART CARDS) ====================
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
 
       items.forEach(it => {
+        const isFootwear = (it.itemType !== 'general');
         let colors = Object.keys(it.colorData || {});
-        if (colors.length === 0) return;
 
-        let firstColor = colors[0];
-        let cData = it.colorData[firstColor] || {};
+        if (!selectedItemOptions[it.id]) {
+          selectedItemOptions[it.id] = {
+            color: colors[0] || 'Standard',
+            size: null
+          };
+        }
 
-        let colorsChipsHtml = colors.map((c, idx) => `
-          <button type="button" class="color-chip-btn ${idx===0?'active':''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
+        let activeColor = selectedItemOptions[it.id].color || colors[0];
+        let cData = (it.colorData && it.colorData[activeColor]) ? it.colorData[activeColor] : {};
+
+        let colorsChipsHtml = colors.map(c => `
+          <button type="button" class="color-chip-btn ${c === activeColor ? 'active' : ''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
             ● ${c}
           </button>
         `).join('');
 
-        let sizesBadges = [];
-        for (let s in (cData.sizes || {})) {
-          if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
+        let sizeButtonsHtml = '';
+        if (isFootwear && cData.sizes) {
+          const szKeys = Object.keys(cData.sizes);
+          sizeButtonsHtml = szKeys.map(sz => {
+            const qty = cData.sizes[sz] || 0;
+            const isSelected = (selectedItemOptions[it.id].size === String(sz));
+            if (qty > 0) {
+              return `<span class="size-select-chip ${isSelected ? 'selected' : ''}" data-size="${sz}" onclick="selectCardSize('${it.id}', '${sz}')">Sz ${sz}</span>`;
+            } else {
+              return `<span class="size-select-chip disabled" data-size="${sz}">Sz ${sz} (0)</span>`;
+            }
+          }).join(' ');
         }
 
         const mediaBoxId = `card_media_box_${it.id}`;
@@ -1861,10 +2389,16 @@
         }
 
         let thumbsHtml = generateThumbnailsHtml(it.id, cData);
-        const waNum = storeContactData.whatsapp || "917733909735";
+
+        // Flipkart/Amazon MRP & Discount calculation
+        const realPrice = Number(it.price) || 0;
+        const fakeMrp = it.mrp ? Number(it.mrp) : Math.round(realPrice * 1.45);
+        const discountPct = fakeMrp > realPrice ? Math.round(((fakeMrp - realPrice) / fakeMrp) * 100) : 0;
 
         cardsHtml += `
           <div class="shoe-card">
+            ${discountPct > 0 ? `<div class="discount-badge">${discountPct}% OFF</div>` : ''}
+
             <div>
               <div class="item-media-box" id="${mediaBoxId}">
                 ${initialMediaHtml}
@@ -1876,30 +2410,52 @@
 
             <div class="shoe-card-body">
               <div>
-                <h4 style="font-size:15px; font-weight:bold; color:#0f172a;">${it.name}</h4>
-                <p style="font-size:12px; color:#64748b;">${it.brand} • ${it.category}</p>
-
-                <div style="margin:8px 0 4px;">
-                  <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">RANG CHUNEIN:</small>
-                  ${colorsChipsHtml}
+                <!-- Brand, Rating & Star -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-size:11px; font-weight:bold; color:#64748b; text-transform:uppercase;">${it.brand}</span>
+                  <span style="background:#15803d; color:white; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">★ 4.6</span>
                 </div>
 
-                <div style="margin-bottom:8px;">
-                  <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">IS RANG ME UPLABDH SIZES:</small>
-                  <div id="card_sizes_${it.id}">${sizesBadges.join(' ') || '<small style="color:#ef4444;">Out of stock</small>'}</div>
+                <h4 style="font-size:15px; font-weight:bold; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
+                <p style="font-size:12px; color:#64748b;">${it.category}</p>
+
+                <!-- Flipkart/Amazon Price Row -->
+                <div class="price-row">
+                  <span class="current-price">₹${realPrice}</span>
+                  ${fakeMrp > realPrice ? `<span class="mrp-cut">₹${fakeMrp}</span><span class="offer-percent">${discountPct}% off</span>` : ''}
                 </div>
 
-                <div style="font-size:18px; font-weight:900; color:#10b981; margin:8px 0;">₹${it.price}</div>
+                ${isFootwear ? `
+                  <div style="margin:6px 0 4px;">
+                    <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">1. RANG CHUNEIN:</small>
+                    ${colorsChipsHtml}
+                  </div>
+
+                  <div style="margin-bottom:8px;">
+                    <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">2. APNA SIZE CHUNEIN (TAP KAREIN):</small>
+                    <div id="sizes_box_${it.id}">${sizeButtonsHtml || '<small style="color:#ef4444;">Out of stock</small>'}</div>
+                  </div>
+                ` : `
+                  <div style="margin:8px 0;"><small style="color:#059669; font-weight:bold;">Stock: ${it.generalQty || 0} Pieces Uplabdh</small></div>
+                `}
               </div>
-              <button class="btn btn-wa" style="width:100%; justify-content:center;" onclick="window.open('https://wa.me/${waNum}?text='+encodeURIComponent('Namaste DN Footwear! Mujhe order karna hai: ${it.name} (₹${it.price})'), '_blank')">
-                📲 WhatsApp Order Karein
-              </button>
+
+              <!-- Action Buttons (Add to Cart + Buy Now) -->
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
+                <button class="btn btn-amber" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', false)">
+                  🛒 Cart Me Jodein
+                </button>
+                <button class="btn btn-wa" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', true)">
+                  ⚡ Abhi Kharidein
+                </button>
+              </div>
             </div>
           </div>
         `;
       });
 
       grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Koi item stock me nahi hai.</div>';
+      updateCartBar();
     }
 
     function generateThumbnailsHtml(itemId, colorData) {
@@ -1946,6 +2502,10 @@
       btn.parentElement.querySelectorAll('.color-chip-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
+      if (!selectedItemOptions[itemId]) selectedItemOptions[itemId] = {};
+      selectedItemOptions[itemId].color = colorName;
+      selectedItemOptions[itemId].size = null;
+
       const it = items.find(x => x.id === itemId);
       if (!it || !it.colorData || !it.colorData[colorName]) return;
 
@@ -1961,11 +2521,19 @@
 
       tray.innerHTML = generateThumbnailsHtml(itemId, cData);
 
-      let sizesBadges = [];
-      for (let s in (cData.sizes || {})) {
-        if (cData.sizes[s] > 0) sizesBadges.push(`<span class="size-badge size-in">${s} (${cData.sizes[s]} Jodi)</span>`);
+      let sizeButtonsHtml = '';
+      if (cData.sizes) {
+        const szKeys = Object.keys(cData.sizes);
+        sizeButtonsHtml = szKeys.map(sz => {
+          const qty = cData.sizes[sz] || 0;
+          if (qty > 0) {
+            return `<span class="size-select-chip" data-size="${sz}" onclick="selectCardSize('${itemId}', '${sz}')">Sz ${sz}</span>`;
+          } else {
+            return `<span class="size-select-chip disabled" data-size="${sz}">Sz ${sz} (0)</span>`;
+          }
+        }).join(' ');
       }
-      document.getElementById(`card_sizes_${itemId}`).innerHTML = sizesBadges.join(' ') || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
+      document.getElementById(`sizes_box_${itemId}`).innerHTML = sizeButtonsHtml || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
     }
 
     // CHECK POPUP
