@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DN Footwear & Sports - Color & Size Wise Inventory, POS & Sales Report</title>
+  <title>DN Footwear & Sports - Online Store & Inventory POS</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -116,15 +116,15 @@
         DN Footwear & Sports
         <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
       </h2>
-      <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Dukaan Admin & POS Mode</span>
+      <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Customer Online Store</span>
     </div>
 
     <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-      <button id="toggleModeBtn" class="btn btn-amber" onclick="toggleAppMode()">
-        🛍️ Customer Catalog Dekhein
+      <button id="toggleModeBtn" class="btn btn-indigo" onclick="toggleAppMode()">
+        🔒 Admin Mode (Dukaan Login)
       </button>
 
-      <span id="adminNavGroup" style="display:inline-flex; gap:6px; flex-wrap:wrap;">
+      <span id="adminNavGroup" style="display:none; gap:6px; flex-wrap:wrap;">
         <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
         <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
         <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
@@ -136,8 +136,40 @@
     </div>
   </header>
 
-  <!-- ==================== 1. ADMIN DASHBOARD & POS ==================== -->
-  <div id="adminViewSection" class="container">
+  <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
+  <div id="customerViewSection" class="container">
+    <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
+      <div id="sliderSlidesContainer"></div>
+      <button onclick="shiftBannerSlide(-1)" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❮</button>
+      <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
+    </div>
+
+    <!-- DYNAMIC CONTACT BAR -->
+    <div class="contact-bar">
+      <div>
+        <h4 style="font-size:15px; font-weight:800; color:#1e1b4b;">📞 Sampark Karein & Order Book Karein:</h4>
+        <p style="font-size:11px; color:#64748b;" id="custStoreAddressText">Siriyari, Pali (Rajasthan) • Fast Delivery Available</p>
+      </div>
+      <div class="call-btn-group" id="custCallBtnContainer"></div>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
+      <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto;">
+        <option value="ALL">Sabhi Samaan</option>
+        <option value="Shoes">Footwear</option>
+        <option value="Socks">Socks</option>
+        <option value="Chasma">Chasma</option>
+        <option value="Belt">Belt</option>
+        <option value="Purse">Purse</option>
+      </select>
+    </div>
+
+    <div id="customerCatalogGrid" class="catalog-grid"></div>
+  </div>
+
+  <!-- ==================== 2. ADMIN DASHBOARD & POS (HIDDEN BY DEFAULT) ==================== -->
+  <div id="adminViewSection" class="container" style="display:none;">
     <div class="stats-grid">
       <div class="stat-card">
         <small style="color:#64748b; font-weight:700;">KUL STOCK (ITEMS / PAIRS)</small>
@@ -262,38 +294,6 @@
       </form>
     </div>
 
-  </div>
-
-  <!-- ==================== 2. CUSTOMER ONLINE STORE ==================== -->
-  <div id="customerViewSection" class="container" style="display:none;">
-    <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
-      <div id="sliderSlidesContainer"></div>
-      <button onclick="shiftBannerSlide(-1)" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❮</button>
-      <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
-    </div>
-
-    <!-- DYNAMIC CONTACT BAR -->
-    <div class="contact-bar">
-      <div>
-        <h4 style="font-size:15px; font-weight:800; color:#1e1b4b;">📞 Sampark Karein & Order Book Karein:</h4>
-        <p style="font-size:11px; color:#64748b;" id="custStoreAddressText">Siriyari, Pali (Rajasthan) • Fast Delivery Available</p>
-      </div>
-      <div class="call-btn-group" id="custCallBtnContainer"></div>
-    </div>
-
-    <div class="filter-bar">
-      <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
-      <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto;">
-        <option value="ALL">Sabhi Samaan</option>
-        <option value="Shoes">Footwear</option>
-        <option value="Socks">Socks</option>
-        <option value="Chasma">Chasma</option>
-        <option value="Belt">Belt</option>
-        <option value="Purse">Purse</option>
-      </select>
-    </div>
-
-    <div id="customerCatalogGrid" class="catalog-grid"></div>
   </div>
 
   <!-- ==================== MODALS ==================== -->
@@ -509,7 +509,6 @@
           </div>
         </div>
 
-        <!-- COLOR-WISE STOCK & SIZES SECTION -->
         <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:10px; border:2px solid #cbd5e1;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label style="font-weight:800; color:#0f172a; margin:0; font-size:13px;">
@@ -757,7 +756,7 @@
     let salesHistory = [];
     let onlineOrders = [];
     let catalogBanners = [];
-    let currentAppMode = 'admin';
+    let currentAppMode = 'customer'; // Default Mode Hamesha Customer Store Rahega
 
     let scannerObj = null;
     let currentScanAction = 'check';
@@ -814,6 +813,26 @@
       });
 
       initBannerSync();
+    }
+
+    // ==================== CHECK URL & DEFAULT TO CUSTOMER CATALOG ====================
+    function checkURLAndSetMode() {
+      // By default customer view open hoga
+      currentAppMode = 'customer';
+      document.getElementById('adminViewSection').style.display = 'none';
+      document.getElementById('customerViewSection').style.display = 'block';
+      document.getElementById('adminNavGroup').style.display = 'none';
+      
+      const toggleBtn = document.getElementById('toggleModeBtn');
+      const subtitle = document.getElementById('appModeSubtitle');
+      if (toggleBtn) {
+        toggleBtn.innerText = '🔒 Admin Mode (Dukaan Login)';
+        toggleBtn.className = 'btn btn-indigo';
+      }
+      if (subtitle) subtitle.innerText = 'Customer Online Store';
+      
+      renderCustomerSlider();
+      renderCustomerCatalog();
     }
 
     // ==================== MANUAL CONTACT DETAILS LOGIC ====================
@@ -1294,7 +1313,6 @@
 
     function switchAppMode(mode) {
       currentAppMode = mode;
-      window.location.hash = (mode === 'customer') ? 'store' : '';
 
       document.getElementById('adminViewSection').style.display = (mode === 'admin') ? 'block' : 'none';
       document.getElementById('customerViewSection').style.display = (mode === 'customer') ? 'block' : 'none';
@@ -1308,14 +1326,14 @@
         toggleBtn.className = 'btn btn-indigo';
         subtitle.innerText = 'Customer Online Store';
         renderCustomerSlider();
+        renderCustomerCatalog();
       } else {
         toggleBtn.innerText = '🛍️ Customer Catalog Dekhein';
         toggleBtn.className = 'btn btn-amber';
         subtitle.innerText = 'Dukaan Admin & POS Mode';
         renderAdminSlideThumbs();
+        renderAdminTable();
       }
-
-      renderApp();
     }
 
     function toggleItemTypeForm(type) {
@@ -1507,7 +1525,7 @@
       openScannerModal('color_size_barcode');
     }
 
-    // ==================== HD PHOTO UPLOAD (1200px HIGH CLARITY) ====================
+    // HD PHOTO UPLOAD (1200px HIGH CLARITY)
     function uploadPhotosForColorBlock(input, colorName) {
       if (input.files && input.files.length > 0) {
         Array.from(input.files).forEach(file => {
@@ -1533,7 +1551,6 @@
               ctx.imageSmoothingQuality = 'high';
               ctx.drawImage(img, 0, 0, w, h);
 
-              // 0.88 Quality for Crystal-Clear HD
               const hdBase64 = canvas.toDataURL('image/jpeg', 0.88);
 
               if (!colorDataMap[colorName].photos) {
@@ -2222,7 +2239,7 @@
     }
 
     function copyCustomerStoreLink() {
-      const url = window.location.origin + window.location.pathname + '#store';
+      const url = window.location.origin + window.location.pathname;
       navigator.clipboard.writeText(url).then(() => alert("Customer Store Link Copy Ho Gaya:\n" + url));
     }
 
@@ -2234,16 +2251,9 @@
       a.click();
     }
 
+    // Auto set to customer mode on load
     window.onload = function() {
-      if (window.location.hash === '#store' || window.location.hash === '#catalog') {
-        currentAppMode = 'customer';
-        document.getElementById('adminViewSection').style.display = 'none';
-        document.getElementById('customerViewSection').style.display = 'block';
-        document.getElementById('adminNavGroup').style.display = 'none';
-        document.getElementById('toggleModeBtn').innerText = '🔒 Admin Mode (Dukaan Login)';
-        document.getElementById('toggleModeBtn').className = 'btn btn-indigo';
-        document.getElementById('appModeSubtitle').innerText = 'Customer Online Store';
-      }
+      checkURLAndSetMode();
       initLiveSync();
     };
   </script>
