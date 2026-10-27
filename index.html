@@ -39,7 +39,7 @@
     .filter-bar { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
     .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
-    /* SLIDER FIX FOR MOBILE AUTOPLAY */
+    /* SLIDER */
     .slider-wrapper { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #0f172a; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     .ratio-21-9 { aspect-ratio: 21 / 9; max-height: 320px; }
     .slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease-in-out; display: flex; align-items: center; justify-content: center; background:#000; }
@@ -217,7 +217,7 @@
     </div>
   </header>
 
-  <!-- ==================== 1. CUSTOMER ONLINE STORE ==================== -->
+  <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
   <div id="customerViewSection" class="container">
     
     <!-- BANNER SLIDER -->
@@ -227,7 +227,7 @@
       <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
     </div>
 
-    <!-- DELIVERY CHECKER (OPTIONAL TOGGLEABLE) -->
+    <!-- AMAZON/FLIPKART STYLE DELIVERY CHECKER -->
     <div class="delivery-check-box" id="deliveryCheckerContainer">
       <div>
         <h4 style="font-size:14px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
@@ -237,7 +237,7 @@
       </div>
       
       <div class="delivery-input-group">
-        <input type="text" id="custDeliveryCheckInput" placeholder="Gaon ya Pincode (e.g. Siriyari, 306021)..." class="form-control" style="font-size:12px;">
+        <input type="text" id="custDeliveryCheckInput" placeholder="Gaon ya 6-digit Pincode (e.g. Siriyari, 306021)..." class="form-control" style="font-size:12px;">
         <button class="btn btn-indigo" onclick="checkDeliveryAvailability()">Check</button>
       </div>
 
@@ -308,7 +308,7 @@
         <small id="dTotalTagValue" style="color:#64748b; font-weight:bold;">Tag Value: ₹0</small>
       </div>
 
-      <div class="stat-card" style="border-left: 4px solid #10b981; cursor:pointer;" onclick="openSalesReportModal()">
+      <div class="stat-card" style="border-left: 4px solid #10b981; cursor:pointer;" onclick="openSalesReportModal()" title="Click karke poori report dekhein">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <small style="color:#10b981; font-weight:700;">TOTAL BIKRI (SALES)</small>
           <span style="font-size:10px; background:#dcfce7; color:#15803d; padding:2px 5px; border-radius:4px; font-weight:bold;">Report</span>
@@ -374,7 +374,7 @@
     </div>
 
     <!-- DELIVERY LOCATIONS & PINCODE TOGGLE (ADMIN) -->
-    <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px solid #3b82f6;">
+    <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px solid #3b82f6; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:4px;">📍 Delivery Locations & Pincode Settings</h3>
       <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Gaon, Shahar aur Pincode likhein, ya delivery check box chupanay ke liye toggle on/off karein:</p>
       
@@ -489,7 +489,7 @@
     </div>
   </div>
 
-  <!-- ONLINE ORDERS MODAL (WITH LIVE STATUS & CANCEL) -->
+  <!-- ONLINE ORDERS MODAL (ADMIN VIEW) -->
   <div id="ordersPanelModal" class="modal">
     <div class="modal-box" style="max-width:850px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -1150,12 +1150,12 @@
         badge.style.background = '#dcfce7';
         badge.style.color = '#15803d';
         badge.style.border = '1px solid #86efac';
-        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b> [${input.toUpperCase()}]`;
+        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b> [${input.toUpperCase()}] me fast delivery ho sakti hai.`;
       } else {
         badge.style.background = '#fee2e2';
         badge.style.color = '#991b1b';
         badge.style.border = '1px solid #fca5a5';
-        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai:</b> [${input.toUpperCase()}]`;
+        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai:</b> Abhi [${input.toUpperCase()}] me service nahi hai. Contact karke confirm karein.`;
       }
     }
 
@@ -1181,23 +1181,25 @@
 
       const rAddr = document.getElementById('rStoreAddress');
       if (rAddr) rAddr.innerText = storeContactData.address || 'Near Bus Stand, Siriyari (Pali)';
+      const rPhone = document.getElementById('rStorePhones');
+      if (rPhone) rPhone.innerText = `Mo: ${storeContactData.phone1 || ''}${storeContactData.phone2 ? ', ' + storeContactData.phone2 : ''}`;
     }
 
     function saveCustomContactDetails(e) {
       e.preventDefault();
       storeContactData = {
-        name1: document.getElementById('admContact1Name').value.trim(),
-        phone1: document.getElementById('admContact1Phone').value.trim(),
-        name2: document.getElementById('admContact2Name').value.trim(),
-        phone2: document.getElementById('admContact2Phone').value.trim(),
-        whatsapp: document.getElementById('admWhatsappNumber').value.trim().replace(/\D/g, ''),
-        address: document.getElementById('admStoreAddress').value.trim()
+        name1: document.getElementById('admContact1Name').value.trim() || 'Dashrath Singh',
+        phone1: document.getElementById('admContact1Phone').value.trim() || '8209452284',
+        name2: document.getElementById('admContact2Name').value.trim() || 'Surendra Singh',
+        phone2: document.getElementById('admContact2Phone').value.trim() || '9636422794',
+        whatsapp: document.getElementById('admWhatsappNumber').value.trim().replace(/\D/g, '') || '917733909735',
+        address: document.getElementById('admStoreAddress').value.trim() || 'Siriyari, Pali (Rajasthan) • Fast Delivery Available'
       };
 
       db.ref('store_contacts').set(storeContactData)
         .then(() => {
           applyContactDetailsToUI();
-          alert("✓ Contact details update ho gayi!");
+          alert("✓ Contact details safalta-purvak cloud par update ho gayi!");
         });
     }
 
@@ -1237,21 +1239,32 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            canvas.width = 800; canvas.height = Math.round((img.height * 800) / img.width);
-            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-            db.ref('catalog_banners_list').push({ url: canvas.toDataURL('image/jpeg', 0.5), type: 'image', timestamp: Date.now() });
+            const MAX_WIDTH = 800;
+            let w = img.width, h = img.height;
+            if (w > MAX_WIDTH) {
+              h = Math.round((h * MAX_WIDTH) / w);
+              w = MAX_WIDTH;
+            }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const compressed = canvas.toDataURL('image/jpeg', 0.50);
+            db.ref('catalog_banners_list').push({ url: compressed, type: 'image', timestamp: Date.now() });
           };
           img.src = e.target.result;
         };
         reader.readAsDataURL(file);
       });
       event.target.value = '';
+      alert("Photos upload ho rahi hain!");
     }
 
     function handleSlideVideoUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) { alert("Video 8MB se choti honi chahiye!"); return; }
+      const files = event.target.files;
+      if (!files || !files[0]) return;
+      const file = files[0];
+      if (file.size > 8 * 1024 * 1024) { alert("Video 8MB se kam honi chahiye!"); return; }
+      alert("Video upload ho rahi hai...");
       const reader = new FileReader();
       reader.onload = function(e) {
         db.ref('catalog_banners_list').push({ url: e.target.result, type: 'video', timestamp: Date.now() }).then(() => alert("✓ Video Added!"));
@@ -1261,11 +1274,15 @@
     }
 
     function deleteSingleCatalogBanner(bannerId) {
-      if (confirm("Hatana chahte hain?")) db.ref('catalog_banners_list/' + bannerId).remove();
+      if (confirm("Hatana chahte hain?")) {
+        db.ref('catalog_banners_list/' + bannerId).remove();
+      }
     }
 
     function deleteAllCatalogBanners() {
-      if (confirm("Saari slides delete karein?")) db.ref('catalog_banners_list').remove();
+      if (confirm("Saari slides delete karein?")) {
+        db.ref('catalog_banners_list').remove();
+      }
     }
 
     function renderAdminSlideThumbs() {
@@ -1276,9 +1293,9 @@
         return;
       }
       box.innerHTML = catalogBanners.map(b => `
-        <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid ${b.type==='video'?'#9333ea':'#cbd5e1'}; flex-shrink:0; background:#000;">
-          ${b.type==='video'?`<video src="${b.url}" style="width:100%;height:100%;object-fit:cover;"></video>`:`<img src="${b.url}" style="width:100%;height:100%;object-fit:cover;">`}
-          <button type="button" onclick="deleteSingleCatalogBanner('${b.id}')" style="position:absolute; top:2px; right:2px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">✕</button>
+        <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid ${b.type==='video'?'#9333ea':'#cbd5e1'}; flex-shrink:0; background:#0f172a;">
+          ${b.type==='video'?`<video src="${b.url}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:`<img src="${b.url}" style="width:100%;height:100%;object-fit:cover;display:block;">`}
+          <button type="button" onclick="deleteSingleCatalogBanner('${b.id}')" style="position:absolute; top:3px; right:3px; background:rgba(239,68,68,0.95); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
         </div>
       `).join('');
     }
@@ -1287,13 +1304,15 @@
       const container = document.getElementById('sliderSlidesContainer');
       if (!container) return;
       if (!catalogBanners || catalogBanners.length === 0) {
-        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px;">No Banner</div>';
+        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px; font-weight:bold;">No Banner</div>';
         return;
       }
       container.innerHTML = catalogBanners.map((b, idx) => `
-        <div class="slider-slide ${idx === 0 ? 'active' : ''}">
+        <div class="slider-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
           ${b.type==='video'?`<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`:`<img src="${b.url}" class="slider-img">`}
-          <div class="slider-caption"><h3 style="font-size:15px; font-weight:800;">DN Footwear & Sports</h3></div>
+          <div class="slider-caption">
+            <h3 style="font-size:16px; font-weight:800;">DN Footwear & Sports Siriyari</h3>
+          </div>
         </div>
       `).join('');
       activeBannerIndex = 0;
@@ -1311,7 +1330,7 @@
         video.currentTime = 0;
         video.play().catch(() => {});
       } else {
-        bannerSlideTimer = setTimeout(() => shiftBannerSlide(1), 3500);
+        bannerSlideTimer = setTimeout(() => { shiftBannerSlide(1); }, 3500);
       }
     }
 
@@ -1364,7 +1383,7 @@
 
       if (isFootwear) {
         chosenSize = (selectedItemOptions[itemId] && selectedItemOptions[itemId].size) ? selectedItemOptions[itemId].size : null;
-        if (!chosenSize) { alert("Pehle Size chunein!"); return; }
+        if (!chosenSize) { alert("Size chunein!"); return; }
         const avail = (it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].sizes) ? it.colorData[chosenColor].sizes[chosenSize] : 0;
         if (avail <= 0) { alert("Out of stock!"); return; }
       }
