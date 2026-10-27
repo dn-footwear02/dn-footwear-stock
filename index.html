@@ -657,25 +657,16 @@
         <div class="row">
           <div class="form-group">
             <label>Category *</label>
-       <select id="fCategorySelect" class="form-control" onchange="handleCategorySelection(this.value)">
-              <optgroup label="👨 Men (Gents)">
-                <option value="Men Shoes">👟 Men's Shoes</option>
-                <option value="Men Chappal">🩴 Men's Chappal & Sandals</option>
-              </optgroup>
-              <optgroup label="👩 Ladies">
-                <option value="Ladies Shoes">👠 Ladies Shoes</option>
-                <option value="Ladies Chappal">👡 Ladies Chappal & Sandals</option>
-              </optgroup>
-              <optgroup label="🧒 Kids (Bachho Ke)">
-                <option value="Kids Shoes">👟 Kids Shoes</option>
-                <option value="Kids Chappal">🩴 Kids Chappal & Sandals</option>
-              </optgroup>
-              <optgroup label="🎒 Accessories">
-                <option value="Socks">🧦 Socks</option>
-                <option value="Chasma">👓 Chasma</option>
-                <option value="Belt">👔 Belt</option>
-                <option value="Purse">👛 Purse</option>
-              </optgroup>
+            <select id="fCategorySelect" class="form-control">
+              <option value="Sports/Running">Footwear: Sports & Running</option>
+              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
+              <option value="Formal Shoes">Footwear: Formal Shoes</option>
+              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
+              <option value="Sandals">Footwear: Sandals</option>
+              <option value="Socks">🧦 Socks (Moje)</option>
+              <option value="Chasma">👓 Chasma (Sunglasses)</option>
+              <option value="Belt">👔 Belt</option>
+              <option value="Purse">👛 Purse / Wallet</option>
             </select>
           </div>
 
@@ -699,7 +690,7 @@
             <input type="number" id="fPrice" required min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
         </div>
-    
+
         <!-- FLIPKART STYLE MRP FIELD -->
         <div class="form-group">
           <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
@@ -1297,36 +1288,6 @@
 
     // ==================== SLIDER AUTO-PLAY & VIDEO ENDED LOGIC ====================
     function renderCustomerSlider() {
-      const container = document.getElementById('sliderSlidesContainer');
-      if (!container) return;
-
-      if (!catalogBanners || catalogBanners.length === 0) {
-        container.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:13px; font-weight:bold;">Koi Banner Uplabdh Nahi Hai</div>';
-        return;
-      }
-
-      container.innerHTML = catalogBanners.map((b, idx) => {
-        let mediaHtml = '';
-        if (b.type === 'video') {
-          // Yahan muted, playsinline aur onended zaroori hai mobile ke liye
-          mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
-        } else {
-          mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
-        }
-
-        return `
-          <div class="slider-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
-            ${mediaHtml}
-            <div class="slider-caption">
-              <h3 style="font-size:16px; font-weight:800;">DN Footwear & Sports Siriyari</h3>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      activeBannerIndex = 0;
-      scheduleNextSlide();
-    }
       const container = document.getElementById('sliderSlidesContainer');
       if (!container) return;
 
@@ -2712,8 +2673,9 @@
 
       const finalPrice = Number(document.getElementById('saleFinalPrice').value);
       const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
-    const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
-const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+
       if (currentSellingItem.itemType === 'general') {
         if ((currentSellingItem.generalQty || 0) <= 0) { alert("Stock khatam hai!"); return; }
         currentSellingItem.generalQty -= 1;
