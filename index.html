@@ -1974,19 +1974,6 @@
       }
     }
 
-    function moveColorBlockPhoto(colorName, index, direction) {
-      if (!colorDataMap[colorName] || !colorDataMap[colorName].photos) return;
-      const photos = colorDataMap[colorName].photos;
-      const newIndex = index + direction;
-
-      if (newIndex < 0 || newIndex >= photos.length) return;
-
-      const temp = photos[index];
-      photos[index] = photos[newIndex];
-      photos[newIndex] = temp;
-
-      renderColorBlocks();
-    }
     function promptAddSizeToColor(col) {
       const customSz = prompt(`[${col}] me naya Size daalein (Jaise: 12, 13, 4.5):`);
       if (customSz) {
@@ -2045,6 +2032,20 @@
             </div>
           `;
         });
+
+         function moveColorBlockPhoto(colorName, index, direction) {
+      if (!colorDataMap[colorName] || !colorDataMap[colorName].photos) return;
+      const photos = colorDataMap[colorName].photos;
+      const newIndex = index + direction;
+
+      if (newIndex < 0 || newIndex >= photos.length) return;
+
+      const temp = photos[index];
+      photos[index] = photos[newIndex];
+      photos[newIndex] = temp;
+
+      renderColorBlocks();
+    }
 
         let sizeRowsHtml = '';
         const sizeKeys = Object.keys(cData.sizes || {});
