@@ -247,15 +247,18 @@
       <div class="call-btn-group" id="custCallBtnContainer"></div>
     </div>
 
+    <!-- UPDATED CATEGORY FILTER (MEN'S, LADIES, KIDS SEPARATED) -->
     <div class="filter-bar">
       <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
-      <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto;">
-        <option value="ALL">Sabhi Samaan</option>
-        <option value="Shoes">Footwear</option>
-        <option value="Socks">Socks</option>
-        <option value="Chasma">Chasma</option>
-        <option value="Belt">Belt</option>
-        <option value="Purse">Purse</option>
+      <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
+        <option value="ALL">🌟 Sabhi Samaan (All)</option>
+        <option value="Mens">👨 Men's Footwear</option>
+        <option value="Ladies">👩 Ladies Footwear</option>
+        <option value="Kids">👶 Kids Footwear</option>
+        <option value="Socks">🧦 Socks (Moje)</option>
+        <option value="Chasma">👓 Chasma</option>
+        <option value="Belt">👔 Belt</option>
+        <option value="Purse">👛 Purse / Wallet</option>
       </select>
     </div>
 
@@ -318,12 +321,14 @@
       <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, brand, color, barcode..." class="search-box">
       
       <select id="adminCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
-        <option value="ALL">Sabhi Categories</option>
-        <option value="Shoes">Footwear (Shoes / Sandals)</option>
-        <option value="Socks">Socks (Moje)</option>
-        <option value="Chasma">Chasma (Sunglasses)</option>
-        <option value="Belt">Belt (Leather)</option>
-        <option value="Purse">Purse / Wallet</option>
+        <option value="ALL">🌟 Sabhi Categories</option>
+        <option value="Mens">👨 Men's Footwear</option>
+        <option value="Ladies">👩 Ladies Footwear</option>
+        <option value="Kids">👶 Kids Footwear</option>
+        <option value="Socks">🧦 Socks</option>
+        <option value="Chasma">👓 Chasma</option>
+        <option value="Belt">👔 Belt</option>
+        <option value="Purse">👛 Purse / Wallet</option>
       </select>
 
       <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Customer Link Copy</button>
@@ -420,7 +425,7 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- CART MODAL (MULTI-ITEM ORDER VIA WHATSAPP) -->
+  <!-- CART MODAL (FLEXIBLE PINCODE / WITHOUT PINCODE ORDER) -->
   <div id="cartModal" class="modal">
     <div class="modal-box" style="max-width:520px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -448,8 +453,8 @@
             <input type="tel" id="cartCustPhone" required placeholder="Mobile no..." class="form-control">
           </div>
           <div class="form-group">
-            <label>Gaon / Shahar (Delivery Pata) *</label>
-            <input type="text" id="cartCustAddress" required placeholder="e.g. Siriyari, Pali" class="form-control">
+            <label>Gaon / Shahar / Pincode *</label>
+            <input type="text" id="cartCustAddress" required placeholder="e.g. Siriyari ya 306021" class="form-control">
           </div>
         </div>
 
@@ -619,7 +624,7 @@
     </div>
   </div>
 
-  <!-- ADD / EDIT ITEM MODAL -->
+  <!-- ADD / EDIT ITEM MODAL (UPDATED WITH KIDS MULTI-PRICE SYSTEM) -->
   <div id="shoeModal" class="modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -657,12 +662,10 @@
         <div class="row">
           <div class="form-group">
             <label>Category *</label>
-            <select id="fCategorySelect" class="form-control">
-              <option value="Sports/Running">Footwear: Sports & Running</option>
-              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
-              <option value="Formal Shoes">Footwear: Formal Shoes</option>
-              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
-              <option value="Sandals">Footwear: Sandals</option>
+            <select id="fCategorySelect" class="form-control" onchange="handleCategorySelectionChange(this.value)">
+              <option value="Mens">👨 Men's Footwear</option>
+              <option value="Ladies">👩 Ladies Footwear</option>
+              <option value="Kids">👶 Kids Footwear</option>
               <option value="Socks">🧦 Socks (Moje)</option>
               <option value="Chasma">👓 Chasma (Sunglasses)</option>
               <option value="Belt">👔 Belt</option>
@@ -671,27 +674,43 @@
           </div>
 
           <div class="form-group" id="footwearGenderGroup">
-            <label>Gender / Kiske Liye:</label>
+            <label id="fGenderLabel">Gender / Range:</label>
             <select id="fGenderSelect" class="form-control" onchange="changePresetGender(this.value)">
-              <option value="Men">Men (Default: 6-11)</option>
-              <option value="Ladies">Ladies (Default: 3-8)</option>
-              <option value="Kids">Kids (Default: 1-13)</option>
+              <option value="Men">Men (Sizes: 6-11)</option>
+              <option value="Ladies">Ladies (Sizes: 3-8)</option>
+              <option value="Kids">Kids (Sizes: 1-13)</option>
             </select>
           </div>
         </div>
 
-        <div class="row">
+        <!-- STANDARD PRICE FIELDS -->
+        <div id="standardPriceSection" class="row">
           <div class="form-group">
             <label>Kharid Rate (Cost ₹) *</label>
-            <input type="number" id="fCost" required min="0" placeholder="e.g. 550" class="form-control">
+            <input type="number" id="fCost" min="0" placeholder="e.g. 550" class="form-control">
           </div>
           <div class="form-group">
             <label>Bikri Rate (Selling Price ₹) *</label>
-            <input type="number" id="fPrice" required min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
+            <input type="number" id="fPrice" min="0" placeholder="e.g. 899" class="form-control" style="font-weight:bold; color:#10b981;">
           </div>
         </div>
 
-        <!-- FLIPKART STYLE MRP FIELD -->
+        <!-- KIDS DUAL PRICE SECTION (1-5 vs 11-13 etc.) -->
+        <div id="kidsDualPriceSection" style="display:none; background:#ecfdf5; padding:12px; border-radius:8px; border:1px solid #10b981; margin-bottom:12px;">
+          <label style="font-size:12px; font-weight:800; color:#065f46; margin-bottom:6px; display:block;">👶 Kids Size Ke Hisab Se Alag Price (Rate):</label>
+          <div class="row">
+            <div class="form-group">
+              <label style="font-size:11px;">Chhote Size (Jaise 1 se 10 / Small) ₹:</label>
+              <input type="number" id="fKidsPriceSmall" min="0" placeholder="e.g. 350" class="form-control" style="font-weight:bold; color:#047857;">
+            </div>
+            <div class="form-group">
+              <label style="font-size:11px;">Bade Size (Jaise 11 se 1 / Big) ₹:</label>
+              <input type="number" id="fKidsPriceBig" min="0" placeholder="e.g. 450" class="form-control" style="font-weight:bold; color:#047857;">
+            </div>
+          </div>
+        </div>
+
+        <!-- MRP FIELD -->
         <div class="form-group">
           <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
           <input type="number" id="fMrpPrice" min="0" placeholder="e.g. 1499" class="form-control">
@@ -940,7 +959,7 @@
     const GENDER_PRESETS = {
       'Men': [6, 7, 8, 9, 10, 11],
       'Ladies': [3, 4, 5, 6, 7, 8],
-      'Kids': [1, 2, 3, 4, 11, 12, 13]
+      'Kids': [1, 2, 3, 4, 5, 11, 12, 13]
     };
 
     let items = [];
@@ -1120,10 +1139,9 @@
         address: document.getElementById('admStoreAddress').value.trim() || 'Siriyari, Pali (Rajasthan) • Fast Delivery Available'
       };
 
-      db.ref('store_contacts').set(storeContactData)
-        .then(() => {
-          applyContactDetailsToUI();
-          alert("✓ Contact details safalta-purvak cloud par update ho gayi!");
+      db.ref('store_contacts').set(storeContactData).then(() => {
+        applyContactDetailsToUI();
+        alert("✓ Contact details safalta-purvak cloud par update ho gayi!");
         })
         .catch(err => {
           alert("Error: " + err.message);
@@ -1361,6 +1379,18 @@
       if (!selectedItemOptions[itemId]) selectedItemOptions[itemId] = {};
       selectedItemOptions[itemId].size = size;
 
+      const it = items.find(x => x.id === itemId);
+      if (it && it.category === 'Kids') {
+        const numSz = Number(size);
+        if (!isNaN(numSz)) {
+          if (numSz >= 11) {
+            selectedItemOptions[itemId].currentPrice = it.priceBig || it.price;
+          } else {
+            selectedItemOptions[itemId].currentPrice = it.priceSmall || it.price;
+          }
+        }
+      }
+
       const box = document.getElementById(`sizes_box_${itemId}`);
       if (box) {
         box.querySelectorAll('.size-select-chip').forEach(btn => {
@@ -1370,6 +1400,11 @@
             btn.classList.remove('selected');
           }
         });
+      }
+      
+      const priceDisplay = document.getElementById(`card_price_${itemId}`);
+      if (priceDisplay && selectedItemOptions[itemId].currentPrice) {
+        priceDisplay.innerText = `₹${selectedItemOptions[itemId].currentPrice}`;
       }
     }
 
@@ -1381,12 +1416,19 @@
       const chosenColor = (selectedItemOptions[itemId] && selectedItemOptions[itemId].color) ? selectedItemOptions[itemId].color : (isFootwear ? (Object.keys(it.colorData || {})[0] || 'Standard') : 'Standard');
       
       let chosenSize = 'Standard';
+      let finalItemPrice = Number(it.price) || 0;
 
       if (isFootwear) {
         chosenSize = (selectedItemOptions[itemId] && selectedItemOptions[itemId].size) ? selectedItemOptions[itemId].size : null;
-        if (!chosenSize) {
-          alert("Kripya pehle apna 'Size' chunein!");
-          return;
+        if (!chosenSize) { alert("Kripya pehle apna 'Size' chunein!"); return; }
+
+        if (it.category === 'Kids') {
+          const numSz = Number(chosenSize);
+          if (!isNaN(numSz) && numSz >= 11) {
+            finalItemPrice = Number(it.priceBig) || Number(it.price) || 0;
+          } else if (!isNaN(numSz)) {
+            finalItemPrice = Number(it.priceSmall) || Number(it.price) || 0;
+          }
         }
 
         const avail = (it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].sizes) ? it.colorData[chosenColor].sizes[chosenSize] : 0;
@@ -1518,7 +1560,7 @@
 
       const custName = document.getElementById('cartCustName').value.trim();
       const custPhone = document.getElementById('cartCustPhone').value.trim();
-      const custAddress = document.getElementById('cartCustAddress').value.trim();
+      const custAddress = document.getElementById('cartCustAddress').value.trim(); // Works with or without pincode
 
       const orderId = 'ORD-' + Math.floor(10000 + Math.random() * 90000);
       let totalPrice = 0;
@@ -1548,7 +1590,7 @@
       waMessage += `📋 *ORDER ID:* ${orderId}\n`;
       waMessage += `👤 *Grahak Ka Naam:* ${custName}\n`;
       waMessage += `📞 *Mobile No:* ${custPhone}\n`;
-      waMessage += `📍 *Delivery Pata:* ${custAddress}\n\n`;
+      waMessage += `📍 *Gaon/Pata:* ${custAddress}\n\n`;
       waMessage += `🛍️ *ORDER ITEMS LIST:*\n${itemsDetailsText}`;
       waMessage += `💰 *KUL BIKRI VALUE (TOTAL):* ₹${totalPrice}\n\n`;
       waMessage += `Kripya mera order confirm karein aur delivery details batayein! Dhanyawad.`;
@@ -1627,9 +1669,8 @@
       document.getElementById('salesReportModal').style.display = 'flex';
     }
 
-    function closeSalesReportModal() {
-      document.getElementById('salesReportModal').style.display = 'none';
-    }
+    function openSalesReportModal() { setReportPeriod('today'); document.getElementById('salesReportModal').style.display = 'flex'; }
+    function closeSalesReportModal() { document.getElementById('salesReportModal').style.display = 'none'; }
 
     function setReportPeriod(period) {
       currentReportPeriod = period;
@@ -1717,11 +1758,15 @@
       document.getElementById('repCashPercent').innerText = `${cashPercent}% of total`;
       document.getElementById('repUpiPercent').innerText = `${upiPercent}% of total`;
 
-      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
+      document.getElementById('repTotalAmount').innerText = "₹" + totalSales;
+      document.getElementById('repCashAmount').innerText = "₹" + cashTotal;
+      document.getElementById('repUpiAmount').innerText = "₹" + upiTotal;
+      document.getElementById('repProfitAmount').innerText = "₹" + profitTotal;
+      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="5" style="text-align:center;">Koi bikri nahi.</td></tr>';
     }
 
     function downloadSalesCSV(type) {
-      let filtered = [];
+      let filtered = [...salesHistory];
       const today = new Date().toISOString().slice(0, 10);
       const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -1782,6 +1827,8 @@
       document.getElementById('pinChangeModal').style.display = 'none';
     }
 
+    function openPinChangeModal() { document.getElementById('pinChangeModal').style.display = 'flex'; }
+    function closePinChangeModal() { document.getElementById('pinChangeModal').style.display = 'none'; }
     function saveNewAdminPin(e) {
       e.preventDefault();
       const oldPin = document.getElementById('oldPinInput').value.trim();
@@ -1871,6 +1918,30 @@
       const isFootwear = (type === 'footwear');
       document.getElementById('footwearGenderGroup').style.display = isFootwear ? 'block' : 'none';
       document.getElementById('generalItemSection').style.display = isFootwear ? 'none' : 'block';
+    }
+
+    function handleCategorySelectionChange(cat) {
+      const genderSel = document.getElementById('fGenderSelect');
+      const kidsPriceSec = document.getElementById('kidsDualPriceSection');
+      const standardPriceSec = document.getElementById('standardPriceSection');
+
+      if (cat === 'Mens') {
+        genderSel.value = 'Men';
+        kidsPriceSec.style.display = 'none';
+        standardPriceSec.style.display = 'grid';
+      } else if (cat === 'Ladies') {
+        genderSel.value = 'Ladies';
+        kidsPriceSec.style.display = 'none';
+        standardPriceSec.style.display = 'grid';
+      } else if (cat === 'Kids') {
+        genderSel.value = 'Kids';
+        kidsPriceSec.style.display = 'block';
+        standardPriceSec.style.display = 'none'; // Use dual prices for kids
+      } else {
+        kidsPriceSec.style.display = 'none';
+        standardPriceSec.style.display = 'grid';
+      }
+      changePresetGender(genderSel.value);
     }
 
     function changePresetGender(gender) {
@@ -2185,14 +2256,18 @@
       if (!mainPhoto) mainPhoto = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80';
 
       const itemObj = {
-        id, itemType, name, brand, category, cost, price,
-        mrp: mrpPrice,
-        gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
-        colors: Object.keys(safeColorData),
-        colorData: safeColorData,
-        photo: mainPhoto,
-        generalQty: (itemType === 'general') ? Number(document.getElementById('fGeneralQty').value) || 0 : 0,
-        generalBarcode: (itemType === 'general') ? document.getElementById('fGeneralBarcode').value.trim() : ''
+        id, itemType,
+        name: document.getElementById('fName').value.trim(),
+        brand: document.getElementById('fBrand').value.trim(),
+        category,
+        cost: Number(document.getElementById('fCost').value) || 0,
+        price, priceSmall, priceBig,
+        mrp: Number(document.getElementById('fMrpPrice').value) || Math.round(price * 1.45),
+        gender: document.getElementById('fGenderSelect').value,
+        colorData: colorDataMap,
+        photo: Object.values(colorDataMap)[0]?.photos[0] || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80',
+        generalQty: Number(document.getElementById('fGeneralQty').value) || 0,
+        generalBarcode: document.getElementById('fGeneralBarcode').value.trim()
       };
 
       db.ref('footwear_stock/' + itemObj.id).set(itemObj)
@@ -2227,6 +2302,8 @@
         colorDataMap = { "Standard": { photos: it.photos || [it.photo], video: it.video || '', sizes: it.sizes || {}, barcodes: it.barcodes || {} } };
       }
 
+      handleCategorySelectionChange(it.category || 'Mens');
+      colorDataMap = JSON.parse(JSON.stringify(it.colorData || {}));
       renderColorBlocks();
       document.getElementById('shoeModalTitle').innerText = "Item Edit Karein";
       document.getElementById('shoeModal').style.display = 'flex';
@@ -2340,10 +2417,16 @@
     // ==================== RENDER CUSTOMER CATALOG (AMAZON/FLIPKART CARDS) ====================
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
+      const catFlt = document.getElementById('custCategoryFilter').value;
+      const search = (document.getElementById('custSearchFilter').value || '').toLowerCase().trim();
+
       let cardsHtml = '';
 
       items.forEach(it => {
-        const isFootwear = (it.itemType !== 'general');
+        const itemCat = it.category || 'Mens';
+        if (catFlt !== 'ALL' && itemCat !== catFlt) return;
+        if (search && !it.name.toLowerCase().includes(search) && !it.brand.toLowerCase().includes(search)) return;
+
         let colors = Object.keys(it.colorData || {});
 
         if (!selectedItemOptions[it.id]) {
@@ -2576,6 +2659,7 @@
             </div>
           `;
         }
+        html += `<div><b>Rang: ${c}</b><div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px;">${grid}</div></div>`;
       }
 
       document.getElementById('chkColorWiseStockContainer').innerHTML = html;
@@ -2595,6 +2679,7 @@
     function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
       if (!item) return;
 
+    function openSaleCheckout(item) {
       currentSellingItem = item;
       currentSellingColor = preferredColor;
       currentSellingSize = preferredSize;
@@ -2647,7 +2732,8 @@
       document.getElementById('saleColorBadge').innerText = `${currentSellingColor}`;
       document.getElementById('saleStockRem').innerText = `Stock: ${availQty}`;
 
-      document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
+      document.getElementById('saleImg').src = item.photo;
+      document.getElementById('saleName').innerText = item.name;
       document.getElementById('saleFinalPrice').value = item.price;
       document.getElementById('saleCustName').value = '';
       document.getElementById('saleCustPhone').value = '';
@@ -2664,6 +2750,8 @@
       if (e) e.preventDefault();
       if (!currentSellingItem) return;
 
+    function confirmSaleTransaction(e, print = false) {
+      e.preventDefault();
       const finalPrice = Number(document.getElementById('saleFinalPrice').value);
       const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
       const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
