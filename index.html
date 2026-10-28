@@ -249,13 +249,17 @@
 
     <div class="filter-bar">
       <input type="text" id="custSearchFilter" oninput="renderApp()" placeholder="Search joota, brand, rang..." class="search-box">
-      <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto;">
-        <option value="ALL">Sabhi Samaan</option>
-        <option value="Shoes">Footwear</option>
-        <option value="Socks">Socks</option>
-        <option value="Chasma">Chasma</option>
-        <option value="Belt">Belt</option>
-        <option value="Purse">Purse</option>
+    <select id="custCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
+        <option value="ALL">🛍️ Sabhi Samaan (All Items)</option>
+        <option value="Mens Shoes">👞 Mens Shoes</option>
+        <option value="Mens Chappal">🩴 Mens Chappal</option>
+        <option value="Ladies Shoes">👠 Ladies Shoes</option>
+        <option value="Ladies Chappal">👡 Ladies Chappal</option>
+        <option value="Kids Footwear">👶 Kids Footwear</option>
+        <option value="Socks">🧦 Socks</option>
+        <option value="Chasma">👓 Chasma</option>
+        <option value="Belt">👔 Belt</option>
+        <option value="Purse">👛 Purse</option>
       </select>
     </div>
 
@@ -318,12 +322,16 @@
       <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, brand, color, barcode..." class="search-box">
       
       <select id="adminCategoryFilter" onchange="renderApp()" class="form-control" style="width:auto; font-weight:bold;">
-        <option value="ALL">Sabhi Categories</option>
-        <option value="Shoes">Footwear (Shoes / Sandals)</option>
-        <option value="Socks">Socks (Moje)</option>
-        <option value="Chasma">Chasma (Sunglasses)</option>
-        <option value="Belt">Belt (Leather)</option>
-        <option value="Purse">Purse / Wallet</option>
+        <option value="ALL">📊 Sabhi Categories (Total Stock)</option>
+        <option value="Mens Shoes">👞 Mens Shoes</option>
+        <option value="Mens Chappal">🩴 Mens Chappal</option>
+        <option value="Ladies Shoes">👠 Ladies Shoes</option>
+        <option value="Ladies Chappal">👡 Ladies Chappal</option>
+        <option value="Kids Footwear">👶 Kids Footwear</option>
+        <option value="Socks">🧦 Socks</option>
+        <option value="Chasma">👓 Chasma</option>
+        <option value="Belt">👔 Belt</option>
+        <option value="Purse">👛 Purse</option>
       </select>
 
       <button class="btn btn-slate" onclick="copyCustomerStoreLink()">🔗 Customer Link Copy</button>
@@ -655,14 +663,14 @@
         </div>
 
         <div class="row">
-          <div class="form-group">
+         <div class="form-group">
             <label>Category *</label>
-            <select id="fCategorySelect" class="form-control">
-              <option value="Sports/Running">Footwear: Sports & Running</option>
-              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
-              <option value="Formal Shoes">Footwear: Formal Shoes</option>
-              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
-              <option value="Sandals">Footwear: Sandals</option>
+            <select id="fCategorySelect" class="form-control" style="font-weight:bold; color:#1e1b4b;">
+              <option value="Mens Shoes">👞 Mens Shoes & Sports</option>
+              <option value="Mens Chappal">🩴 Mens Chappal & Sandals</option>
+              <option value="Ladies Shoes">👠 Ladies Shoes & Sneakers</option>
+              <option value="Ladies Chappal">👡 Ladies Chappal & Sandals</option>
+              <option value="Kids Footwear">👶 Kids Footwear (Kids Shoes/Chappal)</option>
               <option value="Socks">🧦 Socks (Moje)</option>
               <option value="Chasma">👓 Chasma (Sunglasses)</option>
               <option value="Belt">👔 Belt</option>
