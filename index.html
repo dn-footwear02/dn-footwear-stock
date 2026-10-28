@@ -214,13 +214,6 @@
   <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
   <div id="customerViewSection" class="container">
     
-    <!-- CUSTOMER ORDER TRACK BUTTON -->
-    <div style="margin-bottom: 12px;" class="no-print">
-      <button class="btn btn-purple" onclick="openCustomerTrackModal()" style="padding: 8px 14px; font-size: 13px; font-weight: bold;">
-        🔍 Mera Order Track Karein
-      </button>
-    </div>
-    
     <!-- BANNER SLIDER -->
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
       <div id="sliderSlidesContainer"></div>
@@ -435,28 +428,6 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- CUSTOMER ORDER TRACK MODAL -->
-  <div id="customerTrackModal" class="modal">
-    <div class="modal-box" style="max-width:460px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:17px; font-weight:800; color:#0f172a;">🔍 Apna Order Status Track Karein</h3>
-        <button class="btn btn-slate" onclick="closeCustomerTrackModal()">✕</button>
-      </div>
-
-      <div class="form-group">
-        <label>Apna Mobile Number ya Order ID Daalein:</label>
-        <div style="display:flex; gap:8px;">
-          <input type="text" id="trackSearchInput" placeholder="e.g. 8209452284 ya ORD-12345" class="form-control">
-          <button class="btn btn-indigo" onclick="searchCustomerOrders()">Track</button>
-        </div>
-      </div>
-
-      <div id="trackResultContainer" style="margin-top:14px; max-height:50vh; overflow-y:auto;">
-        <small style="color:#64748b;">Apna mobile number daalkar track button dabayein.</small>
-      </div>
-    </div>
-  </div>
-  
   <!-- CART MODAL (MULTI-ITEM ORDER VIA WHATSAPP) -->
   <div id="cartModal" class="modal">
     <div class="modal-box" style="max-width:520px;">
@@ -1622,27 +1593,17 @@
 
         const isDelivered = (o.status === 'Delivered');
 
-     return `
+        return `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
             <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
-            <td style="font-size:12px; line-height:1.4;">${itemsListHtml}</td>
-            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b></td>
-            <td>
-              <select onchange="updateOrderStatus('${o.orderId}', this.value)" class="form-control" style="font-size:12px; font-weight:bold; background:#f8fafc;">
-                <option value="Ordered" ${currentStatus==='Ordered'?'selected':''}>Ordered</option>
-                <option value="Confirm" ${currentStatus==='Confirm'?'selected':''}>Confirm</option>
-                <option value="Packed" ${currentStatus==='Packed'?'selected':''}>Packed</option>
-                <option value="On the way" ${currentStatus==='On the way'?'selected':''}>On the way</option>
-                <option value="Delivered" ${currentStatus==='Delivered'?'selected':''}>Delivered</option>
-              </select>
-            </td>
+            <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
+            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
             <td style="text-align:right;">
-              <button class="btn btn-red" style="padding:4px 8px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️ Hatao</button>
+              ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
             </td>
           </tr>
-        `;
-        
         `;
       }).join('');
     }
@@ -1922,81 +1883,6 @@
       renderColorBlocks();
     }
 
- function openCustomerTrackModal() {
-      document.getElementById('trackSearchInput').value = '';
-      document.getElementById('trackResultContainer').innerHTML = '<small style="color:#64748b;">Apna mobile number ya Order ID daalkar track button dabayein.</small>';
-      document.getElementById('customerTrackModal').style.display = 'flex';
-      setTimeout(() => document.getElementById('trackSearchInput').focus(), 100);
-    }
-
-    function closeCustomerTrackModal() {
-      document.getElementById('customerTrackModal').style.display = 'none';
-    }
-
-    function searchCustomerOrders() {
-      const query = document.getElementById('trackSearchInput').value.trim().toLowerCase();
-      const container = document.getElementById('trackResultContainer');
-
-      if (!query) {
-        alert("Kripya apna mobile number ya Order ID likhein!");
-        return;
-      }
-
-      if (!onlineOrders || onlineOrders.length === 0) {
-        container.innerHTML = `<div style="background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; font-size:12px; text-align:center;"><b>Koi order nahi mila!</b></div>`;
-        return;
-      }
-
-      const matchedOrders = onlineOrders.filter(o => {
-        const phone = o.phone ? String(o.phone).trim().toLowerCase() : '';
-        const orderId = o.orderId ? String(o.orderId).trim().toLowerCase() : '';
-        const customer = o.customer ? String(o.customer).trim().toLowerCase() : '';
-        return phone.includes(query) || orderId.includes(query) || customer.includes(query);
-      });
-
-      if (matchedOrders.length === 0) {
-        container.innerHTML = `<div style="background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; font-size:12px; text-align:center;"><b>Is number/ID se koi order nahi mila!</b></div>`;
-        return;
-      }
-
-      let html = '';
-      matchedOrders.forEach(o => {
-        const status = o.status || 'Ordered';
-        let statusBadgeBg = '#fef3c7; color:#92400e;';
-        if (status === 'Confirm') statusBadgeBg = '#dbeafe; color:#1e40af;';
-        if (status === 'Packed') statusBadgeBg = '#f3e8ff; color:#6b21a8;';
-        if (status === 'On the way') statusBadgeBg = '#ffedd5; color:#9a3412;';
-        if (status === 'Delivered') statusBadgeBg = '#dcfce7; color:#166534;';
-
-        let itemsHtml = (o.items || []).map(i => `
-          <div style="font-size:11px; color:#334155;">● ${i.name} (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
-        `).join('');
-
-        html += `
-          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b>
-              <span class="cat-chip" style="background:${statusBadgeBg}; font-weight:bold; padding:3px 8px; font-size:11px;">📌 ${status}</span>
-            </div>
-            <p style="font-size:12px; color:#64748b; margin-bottom:6px;">Grahak: <b>${o.customer}</b> (${o.phone})</p>
-            <div style="background:white; padding:8px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:6px;">
-              ${itemsHtml}
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#0f172a;">
-              <span>Kul Raashi:</span>
-              <span style="color:#10b981;">₹${o.totalAmount}</span>
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function updateOrderStatus(orderId, newStatus) {
-      db.ref('customer_orders/' + orderId + '/status').set(newStatus);
-    }
-  
     function addNewColorBlock() {
       const input = document.getElementById('manualColorInput');
       const rawColor = input.value.trim();
