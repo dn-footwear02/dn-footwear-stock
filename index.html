@@ -2804,15 +2804,16 @@
       } else document.getElementById('scannerModal').style.display = 'none';
     }
 
-    let isScanningLocked = false;
+let isScanningLocked = false;
 
     function onScanFound(code) {
       if (isScanningLocked) return;
-      const cleanCode = code ? code.trim() : '';
+      const cleanCode = code ? String(code).trim() : '';
       if (!cleanCode) return;
 
-      const c = cleanCode.toLowerCase();
+      const scannedCodeLower = cleanCode.toLowerCase();
 
+      // Agar box barcode set karne ke liye scanner khula hai
       if (currentScanAction === 'color_size_barcode' && targetScanInputId) {
         isScanningLocked = true;
         const inp = document.getElementById(targetScanInputId.inputId);
@@ -2828,10 +2829,12 @@
       let matchedColor = null;
       let matchedSize = null;
 
+      // Sabhi items aur unke colors/sizes me barcode dhoondhein
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
+        
         if (it.itemType === 'general') {
-          if (it.generalBarcode && it.generalBarcode.trim().toLowerCase() === c) {
+          if (it.generalBarcode && String(it.generalBarcode).trim().toLowerCase() === scannedCodeLower) {
             matchedItem = it;
             matchedColor = 'General';
             matchedSize = '1 Piece';
@@ -2839,9 +2842,12 @@
           }
         } else if (it.colorData) {
           for (let col in it.colorData) {
-            const bcMap = it.colorData[col].barcodes || {};
+            const colorObj = it.colorData[col];
+            const bcMap = colorObj.barcodes || {};
+            
             for (let sz in bcMap) {
-              if (bcMap[sz] && String(bcMap[sz]).trim().toLowerCase() === c) {
+              const savedBarcode = bcMap[sz] ? String(bcMap[sz]).trim().toLowerCase() : '';
+              if (savedBarcode && savedBarcode === scannedCodeLower) {
                 matchedItem = it;
                 matchedColor = col;
                 matchedSize = sz;
@@ -2856,7 +2862,7 @@
 
       if (!matchedItem) {
         isScanningLocked = true;
-        alert(`Barcode [${cleanCode}] kisi item se match nahi hua!`);
+        alert(`Barcode [${cleanCode}] kisi item se match nahi hua! Kripya check karein ki yeh barcode item me save hai ya nahi.`);
         setTimeout(() => { isScanningLocked = false; }, 2000);
         return;
       }
@@ -2868,12 +2874,13 @@
         openCheckPopup(matchedItem.id, matchedColor, matchedSize);
       } else if (currentScanAction === 'inward') {
         if (matchedItem.itemType === 'general') {
-          matchedItem.generalQty = (matchedItem.generalQty || 0) + 1;
+          matchedItem.generalQty = (Number(matchedItem.generalQty) || 0) + 1;
         } else {
-          matchedItem.colorData[matchedColor].sizes[matchedSize] = (matchedItem.colorData[matchedColor].sizes[matchedSize] || 0) + 1;
+          if (!matchedItem.colorData[matchedColor].sizes) matchedItem.colorData[matchedColor].sizes = {};
+          matchedItem.colorData[matchedColor].sizes[matchedSize] = (Number(matchedItem.colorData[matchedColor].sizes[matchedSize]) || 0) + 1;
         }
         db.ref('footwear_stock/' + matchedItem.id).set(matchedItem);
-        alert(`[${matchedItem.name}] ${matchedColor} Size ${matchedSize} me +1 jodi stock badh gaya!`);
+        alert(`✓ [${matchedItem.name}] (${matchedColor} - Size ${matchedSize}) me +1 jodi stock badh gaya!`);
         closeScannerModal();
       } else if (currentScanAction === 'sale') {
         closeScannerModal();
@@ -2882,7 +2889,7 @@
 
       setTimeout(() => { isScanningLocked = false; }, 1500);
     }
-
+    
     function handleManualScan() {
       const v = document.getElementById('manualInput').value.trim();
       if (v) onScanFound(v);
