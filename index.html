@@ -135,7 +135,7 @@
 
     .cat-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: #e0e7ff; color: #3730a3; text-transform: uppercase; }
 
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 999; padding: 15px; }
     .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
@@ -2806,14 +2806,14 @@
 
 let isScanningLocked = false;
 
-    function onScanFound(code) {
+  function onScanFound(code) {
       if (isScanningLocked) return;
       const cleanCode = code ? String(code).trim() : '';
       if (!cleanCode) return;
 
       const scannedCodeLower = cleanCode.toLowerCase();
 
-      // Agar box barcode set karne ke liye scanner khula hai
+      // 1. Agar box barcode set karne ke liye scanner khula hai
       if (currentScanAction === 'color_size_barcode' && targetScanInputId) {
         isScanningLocked = true;
         const inp = document.getElementById(targetScanInputId.inputId);
@@ -2829,7 +2829,7 @@ let isScanningLocked = false;
       let matchedColor = null;
       let matchedSize = null;
 
-      // Sabhi items aur unke colors/sizes me barcode dhoondhein
+      // 2. Sabhi items me bar-code match karein
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
         
@@ -2862,15 +2862,31 @@ let isScanningLocked = false;
 
       if (!matchedItem) {
         isScanningLocked = true;
-        alert(`Barcode [${cleanCode}] kisi item se match nahi hua! Kripya check karein ki yeh barcode item me save hai ya nahi.`);
+        alert(`Barcode [${cleanCode}] database me match nahi hua! Kripya check karein ki yeh barcode item me save hai ya nahi.`);
         setTimeout(() => { isScanningLocked = false; }, 2000);
         return;
       }
 
       isScanningLocked = true;
 
+      // ⚠️ SABSE ZAROORI FIX: Pehle scanner ko poori tarah band karein, phir sale modal kholein
+      if (scannerObj && scannerObj.isScanning) {
+        scannerObj.stop().then(() => {
+          document.getElementById('scannerModal').style.display = 'none';
+          executePostScanAction(matchedItem, matchedColor, matchedSize);
+        }).catch(() => {
+          document.getElementById('scannerModal').style.display = 'none';
+          executePostScanAction(matchedItem, matchedColor, matchedSize);
+        });
+      } else {
+        document.getElementById('scannerModal').style.display = 'none';
+        executePostScanAction(matchedItem, matchedColor, matchedSize);
+      }
+    }
+
+    // Helper function to handle action after scanner closes successfully
+    function executePostScanAction(matchedItem, matchedColor, matchedSize) {
       if (currentScanAction === 'check') {
-        closeScannerModal();
         openCheckPopup(matchedItem.id, matchedColor, matchedSize);
       } else if (currentScanAction === 'inward') {
         if (matchedItem.itemType === 'general') {
@@ -2881,10 +2897,11 @@ let isScanningLocked = false;
         }
         db.ref('footwear_stock/' + matchedItem.id).set(matchedItem);
         alert(`✓ [${matchedItem.name}] (${matchedColor} - Size ${matchedSize}) me +1 jodi stock badh gaya!`);
-        closeScannerModal();
       } else if (currentScanAction === 'sale') {
-        closeScannerModal();
-        openSaleCheckout(matchedItem, matchedColor, matchedSize);
+        // Turant Bikri Billing Counter modal kholein
+        setTimeout(() => {
+          openSaleCheckout(matchedItem, matchedColor, matchedSize);
+        }, 150);
       }
 
       setTimeout(() => { isScanningLocked = false; }, 1500);
