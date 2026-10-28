@@ -843,6 +843,17 @@
           </div>
         </div>
 
+        <!-- 📱 SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
+        <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
+          <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:4px;">📱 Scan & Pay (Exact Amount):</b>
+          <div style="font-size:14px; font-weight:900; color:#7e22ce; margin-bottom:8px;" id="qrDisplayAmountText">₹0</div>
+          
+          <!-- Ye QR code automatic selling price ke hisab se amount bharkar generate hoga -->
+          <img id="storeDynamicQrImg" src="" style="width:140px; height:140px; object-fit:contain; background:#fff; padding:4px; border-radius:6px; border:1px solid #e9d5ff; margin-bottom:4px;" alt="UPI QR">
+          
+          <small style="display:block; font-size:10px; color:#6b21a8; font-weight:bold;">PhonePe / GooglePay / Paytm Se Scan Karein</small>
+        </div>
+
         <div class="row">
           <div class="form-group">
             <label>Grahak Ka Naam (Optional):</label>
@@ -3022,3 +3033,61 @@ let isScanningLocked = false;
       });
     }
 initQrLiveSync();
+
+// 📱 UPI Select hone par aur Price badalne par Automatic Amount wala QR banane ka function
+    function updateDynamicUpiQrCode() {
+      const payModeRadio = document.querySelector('input[name="salePayMode"]:checked');
+      const qrBox = document.getElementById('saleQrCodeBox');
+      
+      if (!payModeRadio || payModeRadio.value !== 'UPI') {
+        if (qrBox) qrBox.style.display = 'none';
+        return;
+      }
+
+      if (qrBox) qrBox.style.display = 'block';
+
+      // Final Selling Price lein
+      const finalPriceInput = document.getElementById('saleFinalPrice');
+      const amount = finalPriceInput ? (Number(finalPriceInput.value) || 0) : 0;
+      
+      const amtText = document.getElementById('qrDisplayAmountText');
+      if (amtText) amtText.innerText = `₹${amount} (Exact Amount)`;
+
+      // Aapki asli UPI ID aur Dukaan ka naam
+      const upiId = "7014401309@ybl"; 
+      const merchantName = "DN%20Footwear%20and%20Sports";
+
+      // UPI deep link jisme amount pehle se jude ga
+      // Format: upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR
+      let upiString = `upi://pay?pa=${upiId}&pn=${merchantName}`;
+      if (amount > 0) {
+        upiString += `&am=${amount}&cu=INR`;
+      }
+
+      // Google ki public API se exact amount wala QR code generate karna
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(upiString);
+      
+      const qrImgElem = document.getElementById('storeDynamicQrImg');
+      if (qrImgElem) {
+        qrImgElem.src = qrImageUrl;
+      }
+    }
+
+    // Event Listeners jodna taaki price badalte hi QR update ho jaye
+    document.addEventListener('DOMContentLoaded', () => {
+      // Payment mode badalne par
+      const payModeRadios = document.querySelectorAll('input[name="salePayMode"]');
+      payModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          updateDynamicUpiQrCode();
+        });
+      });
+
+      // Selling price type karte hi QR update hone ke liye
+      const priceInput = document.getElementById('saleFinalPrice');
+      if (priceInput) {
+        priceInput.addEventListener('input', () => {
+          updateDynamicUpiQrCode();
+        });
+      }
+    });
