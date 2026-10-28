@@ -2782,15 +2782,23 @@ function moveColorPhoto(col, index, direction) {
       } else document.getElementById('scannerModal').style.display = 'none';
     }
 
+   let isScanningLocked = false; // Barcode baar-baar trigger hone se rokne ke liye
+
     function onScanFound(code) {
-      const c = code.trim().toLowerCase();
+      if (isScanningLocked) return;
+      const cleanCode = code ? code.trim() : '';
+      if (!cleanCode) return;
+
+      const c = cleanCode.toLowerCase();
 
       if (currentScanAction === 'color_size_barcode' && targetScanInputId) {
+        isScanningLocked = true;
         const inp = document.getElementById(targetScanInputId.inputId);
-        if (inp) inp.value = code.trim();
-        updateColorBarcode(targetScanInputId.col, targetScanInputId.size, code.trim());
+        if (inp) inp.value = cleanCode;
+        updateColorBarcode(targetScanInputId.col, targetScanInputId.size, cleanCode);
         closeScannerModal();
-        alert(`Barcode set ho gaya: ${code.trim()}`);
+        alert(`Barcode set ho gaya: ${cleanCode}`);
+        setTimeout(() => { isScanningLocked = false; }, 1500);
         return;
       }
 
@@ -2801,7 +2809,7 @@ function moveColorPhoto(col, index, direction) {
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
         if (it.itemType === 'general') {
-          if (it.generalBarcode && it.generalBarcode.toLowerCase() === c) {
+          if (it.generalBarcode && it.generalBarcode.trim().toLowerCase() === c) {
             matchedItem = it;
             matchedColor = 'General';
             matchedSize = '1 Piece';
@@ -2811,7 +2819,7 @@ function moveColorPhoto(col, index, direction) {
           for (let col in it.colorData) {
             const bcMap = it.colorData[col].barcodes || {};
             for (let sz in bcMap) {
-              if (bcMap[sz] && bcMap[sz].toLowerCase() === c) {
+              if (bcMap[sz] && String(bcMap[sz]).trim().toLowerCase() === c) {
                 matchedItem = it;
                 matchedColor = col;
                 matchedSize = sz;
@@ -2825,9 +2833,13 @@ function moveColorPhoto(col, index, direction) {
       }
 
       if (!matchedItem) {
-        alert(`Barcode [${code.trim()}] kisi item se match nahi hua!`);
+        isScanningLocked = true;
+        alert(`Barcode [${cleanCode}] kisi item se match nahi hua!`);
+        setTimeout(() => { isScanningLocked = false; }, 2000);
         return;
       }
+
+      isScanningLocked = true;
 
       if (currentScanAction === 'check') {
         closeScannerModal();
@@ -2840,10 +2852,13 @@ function moveColorPhoto(col, index, direction) {
         }
         db.ref('footwear_stock/' + matchedItem.id).set(matchedItem);
         alert(`[${matchedItem.name}] ${matchedColor} Size ${matchedSize} me +1 jodi stock badh gaya!`);
+        closeScannerModal();
       } else if (currentScanAction === 'sale') {
         closeScannerModal();
         openSaleCheckout(matchedItem, matchedColor, matchedSize);
       }
+
+      setTimeout(() => { isScanningLocked = false; }, 1500);
     }
 
     function handleManualScan() {
