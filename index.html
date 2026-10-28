@@ -190,8 +190,31 @@
   <!-- HEADER -->
   <header>
       </div>
-    
-    <!-- Customer View ke liye Order Track Button -->
+    <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+        DN Footwear & Sports
+        <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
+      </h2>
+      <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Customer Online Store</span>
+    </div>
+
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+      <span id="adminNavGroup" style="display:none; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-amber" onclick="switchAppMode('customer')">🛍️ Customer View</button>
+        <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
+        <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
+        <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
+        <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders (<span id="adminOrderBadge">0</span>)</button>
+        <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
+        <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
+        <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
+      </span>
+    </div>
+  </header>
+
+  <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
+  <div id="customerViewSection" class="container">
+
+     <!-- Customer View ke liye Order Track Button -->
 <div style="margin-top:8px;" class="no-print">
   <button class="btn btn-purple" onclick="openCustomerTrackModal()" style="font-size:12px;">
     🔍 Mera Order Track Karein
@@ -276,30 +299,6 @@
 
       container.innerHTML = html;
     }
-      
-      <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
-        DN Footwear & Sports
-        <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
-      </h2>
-      <span id="appModeSubtitle" style="font-size:11px; opacity:0.85;">Customer Online Store</span>
-    </div>
-
-    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-      <span id="adminNavGroup" style="display:none; gap:6px; flex-wrap:wrap;">
-        <button class="btn btn-amber" onclick="switchAppMode('customer')">🛍️ Customer View</button>
-        <button class="btn btn-slate" style="background:#334155; color:white;" onclick="openPinChangeModal()" title="Secret Password Badlein">🔑 PIN Badlein</button>
-        <button class="btn btn-green" onclick="openSalesReportModal()" title="Bikri Report & Download">📊 Bikri Report</button>
-        <button class="btn btn-amber" onclick="openScannerModal('check')">🔍 Barcode Check</button>
-        <button class="btn btn-red" onclick="openOrdersPanelModal()">📦 Online Orders (<span id="adminOrderBadge">0</span>)</button>
-        <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
-        <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
-        <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
-      </span>
-    </div>
-  </header>
-
-  <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
-  <div id="customerViewSection" class="container">
     
     <!-- BANNER SLIDER -->
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
