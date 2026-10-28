@@ -317,6 +317,26 @@
       </div>
     </div>
 
+    <!-- 📱 MANUAL UPI QR CODE UPLOADER (ADMIN) -->
+    <div style="background:#ffffff; margin-top:16px; padding:18px; border-radius:12px; border:1px solid #9333ea; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+      <h3 style="font-size:16px; font-weight:800; color:#6b21a8; margin-bottom:4px;">📱 PhonePe / UPI QR Code Manual Upload Karein</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Agar aap apna naya QR code ya scanner upload karna chahte hain, toh yahan se photo select karein:</p>
+      
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="width:90px; height:90px; border:2px dashed #9333ea; border-radius:8px; overflow:hidden; background:#faf5ff; display:flex; align-items:center; justify-content:center;">
+          <img id="adminCurrentQrPreview" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=7014401309@ybl&pn=Kanchan%20Kanwar%20Chouhan" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        
+        <div style="flex:1; min-width:220px;">
+          <input type="file" id="manualQrImageInput" accept="image/*" style="display:none;" onchange="handleManualQrUpload(event)">
+          <button type="button" class="btn btn-purple" onclick="document.getElementById('manualQrImageInput').click()" style="padding:9px 16px; font-size:13px; margin-bottom:6px;">
+            📁 Apne Phone Se QR Photo Chunein
+          </button>
+          <small style="display:block; font-size:11px; color:#64748b;">Photo chunte hi yeh cloud par save ho jayega aur billing counter par dikhne lagega.</small>
+        </div>
+      </div>
+    </div>
+    
     <!-- FILTER BAR -->
     <div class="filter-bar">
       <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, brand, color, barcode..." class="search-box">
@@ -2956,3 +2976,49 @@ let isScanningLocked = false;
   </script>
 </body>
 </html>
+
+// 📱 Manual QR Image Upload Handler
+    function handleManualQrUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert("QR code ki photo 2MB se kam size ki honi chahiye!");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Img = e.target.result;
+
+        // Firebase par save karein
+        db.ref('store_settings/upi_qr_image').set(base64Img).then(() => {
+          alert("✓ Naya UPI QR Code safalta-purvak save ho gaya!");
+          applyCustomQrToUI(base64Img);
+        }).catch(err => {
+          alert("Error: " + err.message);
+        });
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    // UI me QR code ko update karne ka helper function
+    function applyCustomQrToUI(qrSrc) {
+      const billingQrImg = document.getElementById('storeDynamicQrImg');
+      if (billingQrImg) billingQrImg.src = qrSrc;
+
+      const adminPreview = document.getElementById('adminCurrentQrPreview');
+      if (adminPreview) adminPreview.src = qrSrc;
+    }
+
+    // Live Sync ke andar Firebase se QR code fetch karne ka listener
+    function initQrLiveSync() {
+      db.ref('store_settings/upi_qr_image').on('value', (snap) => {
+        const qrUrl = snap.val();
+        if (qrUrl) {
+          applyCustomQrToUI(qrUrl);
+        }
+      });
+    }
+initQrLiveSync();
