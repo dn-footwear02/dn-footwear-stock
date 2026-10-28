@@ -2984,11 +2984,8 @@ let isScanningLocked = false;
       checkURLAndSetMode();
       initLiveSync();
     };
-  </script>
-</body>
-</html>
 
-// 📱 Manual QR Image Upload Handler
+    // 📱 Manual QR Image Upload Handler
     function handleManualQrUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -3091,3 +3088,7 @@ initQrLiveSync();
         });
       }
     });
+
+  </script>
+</body>
+</html>
