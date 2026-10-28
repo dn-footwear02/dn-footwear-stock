@@ -213,6 +213,22 @@
 
   <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
   <div id="customerViewSection" class="container">
+
+    <!-- 📦 CUSTOMER ORDER TRACKING BOX -->
+    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,0.03);">
+      <h4 style="font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+        📦 Apna Order Status Track Karein:
+      </h4>
+      <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Apna Order ID daalkar check karein ki saman abhi kis gaon/shahar me hai aur kab tak pahuchega.</p>
+      
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input type="text" id="trackOrderIdInput" placeholder="Order ID daalein (jaise: ORD-12345)..." class="form-control" style="font-size:12px; flex:1; min-width:200px;">
+        <button class="btn btn-indigo" onclick="trackCustomerOrder()" style="padding:9px 16px;">Track Karein</button>
+      </div>
+
+      <!-- TRACKING RESULT DISPLAY AREA -->
+      <div id="trackResultBox" style="display:none; margin-top:14px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;"></div>
+    </div>
     
     <!-- BANNER SLIDER -->
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
@@ -3089,6 +3105,67 @@ initQrLiveSync();
       }
     });
 
+    // 📦 Customer Order Tracking Function
+    function trackCustomerOrder() {
+      const orderIdInput = document.getElementById('trackOrderIdInput').value.trim();
+      const resultBox = document.getElementById('trackResultBox');
+
+      if (!orderIdInput) {
+        alert("Kripya apna Order ID likhein!");
+        return;
+      }
+
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = '<span style="font-size:12px; color:#64748b;">Order khoja ja raha hai, kripya intezar karein...</span>';
+
+      // Firebase se order data check karna
+      db.ref('customer_orders/' + orderIdInput).once('value').then((snapshot) => {
+        const order = snapshot.val();
+
+        if (!order) {
+          resultBox.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Yeh Order ID [${orderIdInput}] galat hai ya mila nahi. Sahi Order ID daalein.</span>`;
+          return;
+        }
+
+        // Expected Delivery Date calculate karna (Order date se 3 din baad ki date)
+        const orderDate = new Date(order.date || Date.now());
+        const deliveryDate = new Date(orderDate);
+        deliveryDate.setDate(orderDate.getDate() + 3);
+        const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // Live Location / Status check karna
+        let currentStatusText = "Dukaan se dispatch ho gaya hai";
+        let locationBadgeBg = "#eff6ff";
+        let locationBadgeColor = "#1e40af";
+
+        if (order.status === 'Delivered') {
+          currentStatusText = "✓ Grahak tak safalta-purvak pahuch gaya hai (Delivered)";
+          locationBadgeBg = "#dcfce7";
+          locationBadgeColor = "#166534";
+        } else {
+          currentStatusText = order.currentLocation || "Raste me hai (Sojat Road / Pali / Siriyari route)";
+        }
+
+        resultBox.innerHTML = `
+          <div style="font-size:13px; line-height:1.5;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+              <span>Order ID: <b>${order.orderId}</b></span>
+              <span class="cat-chip" style="background:${locationBadgeBg}; color:${locationBadgeColor};">${order.status || 'Processing'}</span>
+            </div>
+            <div style="margin-bottom:4px;">👤 <b>Grahak:</b> ${order.customer} (${order.phone})</div>
+            <div style="margin-bottom:4px;">📍 <b>Pata:</b> ${order.address || 'Siriyari'}</div>
+            <div style="margin-bottom:4px; background:#e0e7ff; padding:6px; border-radius:6px; color:#3730a3;">
+              🚚 <b>Abhi Kahan Pahucha Hai:</b> ${currentStatusText}
+            </div>
+            <div style="color:#059669; font-weight:bold; margin-top:6px;">
+              📅 Pakki Delivery Date: ${formattedDeliveryDate} tak pahuch jayega!
+            </div>
+          </div>
+        `;
+      }).catch((err) => {
+        resultBox.innerHTML = `<span style="font-size:12px; color:#ef4444;">Error: ${err.message}</span>`;
+      });
+    }
   </script>
 </body>
 </html>
