@@ -657,26 +657,18 @@
         <div class="row">
           <div class="form-group">
             <label>Category *</label>
-           <select id="fCategorySelect" class="form-control" onchange="handleCategorySelection(this.value)">
-              <optgroup label="👨 Men (Gents)">
-                <option value="Men Shoes">👟 Men's Shoes</option>
-                <option value="Men Chappal">🩴 Men's Chappal & Sandals</option>
-              </optgroup>
-              <optgroup label="👩 Ladies">
-                <option value="Ladies Shoes">👠 Ladies Shoes</option>
-                <option value="Ladies Chappal">👡 Ladies Chappal & Sandals</option>
-              </optgroup>
-              <optgroup label="🧒 Kids (Bachho Ke)">
-                <option value="Kids Shoes">👟 Kids Shoes</option>
-                <option value="Kids Chappal">🩴 Kids Chappal & Sandals</option>
-              </optgroup>
-              <optgroup label="🎒 Accessories">
-                <option value="Socks">🧦 Socks</option>
-                <option value="Chasma">👓 Chasma</option>
-                <option value="Belt">👔 Belt</option>
-                <option value="Purse">👛 Purse</option>
-              </optgroup>
+            <select id="fCategorySelect" class="form-control">
+              <option value="Sports/Running">Footwear: Sports & Running</option>
+              <option value="Casual/Sneakers">Footwear: Casual & Sneakers</option>
+              <option value="Formal Shoes">Footwear: Formal Shoes</option>
+              <option value="Slippers/Chappal">Footwear: Slippers & Chappal</option>
+              <option value="Sandals">Footwear: Sandals</option>
+              <option value="Socks">🧦 Socks (Moje)</option>
+              <option value="Chasma">👓 Chasma (Sunglasses)</option>
+              <option value="Belt">👔 Belt</option>
+              <option value="Purse">👛 Purse / Wallet</option>
             </select>
+          </div>
 
           <div class="form-group" id="footwearGenderGroup">
             <label>Gender / Kiske Liye:</label>
@@ -1573,7 +1565,16 @@
     }
 
     // ==================== ONLINE ORDERS ADMIN PANEL ====================
-   function renderOnlineOrdersTable() {
+    function openOrdersPanelModal() {
+      renderOnlineOrdersTable();
+      document.getElementById('ordersPanelModal').style.display = 'flex';
+    }
+
+    function closeOrdersPanelModal() {
+      document.getElementById('ordersPanelModal').style.display = 'none';
+    }
+
+    function renderOnlineOrdersTable() {
       const tbody = document.getElementById('onlineOrdersTableBody');
       if (!tbody) return;
 
@@ -1591,24 +1592,17 @@
           <div>● <b>${i.name}</b> (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
         `).join('');
 
-        const curStatus = o.status || 'Ordered';
+        const isDelivered = (o.status === 'Delivered');
 
         return `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
             <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
             <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
-            <td>
-              <select onchange="db.ref('customer_orders/${o.orderId}/status').set(this.value)" class="form-control" style="font-size:11px; padding:3px; font-weight:bold;">
-                <option value="Ordered" ${curStatus==='Ordered'?'selected':''}>📦 Ordered</option>
-                <option value="Confirmed" ${curStatus==='Confirmed'?'selected':''}>✅ Confirmed</option>
-                <option value="Packed" ${curStatus==='Packed'?'selected':''}>🎁 Packed</option>
-                <option value="Delivered" ${curStatus==='Delivered'?'selected':''}>🎉 Delivered</option>
-                <option value="Cancelled" ${curStatus==='Cancelled'?'selected':''}>❌ Cancelled (Cancelled by Customer/Admin)</option>
-              </select>
-            </td>
+            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
             <td style="text-align:right;">
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="db.ref('customer_orders/${o.orderId}').remove()">🗑️ Delete</button>
+              ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
             </td>
           </tr>
         `;
