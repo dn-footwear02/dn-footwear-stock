@@ -552,7 +552,7 @@
           </div>
         </div>
 
-        <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+  <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
           <table>
             <thead>
               <tr style="background:#f1f5f9;">
@@ -561,6 +561,7 @@
                 <th style="padding:8px 6px;">Item, Size & Color</th>
                 <th style="padding:8px 6px;">Payment</th>
                 <th style="padding:8px 6px; text-align:right;">Amount</th>
+                <th style="padding:8px 6px; text-align:right;">Hatao</th>
               </tr>
             </thead>
             <tbody id="reportTableBody"></tbody>
@@ -1655,7 +1656,7 @@
       calculateSalesReport();
     }
 
-    function calculateSalesReport() {
+   function calculateSalesReport() {
       const sDate = document.getElementById('reportStartDate').value;
       const eDate = document.getElementById('reportEndDate').value;
 
@@ -1700,6 +1701,9 @@
             <td style="padding:6px;"><b>${s.name || 'Shoe'}</b><br><small style="color:#4f46e5;">Sz: ${s.size} • ${s.color||''}</small></td>
             <td style="padding:6px;"><span class="cat-chip" style="${mode.includes('UPI')?'background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;':'background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;'}">${mode}</span></td>
             <td style="padding:6px; text-align:right;"><b style="color:#10b981; font-size:14px;">₹${amt}</b></td>
+            <td style="padding:6px; text-align:right;">
+              <button class="btn btn-red" style="padding:3px 6px; font-size:11px;" onclick="deleteSaleRecord('${s.id}')" title="Galat entry delete karein">🗑️ Delete</button>
+            </td>
           </tr>
         `;
       });
@@ -1715,7 +1719,20 @@
       document.getElementById('repCashPercent').innerText = `${cashPercent}% of total`;
       document.getElementById('repUpiPercent').innerText = `${upiPercent}% of total`;
 
-      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
+      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
+    }
+
+    // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka function
+    function deleteSaleRecord(saleId) {
+      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse total sales aur amount se yeh entry hat jayegi.)")) {
+        
+        // Firebase se us sale record ko delete karein
+        db.ref('footwear_sales/' + saleId).remove().then(() => {
+          alert("✓ Bikri entry safalta-purvak delete ho gayi!");
+        }).catch((err) => {
+          alert("Error: " + err.message);
+        });
+      }
     }
 
     function downloadSalesCSV(type) {
