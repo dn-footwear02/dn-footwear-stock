@@ -189,8 +189,8 @@
 
   <!-- HEADER -->
   <header>
-      </div>
-    <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+    <div>
+      <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
         DN Footwear & Sports
         <span class="sync-status"><span class="sync-dot"></span> Live Sync</span>
       </h2>
@@ -213,92 +213,6 @@
 
   <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
   <div id="customerViewSection" class="container">
-
-     <!-- Customer View ke liye Order Track Button -->
-<div style="margin-top:8px;" class="no-print">
-  <button class="btn btn-purple" onclick="openCustomerTrackModal()" style="font-size:12px;">
-    🔍 Mera Order Track Karein
-  </button>
-</div>
-    <div>
-      <!-- CUSTOMER ORDER TRACK MODAL -->
-  <div id="customerTrackModal" class="modal">
-    <div class="modal-box" style="max-width:440px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🔍 Apna Order Status Dekhein</h3>
-        <button class="btn btn-slate" onclick="closeCustomerTrackModal()">✕</button>
-      </div>
-
-      <div class="form-group">
-        <label>Apna Mobile Number ya Order ID Daalein:</label>
-        <div style="display:flex; gap:8px;">
-          <input type="text" id="trackSearchInput" placeholder="e.g. 8209452284 ya ORD-12345" class="form-control">
-          <button class="btn btn-indigo" onclick="searchCustomerOrders()">Track Karein</button>
-        </div>
-      </div>
-
-      <div id="trackResultContainer" style="margin-top:14px; max-height:50vh; overflow-y:auto;"></div>
-    </div>
-
-      function openCustomerTrackModal() {
-      document.getElementById('trackSearchInput').value = '';
-      document.getElementById('trackResultContainer').innerHTML = '<small style="color:#64748b;">Apna mobile number daalkar track button dabayein.</small>';
-      document.getElementById('customerTrackModal').style.display = 'flex';
-    }
-
-    function closeCustomerTrackModal() {
-      document.getElementById('customerTrackModal').style.display = 'none';
-    }
-
-    function searchCustomerOrders() {
-      const query = document.getElementById('trackSearchInput').value.trim().toLowerCase();
-      const container = document.getElementById('trackResultContainer');
-
-      if (!query) {
-        alert("Kripya apna mobile number ya Order ID likhein!");
-        return;
-      }
-
-      const matchedOrders = onlineOrders.filter(o => 
-        (o.phone && o.phone.toLowerCase().includes(query)) || 
-        (o.orderId && o.orderId.toLowerCase().includes(query)) ||
-        (o.customer && o.customer.toLowerCase().includes(query))
-      );
-
-      if (matchedOrders.length === 0) {
-        container.innerHTML = `<div style="background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; font-size:12px; text-align:center;"><b>Koi order nahi mila!</b> Kripya sahi mobile number ya Order ID daalein.</div>`;
-        return;
-      }
-
-      let html = '';
-      matchedOrders.forEach(o => {
-        const isDelivered = (o.status === 'Delivered');
-        const statusBg = isDelivered ? '#dcfce7; color:#166534;' : '#fef3c7; color:#92400e;';
-        
-        let itemsHtml = (o.items || []).map(i => `
-          <div style="font-size:11px; color:#334155;">● ${i.name} (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
-        `).join('');
-
-        html += `
-          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b>
-              <span class="cat-chip" style="background:${statusBg}; font-weight:bold;">${o.status || 'Pending'}</span>
-            </div>
-            <p style="font-size:12px; color:#64748b; margin-bottom:6px;">Grahak: <b>${o.customer}</b> (${o.phone})</p>
-            <div style="background:white; padding:8px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:6px;">
-              ${itemsHtml}
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#0f172a;">
-              <span>Kul Raashi:</span>
-              <span style="color:#10b981;">₹${o.totalAmount}</span>
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
     
     <!-- BANNER SLIDER -->
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
