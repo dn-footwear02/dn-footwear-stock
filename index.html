@@ -1640,22 +1640,32 @@
         `).join('');
 
         const isDelivered = (o.status === 'Delivered');
+        const currentLocationVal = o.currentLocation || '';
 
         return `
-          <tr style="border-bottom:1px solid #f1f5f9;">
+          <tr style="border-bottom:1px solid #f1f5f9; vertical-align:top;">
             <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
             <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
             <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
-            <td><b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Pending'}</span></td>
+            <td>
+              <b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br>
+              <span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Processing'}</span>
+              
+              <!-- 🚚 ADMIN LOCATION UPDATE BOX -->
+              <div style="margin-top:6px;">
+                <input type="text" id="loc_input_${o.orderId}" value="${currentLocationVal}" placeholder="Location likhein (jaise: Sojat Road)..." class="form-control" style="font-size:11px; padding:4px 6px; margin-bottom:4px;">
+                <button class="btn btn-blue" style="padding:2px 8px; font-size:10px;" onclick="updateOrderLocation('${o.orderId}')">💾 Location Save</button>
+              </div>
+            </td>
             <td style="text-align:right;">
               ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️ Delete</button>
             </td>
           </tr>
         `;
       }).join('');
     }
-
+    
     function markOrderDelivered(orderId) {
       if (confirm(`Order [${orderId}] ko Delivered mark karein?`)) {
         db.ref('customer_orders/' + orderId + '/status').set('Delivered');
@@ -3164,6 +3174,24 @@ initQrLiveSync();
         `;
       }).catch((err) => {
         resultBox.innerHTML = `<span style="font-size:12px; color:#ef4444;">Error: ${err.message}</span>`;
+      });
+    }
+
+    // 🚚 Admin dwara Order ka Current Location Firebase par save karne ka function
+    function updateOrderLocation(orderId) {
+      const inputElem = document.getElementById(`loc_input_${orderId}`);
+      if (!inputElem) return;
+
+      const newLocation = inputElem.value.trim();
+      if (!newLocation) {
+        alert("Kripya location ya gaon ka naam likhein!");
+        return;
+      }
+
+      db.ref('customer_orders/' + orderId + '/currentLocation').set(newLocation).then(() => {
+        alert(`✓ Order [${orderId}] ki location update ho gayi: "${newLocation}"`);
+      }).catch((err) => {
+        alert("Error: " + err.message);
       });
     }
   </script>
