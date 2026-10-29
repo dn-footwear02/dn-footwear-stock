@@ -361,9 +361,11 @@
       </div>
 
       <div class="stat-card" style="border-left: 4px solid #ef4444;">
+        <small style="color:#ef4444; font-weight:700;"><!-- KAM STOCK WARNING CARD (CLICKABLE) -->
+      <div class="stat-card" style="border-left: 4px solid #ef4444; cursor:pointer;" onclick="openLowStockModal()" title="Click karke dekhein kaunsa stock kam hai">
         <small style="color:#ef4444; font-weight:700;">KAM STOCK WARNING (≤ 3)</small>
         <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
-        <small style="color:#64748b; font-size:11px;">Restock jald karein</small>
+        <small style="color:#64748b; font-size:11px;">Click karke list dekhein</small>
       </div>
     </div>
 
@@ -540,6 +542,29 @@
     </div>
   </div>
 
+    <!-- LOW STOCK ITEMS MODAL -->
+  <div id="lowStockModal" class="modal">
+    <div class="modal-box" style="max-width:700px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:17px; font-weight:900; color:#ef4444;">⚠️ Kam Stock Wale Items Ki List (≤ 3 Jodi)</h3>
+        <button class="btn btn-slate" onclick="closeLowStockModal()">✕</button>
+      </div>
+      <div style="max-height:50vh; overflow-y:auto;">
+        <table>
+          <thead>
+            <tr style="background:#fef2f2;">
+              <th style="padding:8px;">Item & Brand</th>
+              <th style="padding:8px;">Kam Stock Details (Color & Size)</th>
+              <th style="padding:8px;">Kul Jodi</th>
+              <th style="padding:8px; text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="lowStockTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+    
   <!-- ONLINE ORDERS MODAL (ADMIN VIEW) -->
   <div id="ordersPanelModal" class="modal">
     <div class="modal-box" style="max-width:750px;">
@@ -3285,6 +3310,72 @@ initQrLiveSync();
       }).catch(err => {
         alert("Error: " + err.message);
       });
+    }
+
+    // ⚠️ Kam stock wale items ki list dikhane ka function
+    function openLowStockModal() {
+      const tbody = document.getElementById('lowStockTableBody');
+      if (!tbody) return;
+
+      let lowItemsHtml = '';
+      let count = 0;
+
+      items.forEach(it => {
+        const itemType = it.itemType || 'footwear';
+        let p = 0;
+        let breakdownHtml = '';
+
+        if (itemType === 'general') {
+          p = Number(it.generalQty) || 0;
+          if (p <= 3) {
+            breakdownHtml = `<span class="size-badge size-low">${p} Pieces bache hain</span>`;
+          }
+        } else if (it.colorData) {
+          for (let c in it.colorData) {
+            const cData = it.colorData[c];
+            const cSizes = cData.sizes || {};
+            let cBadges = [];
+            for (let sz in cSizes) {
+              const q = Number(cSizes[sz]) || 0;
+              p += q;
+              if (q <= 3) {
+                cBadges.push(`Sz ${sz}: <b style="color:#ef4444;">${q} Jodi</b>`);
+              }
+            }
+            if (cBadges.length > 0) {
+              breakdownHtml += `<div style="margin-bottom:2px;"><b style="color:#4f46e5;">● ${c}:</b> ${cBadges.join(', ')}</div>`;
+            }
+          }
+        }
+
+        // Agar total stock ya koi size 3 ya usse kam hai toh list me dikhao
+        if (p <= 3) {
+          count++;
+          let mainImg = it.photo || 'https://via.placeholder.com/40';
+          lowItemsHtml += `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <img src="${mainImg}" style="width:40px; height:40px; object-fit:contain; background:#fff; border-radius:4px; border:1px solid #cbd5e1;">
+                  <div><b>${it.name}</b><br><small style="color:#64748b;">${it.brand} • ${it.category}</small></div>
+                </div>
+              </td>
+              <td style="padding:8px; font-size:12px;">${breakdownHtml || 'Low stock'}</td>
+              <td style="padding:8px;"><b style="color:#ef4444; font-size:14px;">${p} Jodi</b></td>
+              <td style="padding:8px; text-align:right;">
+                <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="closeLowStockModal(); openCheckPopup('${it.id}')">Stock Check</button>
+              </td>
+            </tr>
+          `;
+        }
+      });
+
+      tbody.innerHTML = lowItemsHtml || '<tr><td colspan="4" style="text-align:center; padding:20px; color:#10b981; font-weight:bold;">✓ Badhai ho! Koi bhi item low stock me nahi hai.</td></tr>';
+      document.getElementById('lowStockModal').style.display = 'flex';
+    }
+
+    function closeLowStockModal() {
+      document.getElementById('lowStockModal').style.display = 'none';
     }
   </script>
 </body>
