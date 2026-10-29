@@ -176,46 +176,65 @@
       to { transform: translate(-50%, 0); opacity: 1; }
     }
 
-    @media print {
-      body * { visibility: hidden !important; }
-      
-      /* Jab Thermal Receipt Print ho */
-      #receiptModal:not([style*="display: none"]) #thermalBillArea, 
-      #receiptModal:not([style*="display: none"]) #thermalBillArea * { 
-        visibility: visible !important; 
-      }
-      #thermalBillArea { 
-        position: absolute !important; 
-        left: 0 !important; 
-        top: 0 !important; 
-        width: 80mm !important; 
-        margin: 0 !important; 
-        padding: 5px !important; 
-        background: white !important;
+   @media print {
+      /* 1. Body ke baaki saare main parts ko print se completely hata do */
+      body > *:not(#receiptModal):not(#salesReportModal) {
+        display: none !important;
       }
 
-      /* Jab Sales Report Print ho */
-      #salesReportModal:not([style*="display: none"]) #reportPrintArea, 
-      #salesReportModal:not([style*="display: none"]) #reportPrintArea * { 
-        visibility: visible !important; 
+      /* 2. Agar Receipt Modal khula hai toh sirf wahi dikhega */
+      #receiptModal {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        display: block !important;
       }
-      #reportPrintArea { 
-        position: absolute !important; 
-        left: 0 !important; 
-        top: 0 !important; 
-        width: 100% !important; 
-        margin: 0 !important; 
-        padding: 10px !important; 
+      #receiptModal .modal-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
         background: white !important;
       }
+      #thermalBillArea {
+        display: block !important;
+        width: 80mm !important;
+        margin: 0 auto !important;
+        border: none !important;
+        padding: 5px !important;
+      }
 
-      .no-print { display: none !important; }
-    } {
-      body * { visibility: hidden; }
-      #thermalBillArea, #thermalBillArea *, #reportPrintArea, #reportPrintArea * { visibility: visible; }
-      #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
-      #reportPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; }
-      .no-print { display: none !important; }
+      /* 3. Agar Sales Report Modal khula hai toh sirf report dikhegi */
+      #salesReportModal {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        display: block !important;
+      }
+      #salesReportModal .modal-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
+      }
+      #reportPrintArea {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      /* 4. Print me buttons aur extra cheezein kabhi nahi aani chahiye */
+      .no-print, button, .modal-box button {
+        display: none !important;
+      }
     }
   </style>
 </head>
