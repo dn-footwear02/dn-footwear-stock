@@ -948,36 +948,34 @@
     </div>
   </div>
 
-  <!-- SMART BIKRI CHECKOUT MODAL -->
+ <!-- SMART BIKRI CHECKOUT MODAL (MULTI-ITEM POS) -->
   <div id="saleModal" class="modal">
-    <div class="modal-box" style="max-width:440px;">
+    <div class="modal-box" style="max-width:480px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Billing Counter</h3>
+        <div>
+          <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Dukaan Billing Counter</h3>
+          <p style="font-size:11px; color:#64748b;">Ek hi bill me multiple items add karein</p>
+        </div>
         <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
       </div>
 
-      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
-        <img id="saleImg" src="" style="width:60px; height:60px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
-        <div style="flex:1;">
-          <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
-          <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
-            <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Size: 8</span>
-            <span id="saleColorBadge" style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Black</span>
-            <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold;">Stock: 4</span>
-          </div>
-        </div>
+      <!-- CURRENT ITEMS LIST IN THIS BILL -->
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Is Bill Me Jude Items:</label>
+        <div id="activeBillItemsContainer" style="max-height:35vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
+      </div>
+
+      <!-- ADD ANOTHER ITEM BUTTON -->
+      <div style="margin-bottom:14px; text-align:right;">
+        <button type="button" class="btn btn-indigo" onclick="openScannerModal('sale')" style="font-size:11px; padding:6px 12px;">
+          📷 + Aur Barcode Scan Karke Jodein
+        </button>
       </div>
 
       <form id="saleForm" onsubmit="confirmSaleTransaction(event, false)">
-        <div class="row" style="margin-bottom:12px;">
-          <div>
-            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Tag Rate:</label>
-            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:5px;">₹999</div>
-          </div>
-          <div>
-            <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
-            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981; border:2px solid #10b981;">
-          </div>
+        <div style="background:#f1f5f9; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:13px; font-weight:bold; color:#334155;">Kul Bill Raashi (Total):</span>
+          <b style="font-size:18px; color:#10b981;" id="saleModalTotalAmount">₹0</b>
         </div>
 
         <div class="form-group">
@@ -987,13 +985,44 @@
               <input type="radio" name="salePayMode" value="Cash" checked> 💵 Cash
             </label>
             <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
-              <input type="radio" name="salePayMode" value="UPI"> 📱 UPI
+              <input type="radio" name="salePayMode" value="UPI" onchange="updateDynamicUpiQrCode()"> 📱 UPI
             </label>
             <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
               <input type="radio" name="salePayMode" value="Udhaar"> 📋 Udhaar
             </label>
           </div>
         </div>
+
+        <!-- SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
+        <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
+          <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:4px;">📱 Scan & Pay (Exact Amount):</b>
+          <div style="font-size:14px; font-weight:900; color:#7e22ce; margin-bottom:8px;" id="qrDisplayAmountText">₹0</div>
+          <img id="storeDynamicQrImg" src="" style="width:140px; height:140px; object-fit:contain; background:#fff; padding:4px; border-radius:6px; border:1px solid #e9d5ff; margin-bottom:4px;" alt="UPI QR">
+          <small style="display:block; font-size:10px; color:#6b21a8; font-weight:bold;">PhonePe / GooglePay / Paytm Se Scan Karein</small>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="saleCustName" placeholder="Customer name..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="saleCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center; padding:10px;">
+            🖨️ Save & Print Bill
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:10px;">
+            ✓ Sirf Save Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
         <!-- 📱 SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
         <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
@@ -3612,6 +3641,221 @@ initQrLiveSync();
         alert(`✓ Bill [${billNo}] Safalta-purvak save ho gaya! Kul Raashi: ₹${totalBillAmt}`);
       }
     }
+
+    let activeBillItems = [];
+
+    // 🛒 Jab bhi koi item scan ho ya bechne ke liye chuna jaye
+    function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
+      if (!item) return;
+
+      let chosenColor = preferredColor;
+      let chosenSize = preferredSize;
+      let availQty = 0;
+      let itemPrice = item.price || 0;
+
+      if (item.itemType === 'general') {
+        availQty = item.generalQty || 0;
+        chosenColor = 'General';
+        chosenSize = '1 Piece';
+      } else {
+        if (!chosenColor || !item.colorData[chosenColor]) {
+          const colors = Object.keys(item.colorData || {});
+          for (let c of colors) {
+            const sizes = item.colorData[c].sizes || {};
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                chosenColor = c;
+                chosenSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+            if (chosenColor) break;
+          }
+        } else {
+          const sizes = item.colorData[chosenColor].sizes || {};
+          if (!chosenSize || !sizes[chosenSize] || sizes[chosenSize] <= 0) {
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                chosenSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+          } else {
+            availQty = sizes[chosenSize];
+          }
+        }
+
+        // Check size-specific price if available
+        if (item.colorData && item.colorData[chosenColor] && item.colorData[chosenColor].prices && item.colorData[chosenColor].prices[chosenSize]) {
+          itemPrice = item.colorData[chosenColor].prices[chosenSize];
+        }
+      }
+
+      if (availQty <= 0) {
+        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
+        return;
+      }
+
+      // Is item ko active bill cart me add karo
+      activeBillItems.push({
+        itemId: item.id,
+        name: item.name,
+        brand: item.brand,
+        color: chosenColor,
+        size: chosenSize,
+        costPrice: item.cost || 0,
+        sellPrice: Number(itemPrice) || 0,
+        qty: 1,
+        itemObj: item
+      });
+
+      renderActiveBillItemsList();
+      closeScannerModal();
+      document.getElementById('saleModal').style.display = 'flex';
+    }
+
+    function renderActiveBillItemsList() {
+      const container = document.getElementById('activeBillItemsContainer');
+      let totalAmount = 0;
+
+      let html = activeBillItems.map((bi, index) => {
+        const rowTotal = bi.qty * bi.sellPrice;
+        totalAmount += rowTotal;
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px 10px; margin-bottom:6px;">
+            <div>
+              <b style="font-size:12px; color:#0f172a;">${bi.name}</b><br>
+              <small style="color:#64748b;">Sz: ${bi.size} • ${bi.color} | Rate: ₹${bi.sellPrice}</small>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <b style="font-size:12px; color:#10b981;">₹${rowTotal}</b>
+              <button type="button" onclick="removeActiveBillItem(${index})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Hatao">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html || '<small style="color:#94a3b8;">Koi item nahi hai. Barcode scan karein.</small>';
+      document.getElementById('saleModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
+      updateDynamicUpiQrCode();
+    }
+
+    function removeActiveBillItem(index) {
+      activeBillItems.splice(index, 1);
+      renderActiveBillItemsList();
+      if (activeBillItems.length === 0) {
+        closeSaleModal();
+      }
+    }
+
+    function closeSaleModal() {
+      activeBillItems = [];
+      document.getElementById('saleModal').style.display = 'none';
+    }
+
+    // Saare items ka ek sath transaction save karna
+    function confirmSaleTransaction(e, shouldPrint = false) {
+      if (e) e.preventDefault();
+      if (activeBillItems.length === 0) {
+        alert("Bill me koi item nahi hai!");
+        return;
+      }
+
+      const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+
+      let totalBillAmt = 0;
+      let totalCostAmt = 0;
+      let multiNamesDesc = [];
+
+      activeBillItems.forEach(bi => {
+        const itemSum = bi.qty * bi.sellPrice;
+        totalBillAmt += itemSum;
+        totalCostAmt += (bi.qty * bi.costPrice);
+        multiNamesDesc.push(`${bi.name} (${bi.color} Sz:${bi.size}) x ${bi.qty}`);
+
+        // Stock reduce karna
+        const itemObj = bi.itemObj;
+        if (itemObj.itemType === 'general') {
+          itemObj.generalQty = Math.max(0, (Number(itemObj.generalQty) || 0) - bi.qty);
+        } else {
+          if (itemObj.colorData && itemObj.colorData[bi.color] && itemObj.colorData[bi.color].sizes) {
+            itemObj.colorData[bi.color].sizes[bi.size] = Math.max(0, (Number(itemObj.colorData[bi.color].sizes[bi.size]) || 0) - bi.qty);
+          }
+        }
+        db.ref('footwear_stock/' + itemObj.id).set(itemObj);
+      });
+
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowIso = new Date().toISOString();
+      const nowStr = new Date().toLocaleString('en-IN');
+
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: nowIso,
+        name: multiNamesDesc.join(', '),
+        brand: 'Multi-Pair Bill',
+        color: '-',
+        size: '-',
+        costPrice: totalCostAmt,
+        tagPrice: totalBillAmt,
+        sellPrice: totalBillAmt,
+        profit: totalBillAmt - totalCostAmt,
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone,
+        itemsList: activeBillItems
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+
+      const tempRecord = {...saleRecord};
+      activeBillItems = [];
+      closeSaleModal();
+
+      if (shouldPrint) {
+        showReceipt(tempRecord, nowStr);
+      } else {
+        alert(`✓ Bill [${billNo}] Safalta-purvak save ho gaya! Kul Raashi: ₹${totalBillAmt}`);
+      }
+    }
+
+    // Dynamic QR code update function
+    function updateDynamicUpiQrCode() {
+      const payModeRadio = document.querySelector('input[name="salePayMode"]:checked');
+      const qrBox = document.getElementById('saleQrCodeBox');
+      
+      if (!payModeRadio || payModeRadio.value !== 'UPI') {
+        if (qrBox) qrBox.style.display = 'none';
+        return;
+      }
+
+      if (qrBox) qrBox.style.display = 'block';
+
+      let totalAmount = 0;
+      activeBillItems.forEach(bi => totalAmount += (bi.qty * bi.sellPrice));
+      
+      const amtText = document.getElementById('qrDisplayAmountText');
+      if (amtText) amtText.innerText = `₹${totalAmount} (Exact Amount)`;
+
+      const upiId = "7014401309@ybl"; 
+      const merchantName = "DN%20Footwear%20and%20Sports";
+
+      let upiString = `upi://pay?pa=${upiId}&pn=${merchantName}`;
+      if (totalAmount > 0) {
+        upiString += `&am=${totalAmount}&cu=INR`;
+      }
+
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(upiString);
+      const qrImgElem = document.getElementById('storeDynamicQrImg');
+      if (qrImgElem) qrImgElem.src = qrImageUrl;
+    }
+    
   </script>
 </body>
 </html>
