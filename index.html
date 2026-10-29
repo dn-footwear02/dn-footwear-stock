@@ -176,44 +176,33 @@
       to { transform: translate(-50%, 0); opacity: 1; }
     }
 
-   @media print {
-      /* 1. Body ke baaki saare main parts ko print se completely hata do */
-      body > *:not(#receiptModal):not(#salesReportModal) {
-        display: none !important;
+ @media print {
+      body * {
+        visibility: hidden !important;
       }
-
-      /* 2. Agar Receipt Modal khula hai toh sirf wahi dikhega */
+      #receiptModal, #receiptModal * {
+        visibility: visible !important;
+      }
       #receiptModal {
         position: absolute !important;
-        top: 0 !important;
         left: 0 !important;
+        top: 0 !important;
         width: 100% !important;
         background: white !important;
         display: block !important;
       }
-      #receiptModal .modal-box {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
+      #thermalBillArea {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 80mm !important;
         margin: 0 !important;
         background: white !important;
       }
-      #thermalBillArea {
-        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
-          <thead>
-            <tr>
-              <th style="padding:4px 0; text-align:left; background:transparent;">Item & Qty</th>
-              <th style="padding:4px 0; text-align:center; background:transparent;">Sz/Col</th>
-              <th style="padding:4px 0; text-align:right; background:transparent;">Rate/Amt</th>
-            </tr>
-          </thead>
-          <tbody id="rReceiptTableBody">
-            <!-- Yahan saare items alag-alag row me aayenge -->
-          </tbody>
-        </table>
+      .no-print, button {
+        display: none !important;
       }
+    }
 
       /* 3. Agar Sales Report Modal khula hai toh sirf report dikhegi */
       #salesReportModal {
@@ -3089,7 +3078,9 @@
       document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice || 0}`;
       
       document.getElementById('receiptModal').style.display = 'flex';
-      setTimeout(() => window.print(), 400);
+
+     //Thoda wait karkr print trigger karna taaki receipt load ho jaye
+      setTimeout(() => window.print(), 500);
     }
     
     function closeReceiptModal() {
