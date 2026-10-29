@@ -201,11 +201,18 @@
         background: white !important;
       }
       #thermalBillArea {
-        display: block !important;
-        width: 80mm !important;
-        margin: 0 auto !important;
-        border: none !important;
-        padding: 5px !important;
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
+          <thead>
+            <tr>
+              <th style="padding:4px 0; text-align:left; background:transparent;">Item & Qty</th>
+              <th style="padding:4px 0; text-align:center; background:transparent;">Sz/Col</th>
+              <th style="padding:4px 0; text-align:right; background:transparent;">Rate/Amt</th>
+            </tr>
+          </thead>
+          <tbody id="rReceiptTableBody">
+            <!-- Yahan saare items alag-alag row me aayenge -->
+          </tbody>
+        </table>
       }
 
       /* 3. Agar Sales Report Modal khula hai toh sirf report dikhegi */
@@ -1949,19 +1956,58 @@
       document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
-    // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka function
+    // 🗑️ Galti se judi bikri entry ko delete karne aur stock ko wapas item me add karne ka function
     function deleteSaleRecord(saleId) {
-      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse total sales aur amount se yeh entry hat jayegi.)")) {
+      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse stock wapas usi item, size aur color me add ho jayega.)")) {
         
-        // Firebase se us sale record ko delete karein
-        db.ref('footwear_sales/' + saleId).remove().then(() => {
-          alert("✓ Bikri entry safalta-purvak delete ho gayi!");
+        // Pehle sales record ko dhoondo taaki pata chale kaunsa item wapas jodna hai
+        db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
+          const saleRec = snapshot.val();
+
+          if (saleRec) {
+            // Agar multi-item bill hai ya single item bill hai
+            const itemsToRestore = saleRec.itemsList || [{
+              itemId: saleRec.itemId,
+              color: saleRec.color,
+              size: saleRec.size,
+              qty: 1
+            }];
+
+            // Har item ke stock ko wapas database me update karo
+            itemsToRestore.forEach(ri => {
+              if (ri.itemId) {
+                db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
+                  const stockItem = stockSnap.val();
+                  if (stockItem) {
+                    const restoreQty = Number(ri.qty) || 1;
+
+                    if (stockItem.itemType === 'general') {
+                      stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
+                    } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
+                      const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
+                      stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
+                    }
+
+                    // Stock wapas save karo
+                    db.ref('footwear_stock/' + ri.itemId).set(stockItem);
+                  }
+                });
+              }
+            });
+          }
+
+          // Ab sales record ko delete kar do
+          db.ref('footwear_sales/' + saleId).remove().then(() => {
+            alert("✓ Bikri entry delete ho gayi aur stock wapas apne item me jud gaya!");
+            calculateSalesReport();
+          });
+
         }).catch((err) => {
           alert("Error: " + err.message);
         });
       }
     }
-
+    
     function downloadSalesCSV(type) {
       let filtered = [];
       const today = new Date().toISOString().slice(0, 10);
@@ -3005,21 +3051,47 @@
       }
     }
 
-    function showReceipt(record, dateStr) {
-      document.getElementById('rBillNo').innerText = record.billNo;
+   function showReceipt(record, dateStr) {
+      document.getElementById('rBillNo').innerText = record.billNo || 'DN-Bill';
       document.getElementById('rDate').innerText = dateStr;
-      document.getElementById('rCust').innerText = `${record.customer} ${record.phone ? '('+record.phone+')' : ''}`;
-      document.getElementById('rPayMode').innerText = record.payMode;
-      document.getElementById('rItemName').innerText = `${record.name} (${record.brand})`;
-      document.getElementById('rItemSize').innerText = `${record.size} / ${record.color}`;
-      document.getElementById('rItemRate').innerText = `₹${record.sellPrice}`;
-      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice}`;
-      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice}`;
+      document.getElementById('rCust').innerText = `${record.customer || 'Walk-in'} ${record.phone ? '('+record.phone+')' : ''}`;
+      document.getElementById('rPayMode').innerText = record.payMode || 'Cash';
+      
+      const tbody = document.getElementById('rReceiptTableBody');
+      let rowsHtml = '';
+
+      // Agar multi-item bill hai toh sabhi ko alag-alag row me dikhao
+      if (record.itemsList && record.itemsList.length > 0) {
+        record.itemsList.forEach(bi => {
+          const itemTotal = bi.qty * bi.sellPrice;
+          rowsHtml += `
+            <tr style="border-bottom:1px dotted #ccc;">
+              <td style="padding:4px 0;"><b>${bi.name}</b><br><small>Qty: ${bi.qty}</small></td>
+              <td style="padding:4px 0; text-align:center;">${bi.size} / ${bi.color}</td>
+              <td style="padding:4px 0; text-align:right;">₹${bi.sellPrice} <br><b>₹${itemTotal}</b></td>
+            </tr>
+          `;
+        });
+      } else {
+        // Single item bill fallback
+        rowsHtml += `
+          <tr>
+            <td style="padding:4px 0;"><b>${record.name || 'Shoe'}</b></td>
+            <td style="padding:4px 0; text-align:center;">${record.size || '-'} / ${record.color || '-'}</td>
+            <td style="padding:4px 0; text-align:right;"><b>₹${record.sellPrice || 0}</b></td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
+      
+      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice || record.sellPrice}`;
+      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice || 0}`;
       
       document.getElementById('receiptModal').style.display = 'flex';
       setTimeout(() => window.print(), 400);
     }
-
+    
     function closeReceiptModal() {
       document.getElementById('receiptModal').style.display = 'none';
     }
