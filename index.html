@@ -1713,7 +1713,7 @@
       calculateSalesReport();
     }
 
-   function calculateSalesReport() {
+  function calculateSalesReport() {
       const sDate = document.getElementById('reportStartDate').value;
       const eDate = document.getElementById('reportEndDate').value;
 
@@ -1751,15 +1751,20 @@
 
         const dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
 
+        // Safe JSON string for passing record to functions
+        const safeRecordStr = encodeURIComponent(JSON.stringify(s));
+
         tableHtml += `
-          <tr style="border-bottom:1px solid #f1f5f9;">
+          <tr style="border-bottom:1px solid #f1f5f9; vertical-align:middle;">
             <td style="padding:6px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
             <td style="padding:6px;"><b>${s.customer || 'Walk-in'}</b><br><small style="color:#64748b;">${s.phone || ''}</small></td>
             <td style="padding:6px;"><b>${s.name || 'Shoe'}</b><br><small style="color:#4f46e5;">Sz: ${s.size} • ${s.color||''}</small></td>
             <td style="padding:6px;"><span class="cat-chip" style="${mode.includes('UPI')?'background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;':'background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;'}">${mode}</span></td>
             <td style="padding:6px; text-align:right;"><b style="color:#10b981; font-size:14px;">₹${amt}</b></td>
-            <td style="padding:6px; text-align:right;">
-              <button class="btn btn-red" style="padding:3px 6px; font-size:11px;" onclick="deleteSaleRecord('${s.id}')" title="Galat entry delete karein">🗑️ Delete</button>
+            <td style="padding:6px; text-align:right; white-space:nowrap;">
+              <button class="btn btn-blue" style="padding:3px 6px; font-size:10px; margin-bottom:2px;" onclick="reprintSalesBill('${safeRecordStr}')" title="Dobara Bill Print Karein">🖨️ Print</button>
+              <button class="btn btn-amber" style="padding:3px 6px; font-size:10px; margin-bottom:2px;" onclick="openEditSaleModal('${safeRecordStr}')" title="Rate ya Details Edit Karein">✏️ Edit</button>
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteSaleRecord('${s.id}')" title="Delete Karein">🗑️</button>
             </td>
           </tr>
         `;
@@ -3191,6 +3196,59 @@ initQrLiveSync();
       db.ref('customer_orders/' + orderId + '/currentLocation').set(newLocation).then(() => {
         alert(`✓ Order [${orderId}] ki location update ho gayi: "${newLocation}"`);
       }).catch((err) => {
+        alert("Error: " + err.message);
+      });
+    }
+
+    // 🖨️ Purana Bill Dobara Print Karne ka Function
+    function reprintSalesBill(encodedStr) {
+      const record = JSON.parse(decodeURIComponent(encodedStr));
+      const dateStr = record.date ? new Date(record.date).toLocaleString('en-IN') : '-';
+      showReceipt(record, dateStr);
+    }
+
+    // ✏️ Edit Sale Modal (Rate, Customer Name aur Sales Date update karne ke liye)
+    function openEditSaleModal(encodedStr) {
+      const record = JSON.parse(decodeURIComponent(encodedStr));
+      
+      const newPrice = prompt(`[${record.name}] ka naya Selling Price (Rate ₹) daalein:`, record.sellPrice);
+      if (newPrice === null) return;
+
+      const parsedPrice = Number(newPrice);
+      if (isNaN(parsedPrice) || parsedPrice < 0) {
+        alert("Kripya sahi amount daalein!");
+        return;
+      }
+
+      const newCustName = prompt("Grahak ka naam update karein:", record.customer || '');
+      if (newCustName === null) return;
+
+      // Purani date ko YYYY-MM-DD format me nikalna
+      const existingDateOnly = record.date ? record.date.slice(0, 10) : new Date().toISOString().slice(0, 10);
+      const newDateInput = prompt("Bikri ki Date update karein (Format: YYYY-MM-DD):", existingDateOnly);
+      if (newDateInput === null) return;
+
+      // Agar user ne date dali hai toh time ke sath set karein
+      let finalDateTime = record.date;
+      if (newDateInput.trim() !== '') {
+        // Purana time ya current time maintain rakhne ke liye
+        const timePart = record.date ? record.date.slice(10) : 'T12:00:00.000Z';
+        finalDateTime = newDateInput.trim() + timePart;
+      }
+
+      // Firebase par record update karna
+      const updatedData = {
+        ...record,
+        sellPrice: parsedPrice,
+        profit: parsedPrice - (record.costPrice || 0),
+        customer: newCustName.trim() || 'Walk-in Customer',
+        date: finalDateTime
+      };
+
+      db.ref('footwear_sales/' + record.id).set(updatedData).then(() => {
+        alert("✓ Bikri ki Date, Rate aur Details safalta-purvak update ho gayi!");
+        calculateSalesReport();
+      }).catch(err => {
         alert("Error: " + err.message);
       });
     }
