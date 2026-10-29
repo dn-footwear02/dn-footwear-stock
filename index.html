@@ -177,6 +177,40 @@
     }
 
     @media print {
+      body * { visibility: hidden !important; }
+      
+      /* Jab Thermal Receipt Print ho */
+      #receiptModal:not([style*="display: none"]) #thermalBillArea, 
+      #receiptModal:not([style*="display: none"]) #thermalBillArea * { 
+        visibility: visible !important; 
+      }
+      #thermalBillArea { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 80mm !important; 
+        margin: 0 !important; 
+        padding: 5px !important; 
+        background: white !important;
+      }
+
+      /* Jab Sales Report Print ho */
+      #salesReportModal:not([style*="display: none"]) #reportPrintArea, 
+      #salesReportModal:not([style*="display: none"]) #reportPrintArea * { 
+        visibility: visible !important; 
+      }
+      #reportPrintArea { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 100% !important; 
+        margin: 0 !important; 
+        padding: 10px !important; 
+        background: white !important;
+      }
+
+      .no-print { display: none !important; }
+    } {
       body * { visibility: hidden; }
       #thermalBillArea, #thermalBillArea *, #reportPrintArea, #reportPrintArea * { visibility: visible; }
       #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
