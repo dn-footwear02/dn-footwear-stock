@@ -176,70 +176,30 @@
       to { transform: translate(-50%, 0); opacity: 1; }
     }
 
-   @media print {
-      /* 1. Body ke baaki saare main parts ko print se completely hata do */
-      body > *:not(#receiptModal):not(#salesReportModal) {
-        display: none !important;
+ @media print {
+      body * {
+        visibility: hidden !important;
       }
-
-      /* 2. Agar Receipt Modal khula hai toh sirf wahi dikhega */
+      #receiptModal, #receiptModal * {
+        visibility: visible !important;
+      }
       #receiptModal {
         position: absolute !important;
-        top: 0 !important;
         left: 0 !important;
+        top: 0 !important;
         width: 100% !important;
         background: white !important;
         display: block !important;
-      }
-      #receiptModal .modal-box {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: white !important;
       }
       #thermalBillArea {
-        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px; border-bottom:1px dashed #000; border-top:1px dashed #000;">
-          <thead>
-            <tr>
-              <th style="padding:4px 0; text-align:left; background:transparent;">Item & Qty</th>
-              <th style="padding:4px 0; text-align:center; background:transparent;">Sz/Col</th>
-              <th style="padding:4px 0; text-align:right; background:transparent;">Rate/Amt</th>
-            </tr>
-          </thead>
-          <tbody id="rReceiptTableBody">
-            <!-- Yahan saare items alag-alag row me aayenge -->
-          </tbody>
-        </table>
-      }
-
-      /* 3. Agar Sales Report Modal khula hai toh sirf report dikhegi */
-      #salesReportModal {
         position: absolute !important;
-        top: 0 !important;
         left: 0 !important;
-        width: 100% !important;
-        background: white !important;
-        display: block !important;
-      }
-      #salesReportModal .modal-box {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
+        top: 0 !important;
+        width: 80mm !important;
         margin: 0 !important;
         background: white !important;
       }
-      #reportPrintArea {
-        display: block !important;
-        width: 100% !important;
-      }
-
-      /* 4. Print me buttons aur extra cheezein kabhi nahi aani chahiye */
-      .no-print, button, .modal-box button {
+      .no-print, button {
         display: none !important;
       }
     }
@@ -3051,7 +3011,7 @@
       }
     }
 
-   function showReceipt(record, dateStr) {
+  function showReceipt(record, dateStr) {
       document.getElementById('rBillNo').innerText = record.billNo || 'DN-Bill';
       document.getElementById('rDate').innerText = dateStr;
       document.getElementById('rCust').innerText = `${record.customer || 'Walk-in'} ${record.phone ? '('+record.phone+')' : ''}`;
@@ -3060,7 +3020,6 @@
       const tbody = document.getElementById('rReceiptTableBody');
       let rowsHtml = '';
 
-      // Agar multi-item bill hai toh sabhi ko alag-alag row me dikhao
       if (record.itemsList && record.itemsList.length > 0) {
         record.itemsList.forEach(bi => {
           const itemTotal = bi.qty * bi.sellPrice;
@@ -3073,7 +3032,6 @@
           `;
         });
       } else {
-        // Single item bill fallback
         rowsHtml += `
           <tr>
             <td style="padding:4px 0;"><b>${record.name || 'Shoe'}</b></td>
@@ -3089,7 +3047,10 @@
       document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice || 0}`;
       
       document.getElementById('receiptModal').style.display = 'flex';
-      setTimeout(() => window.print(), 400);
+      
+      setTimeout(() => {
+        window.print();
+      }, 500);
     }
     
     function closeReceiptModal() {
