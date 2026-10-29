@@ -260,6 +260,7 @@
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
         <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
         <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
+        <button class="btn btn-amber" onclick="openAdminPosCartModal()" title="Current Bill Cart">🛒 Bill Cart (<span id="adminPosCartBadge">0</span>)</button>
       </span>
     </div>
   </header>
@@ -517,6 +518,65 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
+
+  <!-- 🛒 ADMIN POS MULTI-ITEM BILLING CART MODAL -->
+  <div id="adminPosCartModal" class="modal">
+    <div class="modal-box" style="max-width:560px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <div>
+          <h3 style="font-size:17px; font-weight:900; color:#0f172a;">🛒 Dukaan Billing Cart (Ek Hi Bill)</h3>
+          <p style="font-size:11px; color:#64748b;">Grahak ke saare items yahan judenge</p>
+        </div>
+        <button class="btn btn-slate" onclick="closeAdminPosCartModal()">✕</button>
+      </div>
+
+      <div id="adminPosCartItemsList" style="max-height:40vh; overflow-y:auto; margin-bottom:14px;"></div>
+
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900; color:#0f172a;">
+          <span>Kul Bill Amount:</span>
+          <span style="color:#10b981;" id="adminPosCartTotalText">₹0</span>
+        </div>
+      </div>
+
+      <form onsubmit="confirmAdminPosMultiSale(event)">
+        <div class="form-group">
+          <label>Payment Mode:</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="posPayMode" value="Cash" checked> 💵 Cash
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="posPayMode" value="UPI"> 📱 UPI
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="posPayMode" value="Udhaar"> 📋 Udhaar
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="posCustName" placeholder="Customer name..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="posCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmAdminPosMultiSale(event, true)" style="justify-content:center; padding:11px;">
+            🖨️ Bill Save & Print
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:11px;">
+            ✓ Sirf Save Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
   
   <!-- LOW STOCK ITEMS MODAL -->
   <div id="lowStockModal" class="modal">
@@ -3393,6 +3453,164 @@ initQrLiveSync();
 
     function closeLowStockModal() {
       document.getElementById('lowStockModal').style.display = 'none';
+    }
+
+    let adminPosCart = [];
+
+    // 🛒 Item ko Admin POS Cart me add karne ka function
+    function addAdminPosCartItem(item, color, size, price) {
+      const cartKey = `${item.id}_${color}_${size}`;
+      const existing = adminPosCart.find(c => c.cartId === cartKey);
+
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        adminPosCart.push({
+          cartId: cartKey,
+          itemId: item.id,
+          name: item.name,
+          brand: item.brand,
+          color: color,
+          size: size,
+          costPrice: item.cost || 0,
+          sellPrice: Number(price) || item.price || 0,
+          qty: 1,
+          itemObj: item
+        });
+      }
+
+      updateAdminPosCartBadge();
+      alert(`✓ [${item.name} - ${color} (Sz ${size})] Bill me jud gaya!`);
+    }
+
+    function updateAdminPosCartBadge() {
+      let totalQty = 0;
+      adminPosCart.forEach(c => totalQty += c.qty);
+      const badge = document.getElementById('adminPosCartBadge');
+      if (badge) badge.innerText = totalQty;
+    }
+
+    function openAdminPosCartModal() {
+      if (adminPosCart.length === 0) {
+        alert("Billing cart khali hai! Pehle koi item scan karein ya bechein.");
+        return;
+      }
+      renderAdminPosCartItems();
+      document.getElementById('adminPosCartModal').style.display = 'flex';
+    }
+
+    function closeAdminPosCartModal() {
+      document.getElementById('adminPosCartModal').style.display = 'none';
+    }
+
+    function renderAdminPosCartItems() {
+      const container = document.getElementById('adminPosCartItemsList');
+      let totalPrice = 0;
+
+      let html = adminPosCart.map(c => {
+        const itemSum = c.qty * c.sellPrice;
+        totalPrice += itemSum;
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+            <div>
+              <b style="font-size:13px; color:#0f172a;">${c.name}</b><br>
+              <small style="color:#64748b;">Rang: ${c.color} | Size: ${c.size}</small><br>
+              <b style="font-size:12px; color:#10b981;">₹${c.sellPrice} x ${c.qty} = ₹${itemSum}</b>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button class="btn btn-slate" style="padding:3px 7px;" onclick="changePosCartQty('${c.cartId}', -1)">-</button>
+              <b>${c.qty}</b>
+              <button class="btn btn-slate" style="padding:3px 7px;" onclick="changePosCartQty('${c.cartId}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      document.getElementById('adminPosCartTotalText').innerText = `₹${totalPrice.toLocaleString('en-IN')}`;
+    }
+
+    function changePosCartQty(cartId, delta) {
+      const item = adminPosCart.find(c => c.cartId === cartId);
+      if (!item) return;
+
+      item.qty += delta;
+      if (item.qty <= 0) {
+        adminPosCart = adminPosCart.filter(c => c.cartId !== cartId);
+      }
+
+      updateAdminPosCartBadge();
+      renderAdminPosCartItems();
+
+      if (adminPosCart.length === 0) {
+        closeAdminPosCartModal();
+      }
+    }
+
+    // 🖨️ Ek hi bill me saare items save karke print karna
+    function confirmAdminPosMultiSale(e, shouldPrint = false) {
+      if (e) e.preventDefault();
+      if (adminPosCart.length === 0) return;
+
+      const payMode = document.querySelector('input[name="posPayMode"]:checked').value;
+      const custName = document.getElementById('posCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('posCustPhone').value.trim() || '';
+
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowIso = new Date().toISOString();
+      const nowStr = new Date().toLocaleString('en-IN');
+
+      let totalBillAmt = 0;
+      let multiItemsDescription = [];
+
+      adminPosCart.forEach(c => {
+        const itemTotal = c.qty * c.sellPrice;
+        totalBillAmt += itemTotal;
+        multiItemsDescription.push(`${c.name} (${c.color} Sz:${c.size}) x ${c.qty} = ₹${itemTotal}`);
+
+        // Stock reduce karna
+        const itemObj = c.itemObj;
+        if (itemObj.itemType === 'general') {
+          itemObj.generalQty = Math.max(0, (Number(itemObj.generalQty) || 0) - c.qty);
+        } else {
+          if (itemObj.colorData && itemObj.colorData[c.color] && itemObj.colorData[c.color].sizes) {
+            itemObj.colorData[c.color].sizes[c.size] = Math.max(0, (Number(itemObj.colorData[c.color].sizes[c.size]) || 0) - c.qty);
+          }
+        }
+        db.ref('footwear_stock/' + itemObj.id).set(itemObj);
+      });
+
+      // Sales history me ek unified single bill record save karna
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: nowIso,
+        name: multiItemsDescription.join(', '),
+        brand: 'Multi-Item Bill',
+        color: '-',
+        size: '-',
+        costPrice: 0,
+        tagPrice: totalBillAmt,
+        sellPrice: totalBillAmt,
+        profit: 0,
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone,
+        itemsList: adminPosCart
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+
+      adminPosCart = [];
+      updateAdminPosCartBadge();
+      closeAdminPosCartModal();
+
+      if (shouldPrint) {
+        showReceipt(saleRecord, nowStr);
+      } else {
+        alert(`✓ Bill [${billNo}] Safalta-purvak save ho gaya! Kul Raashi: ₹${totalBillAmt}`);
+      }
     }
   </script>
 </body>
