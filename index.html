@@ -3716,7 +3716,7 @@ initQrLiveSync();
       document.getElementById('saleModal').style.display = 'flex';
     }
 
-    function renderActiveBillItemsList() {
+function renderActiveBillItemsList() {
       const container = document.getElementById('activeBillItemsContainer');
       let totalAmount = 0;
 
@@ -3725,13 +3725,20 @@ initQrLiveSync();
         totalAmount += rowTotal;
 
         return `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px 10px; margin-bottom:6px;">
-            <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px 10px; margin-bottom:6px; gap:8px;">
+            <div style="flex:1;">
               <b style="font-size:12px; color:#0f172a;">${bi.name}</b><br>
-              <small style="color:#64748b;">Sz: ${bi.size} • ${bi.color} | Rate: ₹${bi.sellPrice}</small>
+              <small style="color:#64748b;">Sz: ${bi.size} • ${bi.color}</small>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <b style="font-size:12px; color:#10b981;">₹${rowTotal}</b>
+            
+            <!-- 🏷️ BARGAIN / RATE CHANGE INPUT BOX -->
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:11px; color:#64748b; font-weight:bold;">₹</span>
+              <input type="number" min="0" value="${bi.sellPrice}" oninput="updateActiveItemBargainPrice(${index}, this.value)" class="form-control" style="width:75px; padding:3px 6px; font-size:12px; font-weight:bold; color:#10b981; text-align:center;" title="Bargain Rate Badlein">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:6px;">
+              <b style="font-size:12px; color:#10b981; min-width:45px; text-align:right;">₹${rowTotal}</b>
               <button type="button" onclick="removeActiveBillItem(${index})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Hatao">✕</button>
             </div>
           </div>
@@ -3743,6 +3750,20 @@ initQrLiveSync();
       updateDynamicUpiQrCode();
     }
 
+    // 🏷️ Bargain price update karne ka function
+    function updateActiveItemBargainPrice(index, newPriceVal) {
+      const parsed = Number(newPriceVal);
+      if (!isNaN(parsed) && parsed >= 0) {
+        activeBillItems[index].sellPrice = parsed;
+        
+        // Total amount aur QR code ko turant update karo
+        let totalAmount = 0;
+        activeBillItems.forEach(bi => totalAmount += (bi.qty * bi.sellPrice));
+        document.getElementById('saleModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
+        updateDynamicUpiQrCode();
+      }
+    }
+    
     function removeActiveBillItem(index) {
       activeBillItems.splice(index, 1);
       renderActiveBillItemsList();
