@@ -498,7 +498,29 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
-
+  
+  <!-- LOW STOCK ITEMS MODAL -->
+  <div id="lowStockModal" class="modal">
+    <div class="modal-box" style="max-width:700px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:17px; font-weight:900; color:#ef4444;">⚠️ Kam Stock Wale Items Ki List (≤ 3 Jodi)</h3>
+        <button class="btn btn-slate" onclick="closeLowStockModal()">✕</button>
+      </div>
+      <div style="max-height:50vh; overflow-y:auto;">
+        <table>
+          <thead>
+            <tr style="background:#fef2f2;">
+              <th style="padding:8px;">Item & Brand</th>
+              <th style="padding:8px;">Kam Stock Details (Color & Size)</th>
+              <th style="padding:8px;">Kul Jodi</th>
+              <th style="padding:8px; text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="lowStockTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   <!-- CART MODAL (MULTI-ITEM ORDER VIA WHATSAPP) -->
   <div id="cartModal" class="modal">
     <div class="modal-box" style="max-width:520px;">
@@ -538,29 +560,6 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
-
-    <!-- LOW STOCK ITEMS MODAL -->
-  <div id="lowStockModal" class="modal">
-    <div class="modal-box" style="max-width:700px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-        <h3 style="font-size:17px; font-weight:900; color:#ef4444;">⚠️ Kam Stock Wale Items Ki List (≤ 3 Jodi)</h3>
-        <button class="btn btn-slate" onclick="closeLowStockModal()">✕</button>
-      </div>
-      <div style="max-height:50vh; overflow-y:auto;">
-        <table>
-          <thead>
-            <tr style="background:#fef2f2;">
-              <th style="padding:8px;">Item & Brand</th>
-              <th style="padding:8px;">Kam Stock Details (Color & Size)</th>
-              <th style="padding:8px;">Kul Jodi</th>
-              <th style="padding:8px; text-align:right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="lowStockTableBody"></tbody>
-        </table>
-      </div>
     </div>
   </div>
     
