@@ -553,6 +553,38 @@
           </div>
         </div>
 
+        <!-- ✏️ CUSTOM MULTI-ITEM EDIT SALE MODAL -->
+  <div id="customEditSaleModal" class="modal">
+    <div class="modal-box" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">✏️ Bikri Bill Edit Karein</h3>
+        <button class="btn btn-slate" onclick="closeCustomEditModal()">✕</button>
+      </div>
+
+      <input type="hidden" id="editRecordId">
+
+      <div class="form-group">
+        <label>Grahak Ka Naam:</label>
+        <input type="text" id="editCustNameInput" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Bikri Date & Time:</label>
+        <input type="datetime-local" id="editDateTimeInput" class="form-control">
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Items & Rates:</label>
+        <div id="editModalItemsContainer" style="max-height:35vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+        <button type="button" class="btn btn-slate" onclick="closeCustomEditModal()">Cancel</button>
+        <button type="button" class="btn btn-indigo" onclick="saveCustomEditedSale()">✓ Sabhi Changes Save Karein</button>
+      </div>
+    </div>
+  </div>
+        
         <!-- SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
         <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
           <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:4px;">📱 Scan & Pay (Exact Amount):</b>
@@ -3398,75 +3430,98 @@ initQrLiveSync();
     }
 
     // ✏️ Edit Sale Modal (Rate, Customer Name aur Sales Date update karne ke liye)
-    // ✏️ Edit Sale Modal (Multi-item rate edit, Customer name aur Date/Time update karne ke liye)
+   let currentEditingRecord = null;
+
     function openEditSaleModal(encodedStr) {
-      const record = JSON.parse(decodeURIComponent(encodedStr));
+      currentEditingRecord = JSON.parse(decodeURIComponent(encodedStr));
       
-      let updatedItemsList = record.itemsList ? JSON.parse(JSON.stringify(record.itemsList)) : null;
-      let newTotalSellPrice = Number(record.sellPrice) || 0;
+      document.getElementById('editCustNameInput').value = currentEditingRecord.customer || '';
+      
+      // Date formatting for datetime-local input
+      let isoDate = currentEditingRecord.date ? currentEditingRecord.date.slice(0, 16) : new Date().toISOString().slice(0, 16);
+      document.getElementById('editDateTimeInput').value = isoDate;
 
-      // Agar bill me multiple items hain, toh ek-ek karke har item ka rate pucho
-      if (updatedItemsList && updatedItemsList.length > 0) {
-        let calculatedNewTotal = 0;
-        for (let i = 0; i < updatedItemsList.length; i++) {
-          let bi = updatedItemsList[i];
-          let itemPromptVal = prompt(`[${bi.name}] (Sz: ${bi.size}, Rang: ${bi.color}) ka naya Selling Rate (₹) daalein:`, bi.sellPrice);
-          if (itemPromptVal === null) return; // Cancel kiya toh rok do
+      const container = document.getElementById('editModalItemsContainer');
+      let itemsList = currentEditingRecord.itemsList || [{
+        name: currentEditingRecord.name || 'Shoe',
+        size: currentEditingRecord.size || '-',
+        color: currentEditingRecord.color || '-',
+        qty: 1,
+        sellPrice: currentEditingRecord.sellPrice || 0
+      }];
 
-          let parsedItemRate = Number(itemPromptVal);
-          if (isNaN(parsedItemRate) || parsedItemRate < 0) {
-            alert("Kripya sahi amount daalein!");
-            return;
-          }
-          bi.sellPrice = parsedItemRate;
-          calculatedNewTotal += (bi.qty * parsedItemRate);
-        }
-        newTotalSellPrice = calculatedNewTotal;
-      } else {
-        // Agar single item bill hai
-        const singleRateInput = prompt(`[${record.name || 'Shoe'}] ka naya Selling Price (Rate ₹) daalein:`, record.sellPrice);
-        if (singleRateInput === null) return;
+      let html = itemsList.map((bi, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px 10px; margin-bottom:6px; gap:8px;">
+          <div style="flex:1;">
+            <b style="font-size:12px; color:#0f172a;">${bi.name}</b><br>
+            <small style="color:#64748b;">Sz: ${bi.size} • ${bi.color} | Qty: ${bi.qty}</small>
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:11px; color:#64748b; font-weight:bold;">₹</span>
+            <input type="number" min="0" value="${bi.sellPrice}" id="edit_item_rate_${idx}" class="form-control" style="width:80px; padding:3px 6px; font-size:12px; font-weight:bold; color:#10b981; text-align:center;">
+          </div>
+        </div>
+      `).join('');
 
-        const parsedSingle = Number(singleRateInput);
-        if (isNaN(parsedSingle) || parsedSingle < 0) {
-          alert("Kripya sahi amount daalein!");
+      container.innerHTML = html;
+      document.getElementById('customEditSaleModal').style.display = 'flex';
+    }
+
+    function closeCustomEditModal() {
+      document.getElementById('customEditSaleModal').style.display = 'none';
+      currentEditingRecord = null;
+    }
+
+    function saveCustomEditedSale() {
+      if (!currentEditingRecord) return;
+
+      let itemsList = currentEditingRecord.itemsList || [{
+        name: currentEditingRecord.name,
+        size: currentEditingRecord.size,
+        color: currentEditingRecord.color,
+        qty: 1,
+        sellPrice: currentEditingRecord.sellPrice
+      }];
+
+      let newTotal = 0;
+      for (let i = 0; i < itemsList.length; i++) {
+        let val = document.getElementById(`edit_item_rate_${i}`).value;
+        let parsed = Number(val);
+        if (isNaN(parsed) || parsed < 0) {
+          alert("Kripya sahi rate daalein!");
           return;
         }
-        newTotalSellPrice = parsedSingle;
+        itemsList[i].sellPrice = parsed;
+        newTotal += (itemsList[i].qty * parsed);
       }
 
-      // Grahak ka naam update karne ke liye
-      const newCustName = prompt("Grahak ka naam update karein:", record.customer || '');
-      if (newCustName === null) return;
-
-      // Bikri ki Date aur Time update karne ke liye (Format: YYYY-MM-DD HH:MM)
-      const existingDateStr = record.date ? record.date.slice(0, 16) : new Date().toISOString().slice(0, 16);
-      const newDateInput = prompt("Bikri ki Date aur Time update karein (Format: YYYY-MM-DDTHH:MM, jaise 2026-10-30T14:30):", existingDateStr);
-      if (newDateInput === null) return;
-
-      let finalDateTime = record.date;
-      if (newDateInput.trim() !== '') {
-        // Agar user ne sahi format diya hai toh ISO string me convert karo
+      let newCustName = document.getElementById('editCustNameInput').value.trim() || 'Walk-in Customer';
+      let newDateVal = document.getElementById('editDateTimeInput').value;
+      let finalDateTime = currentEditingRecord.date;
+      if (newDateVal) {
         try {
-          finalDateTime = new Date(newDateInput.trim()).toISOString();
-        } catch(err) {
-          finalDateTime = newDateInput.trim() + ':00.000Z';
+          finalDateTime = new Date(newDateVal).toISOString();
+        } catch(e) {
+          finalDateTime = newDateVal + ':00.000Z';
         }
       }
 
-      // Firebase par naye data ke sath update karna
+      let multiNamesDesc = itemsList.map(bi => `${bi.name} (${bi.color} Sz:${bi.size}) x ${bi.qty}`);
+
       const updatedData = {
-        ...record,
-        sellPrice: newTotalSellPrice,
-        tagPrice: newTotalSellPrice,
-        profit: newTotalSellPrice - (record.costPrice || 0),
-        customer: newCustName.trim() || 'Walk-in Customer',
+        ...currentEditingRecord,
+        name: multiNamesDesc.join(', '),
+        sellPrice: newTotal,
+        tagPrice: newTotal,
+        profit: newTotal - (currentEditingRecord.costPrice || 0),
+        customer: newCustName,
         date: finalDateTime,
-        itemsList: updatedItemsList
+        itemsList: itemsList
       };
 
-      db.ref('footwear_sales/' + record.id).set(updatedData).then(() => {
-        alert("✓ Bikri ka alag-alag item rate, Date/Time aur details safalta-purvak update ho gayi!");
+      db.ref('footwear_sales/' + currentEditingRecord.id).set(updatedData).then(() => {
+        alert("✓ Bikri ki sabhi details ek sath safalta-purvak update ho gayi!");
+        closeCustomEditModal();
         calculateSalesReport();
       }).catch(err => {
         alert("Error: " + err.message);
