@@ -486,6 +486,22 @@
 
   <!-- ==================== MODALS ==================== -->
 
+<!-- 🎨 SALE MODAL ME COLOR & SIZE SELECTOR -->
+<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
+  <div class="row" style="margin-bottom:6px;">
+    <div class="form-group" style="margin:0;">
+      <label style="font-size:10px; color:#475569;">Rang (Color) Badlein:</label>
+      <select id="saleColorSelect" class="form-control" style="font-size:12px; font-weight:bold;" onchange="onSaleColorChanged()">
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label style="font-size:10px; color:#475569;">Size Badlein:</label>
+      <select id="saleSizeSelect" class="form-control" style="font-size:12px; font-weight:bold;" onchange="onSaleSizeChanged()">
+      </select>
+    </div>
+  </div>
+</div>
+  
   <!-- LOW STOCK ITEMS MODAL -->
   <div id="lowStockModal" class="modal">
     <div class="modal-box" style="max-width:700px;">
@@ -2918,65 +2934,101 @@
       }
     }
 
-    function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
+   function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
       if (!item) return;
 
       currentSellingItem = item;
       currentSellingColor = preferredColor;
       currentSellingSize = preferredSize;
 
-      let availQty = 0;
+      // Agar color/size nahi diya hai toh pehla available uthao
+      if (!currentSellingColor || !item.colorData[currentSellingColor]) {
+        const colors = Object.keys(item.colorData || {});
+        currentSellingColor = colors[0] || 'Standard';
+      }
 
-      if (item.itemType === 'general') {
-        availQty = item.generalQty || 0;
-        currentSellingColor = 'General';
-        currentSellingSize = '1 Piece';
-      } else {
-        if (!currentSellingColor || !item.colorData[currentSellingColor]) {
-          const colors = Object.keys(item.colorData || {});
-          for (let c of colors) {
-            const sizes = item.colorData[c].sizes || {};
-            for (let s in sizes) {
-              if (sizes[s] > 0) {
-                currentSellingColor = c;
-                currentSellingSize = s;
-                availQty = sizes[s];
-                break;
-              }
-            }
-            if (currentSellingColor) break;
+      if (!currentSellingSize || !item.colorData[currentSellingColor].sizes[currentSellingSize]) {
+        const sizes = item.colorData[currentSellingColor].sizes || {};
+        for (let s in sizes) {
+          if (sizes[s] > 0) {
+            currentSellingSize = s;
+            break;
           }
-        } else {
-          const sizes = item.colorData[currentSellingColor].sizes || {};
-          if (!currentSellingSize || !sizes[currentSellingSize] || sizes[currentSellingSize] <= 0) {
-            for (let s in sizes) {
-              if (sizes[s] > 0) {
-                currentSellingSize = s;
-                availQty = sizes[s];
-                break;
-              }
-            }
-          } else {
-            availQty = sizes[currentSellingSize];
-          }
+        }
+        if (!currentSellingSize) {
+          currentSellingSize = Object.keys(sizes)[0] || '1';
         }
       }
 
-      if (availQty <= 0) {
-        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
-        return;
+      // Populate Color Dropdown
+      const colorSelect = document.getElementById('saleColorSelect');
+      if (colorSelect) {
+        const colors = Object.keys(item.colorData || {});
+        colorSelect.innerHTML = colors.map(c => `<option value="${c}" ${c === currentSellingColor ? 'selected' : ''}>${c}</option>`).join('');
       }
 
+      // Populate Size Dropdown for selected color
+      populateSaleSizesDropdown(currentSellingColor);
+
+      // Modal info update
       document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
       document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
-      document.getElementById('saleSizeBadge').innerText = `Size: ${currentSellingSize}`;
-      document.getElementById('saleColorBadge').innerText = `${currentSellingColor}`;
-      document.getElementById('saleStockRem').innerText = `Stock: ${availQty}`;
-
       document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
       document.getElementById('saleFinalPrice').value = item.price;
       document.getElementById('saleCustName').value = '';
       document.getElementById('saleCustPhone').value = '';
+
+      updateSaleStockDisplay();
+
+      closeScannerModal();
+      document.getElementById('saleModal').style.display = 'flex';
+    }
+
+    function populateSaleSizesDropdown(colorName) {
+      const sizeSelect = document.getElementById('saleSizeSelect');
+      if (!sizeSelect || !currentSellingItem || !currentSellingItem.colorData[colorName]) return;
+
+      const sizesMap = currentSellingItem.colorData[colorName].sizes || {};
+      let html = '';
+      for (let s in sizesMap) {
+        let q = sizesMap[s] || 0;
+        let selectedAttr = (String(s) === String(currentSellingSize)) ? 'selected' : '';
+        html += `<option value="${s}" ${selectedAttr}>Sz ${s} (${q} Jodi)</option>`;
+      }
+      sizeSelect.innerHTML = html;
+    }
+
+    function onSaleColorChanged() {
+      const colorSelect = document.getElementById('saleColorSelect');
+      if (!colorSelect) return;
+      currentSellingColor = colorSelect.value;
+      
+      populateSaleSizesDropdown(currentSellingColor);
+      
+      const sizeSelect = document.getElementById('saleSizeSelect');
+      if (sizeSelect) currentSellingSize = sizeSelect.value;
+
+      updateSaleStockDisplay();
+    }
+
+    function onSaleSizeChanged() {
+      const sizeSelect = document.getElementById('saleSizeSelect');
+      if (!sizeSelect) return;
+      currentSellingSize = sizeSelect.value;
+      updateSaleStockDisplay();
+    }
+
+    function updateSaleStockDisplay() {
+      if (!currentSellingItem) return;
+      let avail = 0;
+      if (currentSellingItem.itemType === 'general') {
+        avail = currentSellingItem.generalQty || 0;
+      } else if (currentSellingItem.colorData && currentSellingItem.colorData[currentSellingColor]) {
+        avail = currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] || 0;
+      }
+      const stockRem = document.getElementById('saleStockRem');
+      if (stockRem) stockRem.innerText = `Stock: ${avail} Jodi Uplabdh`;
+    }
 
       closeScannerModal();
       document.getElementById('saleModal').style.display = 'flex';
