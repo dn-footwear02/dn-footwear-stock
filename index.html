@@ -227,6 +227,7 @@
         <button class="btn btn-green" onclick="openScannerModal('sale')">🛒 Bikri Scan</button>
         <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
         <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
+        <button class="btn btn-red" onclick="openUdhaarReportModal()" title="Udhaar Khata & Pending Payments">📋 Udhaar Khata</button>
       </span>
     </div>
   </header>
@@ -647,6 +648,43 @@
           </thead>
           <tbody id="onlineOrdersTableBody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📋 UDHAAR KHATA REPORT MODAL -->
+  <div id="udhaarReportModal" class="modal">
+    <div class="modal-box" style="max-width:750px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <div>
+          <h3 style="font-size:17px; font-weight:900; color:#ef4444;">📋 Udhaar Khata (Pending Payments)</h3>
+          <p style="font-size:11px; color:#64748b;">Jin grahako ne udhaar saman liya hai unki list</p>
+        </div>
+        <button class="btn btn-slate" onclick="closeUdhaarReportModal()">✕</button>
+      </div>
+
+      <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; font-weight:bold; color:#991b1b;">Kul Udhaar Baaki (Total Pending):</span>
+        <b style="font-size:20px; color:#dc2626;" id="totalUdhaarAmountText">₹0</b>
+      </div>
+
+      <div style="max-height:45vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+        <table>
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="padding:8px;">Bill & Date</th>
+              <th style="padding:8px;">Grahak (Customer)</th>
+              <th style="padding:8px;">Items & Details</th>
+              <th style="padding:8px; text-align:right;">Udhaar Amount</th>
+              <th style="padding:8px; text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="udhaarTableBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+        <button class="btn btn-slate" onclick="closeUdhaarReportModal()">Band Karein</button>
       </div>
     </div>
   </div>
@@ -3785,7 +3823,63 @@ function renderActiveBillItemsList() {
       const qrImgElem = document.getElementById('storeDynamicQrImg');
       if (qrImgElem) qrImgElem.src = qrImageUrl;
     }
-    
+
+    function openUdhaarReportModal() {
+      renderUdhaarTable();
+      document.getElementById('udhaarReportModal').style.display = 'flex';
+    }
+
+    function closeUdhaarReportModal() {
+      document.getElementById('udhaarReportModal').style.display = 'none';
+    }
+
+    function renderUdhaarTable() {
+      const tbody = document.getElementById('udhaarTableBody');
+      if (!tbody) return;
+
+      // Sirf woh sales records filter karein jinka payMode 'Udhaar' hai
+      let udhaarSales = salesHistory.filter(s => {
+        let mode = (s.payMode || '').toLowerCase();
+        return mode.includes('udhaar') && s.status !== 'Paid';
+      });
+
+      udhaarSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      let totalUdhaar = 0;
+      let html = udhaarSales.map(s => {
+        let amt = Number(s.sellPrice) || 0;
+        totalUdhaar += amt;
+        let dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+
+        return `
+          <tr style="border-bottom:1px solid #f1f5f9; vertical-align:middle;">
+            <td style="padding:8px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
+            <td style="padding:8px;"><b>${s.customer || 'Walk-in'}</b><br><a href="tel:${s.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${s.phone || 'No Phone'}</a></td>
+            <td style="padding:8px; font-size:12px;">${s.name || '-'}</td>
+            <td style="padding:8px; text-align:right;"><b style="color:#dc2626; font-size:15px;">₹${amt}</b></td>
+            <td style="padding:8px; text-align:right;">
+              <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="markUdhaarAsPaid('${s.id}')">✓ Paisa Mila (Clear)</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:25px; color:#10b981; font-weight:bold;">✓ Badhai ho! Koi bhi udhaar baaki nahi hai.</td></tr>';
+      document.getElementById('totalUdhaarAmountText').innerText = `₹${totalUdhaar.toLocaleString('en-IN')}`;
+    }
+
+    function markUdhaarAsPaid(saleId) {
+      if (confirm("Kya is udhaar ka paisa mil gaya hai aur khata clear (Paid) karna chahte hain?")) {
+        db.ref('footwear_sales/' + saleId + '/payMode').set('Cash (Paid)').then(() => {
+          db.ref('footwear_sales/' + saleId + '/status').set('Paid');
+          alert("✓ Udhaar khata clear ho gaya!");
+          renderUdhaarTable();
+          calculateSalesReport();
+        }).catch(err => {
+          alert("Error: " + err.message);
+        });
+      }
+    }
   </script>
 </body>
 </html>
