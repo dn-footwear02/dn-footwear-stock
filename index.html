@@ -3407,27 +3407,31 @@ initQrLiveSync();
         
         let defaultRates = itemsList ? itemsList.map(bi => bi.sellPrice).join(', ') : record.sellPrice;
         let defaultName = record.customer || 'Walk-in Customer';
-        let defaultDate = record.date ? record.date.slice(0, 10) : new Date().toISOString().slice(0, 10);
+        
+        // Yahan Date ke sath Time (YYYY-MM-DD HH:MM) bhi default me aayega
+        let defaultDate = record.date ? record.date.slice(0, 16).replace('T', ' ') : new Date().toISOString().slice(0, 16).replace('T', ' ');
+        let defaultPayMode = record.payMode || 'Cash';
 
-        // Ek hi popup me teeno cheezein mangna
+        // Ek hi popup me Rates | Name | Date & Time | Payment Mode
         let userInput = prompt(
           `Bikri Edit Karein (Sabhi details ek hi line me bharein):\n\n` +
-          `Format: [Rates comma se] | [Grahak Ka Naam] | [Date YYYY-MM-DD]\n\n` +
-          `Udaharan:\n${defaultRates} | ${defaultName} | ${defaultDate}`,
-          `${defaultRates} | ${defaultName} | ${defaultDate}`
+          `Format: [Rates] | [Naam] | [Date & Time YYYY-MM-DD HH:MM] | [Payment: Cash/UPI/Udhaar]\n\n` +
+          `Udaharan:\n${defaultRates} | ${defaultName} | ${defaultDate} | ${defaultPayMode}`,
+          `${defaultRates} | ${defaultName} | ${defaultDate} | ${defaultPayMode}`
         );
 
         if (userInput === null) return;
 
         let parts = userInput.split('|').map(p => p.trim());
-        if (parts.length < 3) {
-          alert("Kripya sahi format me bharein ( beech me pipe '|' lagana zaroori hai ).");
+        if (parts.length < 4) {
+          alert("Kripya sahi format me bharein ( beech me 3 jagah pipe '|' lagana zaroori hai ).");
           return;
         }
 
         let ratesArr = parts[0].split(',').map(r => Number(r.trim()));
         let newCustName = parts[1];
-        let newDateVal = parts[2];
+        let newDateVal = parts[2]; // Yahan Date aur Time dono honge (jaise 2026-10-30 15:30)
+        let newPayMode = parts[3];
 
         let newTotalSellPrice = 0;
         if (itemsList && itemsList.length > 0) {
@@ -3443,10 +3447,16 @@ initQrLiveSync();
           newTotalSellPrice = ratesArr[0] || 0;
         }
 
+        // Date aur Time ko properly ISO format me convert karne ke liye
         let finalDateTime = record.date;
         if (newDateVal.trim() !== '') {
-          let timePart = record.date ? record.date.slice(10) : 'T12:00:00.000Z';
-          finalDateTime = newDateVal.trim() + timePart;
+          try {
+            let formattedStr = newDateVal.trim().replace(' ', 'T');
+            if (formattedStr.length === 16) formattedStr += ':00.000Z';
+            finalDateTime = new Date(formattedStr).toISOString();
+          } catch(e) {
+            finalDateTime = newDateVal.trim() + ':00.000Z';
+          }
         }
 
         let multiNamesDesc = itemsList ? itemsList.map(bi => `${bi.name} (${bi.color} Sz:${bi.size}) x ${bi.qty}`) : record.name;
@@ -3459,11 +3469,12 @@ initQrLiveSync();
           profit: newTotalSellPrice - (record.costPrice || 0),
           customer: newCustName || 'Walk-in Customer',
           date: finalDateTime,
+          payMode: newPayMode || 'Cash',
           itemsList: itemsList
         };
 
         db.ref('footwear_sales/' + record.id).set(updatedData).then(() => {
-          alert("✓ Bikri ki saari details ek hi baar me update ho gayi!");
+          alert("✓ Bikri ki saari details, Date & Time aur Payment Mode safalta-purvak update ho gaye!");
           calculateSalesReport();
         }).catch(err => {
           alert("Error: " + err.message);
