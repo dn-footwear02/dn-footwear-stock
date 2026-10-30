@@ -1057,8 +1057,11 @@
               <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
+          <tbody id="rReceiptTableBody">
+            <!-- Yahan saare items alag-alag row me aayenge -->
+          </tbody>
+        </table>
+        
               <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
               <td style="padding:4px 0; text-align:center;" id="rItemSize">8 / Black</td>
               <td style="padding:4px 0; text-align:right;" id="rItemRate">₹850</td>
@@ -2975,15 +2978,41 @@
     }
 
     function showReceipt(record, dateStr) {
-      document.getElementById('rBillNo').innerText = record.billNo;
+      document.getElementById('rBillNo').innerText = record.billNo || 'DN-Bill';
       document.getElementById('rDate').innerText = dateStr;
-      document.getElementById('rCust').innerText = `${record.customer} ${record.phone ? '('+record.phone+')' : ''}`;
-      document.getElementById('rPayMode').innerText = record.payMode;
-      document.getElementById('rItemName').innerText = `${record.name} (${record.brand})`;
-      document.getElementById('rItemSize').innerText = `${record.size} / ${record.color}`;
-      document.getElementById('rItemRate').innerText = `₹${record.sellPrice}`;
-      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice}`;
-      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice}`;
+      document.getElementById('rCust').innerText = `${record.customer || 'Walk-in'} ${record.phone ? '('+record.phone+')' : ''}`;
+      document.getElementById('rPayMode').innerText = record.payMode || 'Cash';
+      
+      const tbody = document.getElementById('rReceiptTableBody');
+      let rowsHtml = '';
+
+      // Agar multi-item bill hai toh sabhi ko alag-alag row me dikhao
+      if (record.itemsList && record.itemsList.length > 0) {
+        record.itemsList.forEach(bi => {
+          const itemTotal = bi.qty * bi.sellPrice;
+          rowsHtml += `
+            <tr style="border-bottom:1px dotted #ccc;">
+              <td style="padding:4px 0;"><b>${bi.name}</b><br><small>Qty: ${bi.qty}</small></td>
+              <td style="padding:4px 0; text-align:center;">${bi.size} / ${bi.color}</td>
+              <td style="padding:4px 0; text-align:right;">₹${bi.sellPrice} <br><b>₹${itemTotal}</b></td>
+            </tr>
+          `;
+        });
+      } else {
+        // Single item bill fallback
+        rowsHtml += `
+          <tr>
+            <td style="padding:4px 0;"><b>${record.name || 'Shoe'}</b></td>
+            <td style="padding:4px 0; text-align:center;">${record.size || '-'} / ${record.color || '-'}</td>
+            <td style="padding:4px 0; text-align:right;"><b>₹${record.sellPrice || 0}</b></td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
+      
+      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice || record.sellPrice}`;
+      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice || 0}`;
       
       document.getElementById('receiptModal').style.display = 'flex';
       setTimeout(() => window.print(), 400);
