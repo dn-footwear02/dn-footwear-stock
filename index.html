@@ -3826,18 +3826,19 @@ function renderActiveBillItemsList() {
 
     function openUdhaarReportModal() {
       renderUdhaarTable();
-      document.getElementById('udhaarReportModal').style.display = 'flex';
+      const modal = document.getElementById('udhaarReportModal');
+      if (modal) modal.style.display = 'flex';
     }
 
     function closeUdhaarReportModal() {
-      document.getElementById('udhaarReportModal').style.display = 'none';
+      const modal = document.getElementById('udhaarReportModal');
+      if (modal) modal.style.display = 'none';
     }
 
     function renderUdhaarTable() {
       const tbody = document.getElementById('udhaarTableBody');
       if (!tbody) return;
 
-      // Sirf woh sales records filter karein jinka payMode 'Udhaar' hai
       let udhaarSales = salesHistory.filter(s => {
         let mode = (s.payMode || '').toLowerCase();
         return mode.includes('udhaar') && s.status !== 'Paid';
@@ -3865,7 +3866,9 @@ function renderActiveBillItemsList() {
       }).join('');
 
       tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:25px; color:#10b981; font-weight:bold;">✓ Badhai ho! Koi bhi udhaar baaki nahi hai.</td></tr>';
-      document.getElementById('totalUdhaarAmountText').innerText = `₹${totalUdhaar.toLocaleString('en-IN')}`;
+      
+      const totalText = document.getElementById('totalUdhaarAmountText');
+      if (totalText) totalText.innerText = `₹${totalUdhaar.toLocaleString('en-IN')}`;
     }
 
     function markUdhaarAsPaid(saleId) {
