@@ -1922,12 +1922,52 @@
     }
 
     // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka function
+    // 🗑️ Galti se judi bikri entry ko delete karne aur stock ko wapas item me add karne ka function
     function deleteSaleRecord(saleId) {
-      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse total sales aur amount se yeh entry hat jayegi.)")) {
+      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse stock wapas usi item, size aur color me add ho jayega.)")) {
         
-        // Firebase se us sale record ko delete karein
-        db.ref('footwear_sales/' + saleId).remove().then(() => {
-          alert("✓ Bikri entry safalta-purvak delete ho gayi!");
+        // Pehle sales record ko dhoondo taaki pata chale kaunsa item wapas jodna hai
+        db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
+          const saleRec = snapshot.val();
+
+          if (saleRec) {
+            // Agar multi-item bill hai ya single item bill hai
+            const itemsToRestore = saleRec.itemsList || [{
+              itemId: saleRec.itemId,
+              color: saleRec.color,
+              size: saleRec.size,
+              qty: 1
+            }];
+
+            // Har item ke stock ko wapas database me update karo
+            itemsToRestore.forEach(ri => {
+              if (ri.itemId) {
+                db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
+                  const stockItem = stockSnap.val();
+                  if (stockItem) {
+                    const restoreQty = Number(ri.qty) || 1;
+
+                    if (stockItem.itemType === 'general') {
+                      stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
+                    } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
+                      const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
+                      stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
+                    }
+
+                    // Stock wapas save karo
+                    db.ref('footwear_stock/' + ri.itemId).set(stockItem);
+                  }
+                });
+              }
+            });
+          }
+
+          // Ab sales record ko delete kar do
+          db.ref('footwear_sales/' + saleId).remove().then(() => {
+            alert("✓ Bikri entry delete ho gayi aur stock wapas apne item me jud gaya!");
+            calculateSalesReport();
+          });
+
         }).catch((err) => {
           alert("Error: " + err.message);
         });
