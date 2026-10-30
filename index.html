@@ -176,46 +176,32 @@
       to { transform: translate(-50%, 0); opacity: 1; }
     }
 
-    @media print {
-      body * { visibility: hidden !important; }
-      
-      /* Jab Thermal Receipt Print ho */
-      #receiptModal:not([style*="display: none"]) #thermalBillArea, 
-      #receiptModal:not([style*="display: none"]) #thermalBillArea * { 
-        visibility: visible !important; 
+   @media print {
+      body * {
+        visibility: hidden !important;
       }
-      #thermalBillArea { 
-        position: absolute !important; 
-        left: 0 !important; 
-        top: 0 !important; 
-        width: 80mm !important; 
-        margin: 0 !important; 
-        padding: 5px !important; 
+      #receiptModal, #receiptModal * {
+        visibility: visible !important;
+      }
+      #receiptModal {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        display: block !important;
+      }
+      #thermalBillArea {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 80mm !important;
+        margin: 0 !important;
         background: white !important;
       }
-
-      /* Jab Sales Report Print ho */
-      #salesReportModal:not([style*="display: none"]) #reportPrintArea, 
-      #salesReportModal:not([style*="display: none"]) #reportPrintArea * { 
-        visibility: visible !important; 
+      .no-print, button {
+        display: none !important;
       }
-      #reportPrintArea { 
-        position: absolute !important; 
-        left: 0 !important; 
-        top: 0 !important; 
-        width: 100% !important; 
-        margin: 0 !important; 
-        padding: 10px !important; 
-        background: white !important;
-      }
-
-      .no-print { display: none !important; }
-    } {
-      body * { visibility: hidden; }
-      #thermalBillArea, #thermalBillArea *, #reportPrintArea, #reportPrintArea * { visibility: visible; }
-      #thermalBillArea { position: absolute; left: 0; top: 0; width: 80mm; margin: 0; padding: 10px; font-family: monospace; }
-      #reportPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; }
-      .no-print { display: none !important; }
     }
   </style>
 </head>
@@ -3017,7 +3003,7 @@
       }
     }
 
-    function showReceipt(record, dateStr) {
+   function showReceipt(record, dateStr) {
       document.getElementById('rBillNo').innerText = record.billNo || 'DN-Bill';
       document.getElementById('rDate').innerText = dateStr;
       document.getElementById('rCust').innerText = `${record.customer || 'Walk-in'} ${record.phone ? '('+record.phone+')' : ''}`;
@@ -3026,7 +3012,6 @@
       const tbody = document.getElementById('rReceiptTableBody');
       let rowsHtml = '';
 
-      // Agar multi-item bill hai toh sabhi ko alag-alag row me dikhao
       if (record.itemsList && record.itemsList.length > 0) {
         record.itemsList.forEach(bi => {
           const itemTotal = bi.qty * bi.sellPrice;
@@ -3039,7 +3024,6 @@
           `;
         });
       } else {
-        // Single item bill fallback
         rowsHtml += `
           <tr>
             <td style="padding:4px 0;"><b>${record.name || 'Shoe'}</b></td>
@@ -3055,9 +3039,12 @@
       document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice || 0}`;
       
       document.getElementById('receiptModal').style.display = 'flex';
-      setTimeout(() => window.print(), 400);
+      
+      setTimeout(() => {
+        window.print();
+      }, 500);
     }
-
+    
     function closeReceiptModal() {
       document.getElementById('receiptModal').style.display = 'none';
     }
