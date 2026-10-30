@@ -3398,51 +3398,81 @@ initQrLiveSync();
     }
 
     // ✏️ Edit Sale Modal (Rate, Customer Name aur Sales Date update karne ke liye)
+    // ✏️ Edit Sale Modal (Multi-item rate edit, Customer name aur Date/Time update karne ke liye)
     function openEditSaleModal(encodedStr) {
       const record = JSON.parse(decodeURIComponent(encodedStr));
       
-      const newPrice = prompt(`[${record.name}] ka naya Selling Price (Rate ₹) daalein:`, record.sellPrice);
-      if (newPrice === null) return;
+      let updatedItemsList = record.itemsList ? JSON.parse(JSON.stringify(record.itemsList)) : null;
+      let newTotalSellPrice = Number(record.sellPrice) || 0;
 
-      const parsedPrice = Number(newPrice);
-      if (isNaN(parsedPrice) || parsedPrice < 0) {
-        alert("Kripya sahi amount daalein!");
-        return;
+      // Agar bill me multiple items hain, toh ek-ek karke har item ka rate pucho
+      if (updatedItemsList && updatedItemsList.length > 0) {
+        let calculatedNewTotal = 0;
+        for (let i = 0; i < updatedItemsList.length; i++) {
+          let bi = updatedItemsList[i];
+          let itemPromptVal = prompt(`[${bi.name}] (Sz: ${bi.size}, Rang: ${bi.color}) ka naya Selling Rate (₹) daalein:`, bi.sellPrice);
+          if (itemPromptVal === null) return; // Cancel kiya toh rok do
+
+          let parsedItemRate = Number(itemPromptVal);
+          if (isNaN(parsedItemRate) || parsedItemRate < 0) {
+            alert("Kripya sahi amount daalein!");
+            return;
+          }
+          bi.sellPrice = parsedItemRate;
+          calculatedNewTotal += (bi.qty * parsedItemRate);
+        }
+        newTotalSellPrice = calculatedNewTotal;
+      } else {
+        // Agar single item bill hai
+        const singleRateInput = prompt(`[${record.name || 'Shoe'}] ka naya Selling Price (Rate ₹) daalein:`, record.sellPrice);
+        if (singleRateInput === null) return;
+
+        const parsedSingle = Number(singleRateInput);
+        if (isNaN(parsedSingle) || parsedSingle < 0) {
+          alert("Kripya sahi amount daalein!");
+          return;
+        }
+        newTotalSellPrice = parsedSingle;
       }
 
+      // Grahak ka naam update karne ke liye
       const newCustName = prompt("Grahak ka naam update karein:", record.customer || '');
       if (newCustName === null) return;
 
-      // Purani date ko YYYY-MM-DD format me nikalna
-      const existingDateOnly = record.date ? record.date.slice(0, 10) : new Date().toISOString().slice(0, 10);
-      const newDateInput = prompt("Bikri ki Date update karein (Format: YYYY-MM-DD):", existingDateOnly);
+      // Bikri ki Date aur Time update karne ke liye (Format: YYYY-MM-DD HH:MM)
+      const existingDateStr = record.date ? record.date.slice(0, 16) : new Date().toISOString().slice(0, 16);
+      const newDateInput = prompt("Bikri ki Date aur Time update karein (Format: YYYY-MM-DDTHH:MM, jaise 2026-10-30T14:30):", existingDateStr);
       if (newDateInput === null) return;
 
-      // Agar user ne date dali hai toh time ke sath set karein
       let finalDateTime = record.date;
       if (newDateInput.trim() !== '') {
-        // Purana time ya current time maintain rakhne ke liye
-        const timePart = record.date ? record.date.slice(10) : 'T12:00:00.000Z';
-        finalDateTime = newDateInput.trim() + timePart;
+        // Agar user ne sahi format diya hai toh ISO string me convert karo
+        try {
+          finalDateTime = new Date(newDateInput.trim()).toISOString();
+        } catch(err) {
+          finalDateTime = newDateInput.trim() + ':00.000Z';
+        }
       }
 
-      // Firebase par record update karna
+      // Firebase par naye data ke sath update karna
       const updatedData = {
         ...record,
-        sellPrice: parsedPrice,
-        profit: parsedPrice - (record.costPrice || 0),
+        sellPrice: newTotalSellPrice,
+        tagPrice: newTotalSellPrice,
+        profit: newTotalSellPrice - (record.costPrice || 0),
         customer: newCustName.trim() || 'Walk-in Customer',
-        date: finalDateTime
+        date: finalDateTime,
+        itemsList: updatedItemsList
       };
 
       db.ref('footwear_sales/' + record.id).set(updatedData).then(() => {
-        alert("✓ Bikri ki Date, Rate aur Details safalta-purvak update ho gayi!");
+        alert("✓ Bikri ka alag-alag item rate, Date/Time aur details safalta-purvak update ho gayi!");
         calculateSalesReport();
       }).catch(err => {
         alert("Error: " + err.message);
       });
     }
-
+    
     // ⚠️ Kam stock wale items ki list dikhane ka function
     function openLowStockModal() {
       const tbody = document.getElementById('lowStockTableBody');
