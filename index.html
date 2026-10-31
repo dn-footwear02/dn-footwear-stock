@@ -2559,9 +2559,21 @@
     }
 
     function renderAdminTable() {
-      // Yahan aapke table body ki ID check hogi (jaise shoeTableBody ya adminTableContainer)
-      const container = document.getElementById('shoeTableBody') || document.getElementById('adminTableContainer');
+      let container = document.getElementById('shoeTableBody');
       if (!container) return;
+
+      // Agar container tbody hai, toh table ko hide karke grid wrapper bana dein
+      let parentDiv = container.parentElement;
+      if (parentDiv && parentDiv.tagName === 'TABLE') {
+        parentDiv.style.display = 'none';
+        let gridWrapper = document.getElementById('adminGridContainer');
+        if (!gridWrapper) {
+          gridWrapper = document.createElement('div');
+          gridWrapper.id = 'adminGridContainer';
+          parentDiv.parentNode.insertBefore(gridWrapper, parentDiv);
+        }
+        container = gridWrapper;
+      }
 
       let filtered = items.filter(it => {
         let q = searchInputQuery ? searchInputQuery.toLowerCase() : '';
@@ -2570,13 +2582,11 @@
                (it.category && it.category.toLowerCase().includes(q));
       });
 
-      // Grid container wrap karega
       let html = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:12px; padding:10px; width:100%;">`;
 
       html += filtered.map(it => {
         let mainImg = it.photo || (it.colorData && Object.values(it.colorData)[0] && Object.values(it.colorData)[0].photo) || 'https://via.placeholder.com/150';
         
-        // Stock breakdown (Colors & Sizes)
         let stockBreakdown = '';
         let totalQty = 0;
         if (it.colorData) {
@@ -2629,7 +2639,7 @@
       html += `</div>`;
       container.innerHTML = html;
     }
-
+    
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
