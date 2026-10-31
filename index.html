@@ -2628,6 +2628,33 @@
       container.innerHTML = html;
     };
 
+      document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi item nahi mila.</td></tr>';
+      document.getElementById('dTotalPairs').innerText = totalStockUnits;
+      document.getElementById('dTotalModels').innerText = items.length + " Models";
+      document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
+      document.getElementById('dTotalTagValue').innerText = "Tag Value: ₹" + totalTagValue.toLocaleString('en-IN');
+      document.getElementById('dLowStock').innerText = lowStock;
+
+      let allSalesAmt = 0;
+      let allCash = 0;
+      let allUpi = 0;
+
+      salesHistory.forEach(s => {
+        const amt = Number(s.sellPrice) || 0;
+        const mode = (s.payMode || 'Cash').toUpperCase();
+        allSalesAmt += amt;
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          allUpi += amt;
+        } else {
+          allCash += amt;
+        }
+      });
+
+      document.getElementById('dTotalSalesVal').innerText = "₹" + allSalesAmt.toLocaleString('en-IN');
+      document.getElementById('dSalesCash').innerText = "₹" + allCash.toLocaleString('en-IN');
+      document.getElementById('dSalesUpi').innerText = "₹" + allUpi.toLocaleString('en-IN');
+    }
+
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
       let cardsHtml = '';
