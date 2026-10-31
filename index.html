@@ -3929,6 +3929,22 @@ function renderActiveBillItemsList() {
         });
       }
     }
+
+    <style>
+  /* Purani table ko chupakar seedha Grid Cards me badalna */
+  table#shoeTable, div[style*="overflow-x:auto;"] table {
+    display: none !important;
+  }
+  
+  /* Admin grid container style */
+  #adminGridContainer {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 12px !important;
+    padding: 10px !important;
+    width: 100% !important;
+  }
+</style>
   </script>
 </body>
 </html>
