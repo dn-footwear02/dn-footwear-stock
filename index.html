@@ -3745,12 +3745,7 @@ function renderActiveBillItemsList() {
       bi.size = newSize;
       renderActiveBillItemsList();
     }
-
-      container.innerHTML = html || '<small style="color:#94a3b8;">Koi item nahi hai. Barcode scan karein.</small>';
-      document.getElementById('saleModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
-      updateDynamicUpiQrCode();
-    }
-
+    
     // 🏷️ Bargain price update karne ka function
     function updateActiveItemBargainPrice(index, newPriceVal) {
       const parsed = Number(newPriceVal);
