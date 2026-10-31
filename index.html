@@ -399,6 +399,8 @@
 
     <!-- TABLE -->
     <div style="overflow-x:auto;">
+      <!-- Yahan hamara naya Grid View aayega -->
+<div id="adminGridContainer" style="width:100%; margin-top:10px;"></div>
       <table>
         <thead>
           <tr>
@@ -2559,7 +2561,7 @@
     }
 
     function renderAdminTable() {
-      let container = document.getElementById('shoeTableBody');
+      <div id="adminGridContainer" style="width:100%; margin-top:10px;"></div>
       if (!container) return;
 
       // Agar container tbody hai, toh table ko hide karke grid wrapper bana dein
