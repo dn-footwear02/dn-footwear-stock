@@ -397,8 +397,22 @@
       <button class="btn btn-slate" onclick="backupJSON()">💾 Backup</button>
     </div>
 
-    <!-- ADMIN GRID CONTAINER (Catalog Style) -->
-<div id="adminGridContainer" style="width:100%; margin-top:10px;"></div>
+    <!-- TABLE -->
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Photo & Name</th>
+            <th>Category & Brand</th>
+            <th>Rang (Colors) & Stock Breakdown</th>
+            <th>Kul Jodi</th>
+            <th>Tag Rate</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryRows"></tbody>
+      </table>
+    </div>
 
     <!-- ==================== DELIVERY LOCATIONS CUSTOMIZER (ADMIN) ==================== -->
     <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px solid #3b82f6; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
@@ -1112,7 +1126,7 @@
   </div>
 
   <script>
-    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "998226";
+    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "123456";
 
     let storeContactData = {
       name1: "Dashrath Singh",
@@ -2545,89 +2559,73 @@
     }
 
     function renderAdminTable() {
-      // Hum purani table ya container ki jagah seedha body/main area me grid inject kar rahe hain
-      let container = document.getElementById('adminGridContainer') || document.getElementById('shoeTableBody');
-      if (!container) return;
+      const search = (document.getElementById('adminSearchFilter').value || '').toLowerCase().trim();
+      const catFlt = document.getElementById('adminCategoryFilter').value;
 
-      // Agar container tbody hai, toh uske parent table ko hide kar do
-      if (container.tagName === 'TBODY') {
-        let parentTable = container.closest('table');
-        if (parentTable) parentTable.style.display = 'none';
-        
-        // Ek naya div bana lo agar pehle se nahi hai
-        let existingGrid = document.getElementById('myCustomGridDiv');
-        if (!existingGrid) {
-          existingGrid = document.createElement('div');
-          existingGrid.id = 'myCustomGridDiv';
-          parentTable.parentNode.insertBefore(existingGrid, parentTable);
-        }
-        container = existingGrid;
-      }
+      let totalStockUnits = 0, totalCost = 0, totalTagValue = 0, lowStock = 0;
+      let tableHtml = '';
 
-      let filtered = items.filter(it => {
-        let q = searchInputQuery ? searchInputQuery.toLowerCase() : '';
-        return (it.name && it.name.toLowerCase().includes(q)) ||
-               (it.brand && it.brand.toLowerCase().includes(q)) ||
-               (it.category && it.category.toLowerCase().includes(q));
-      });
+      items.forEach(it => {
+        const itemType = it.itemType || 'footwear';
+        const itemCat = it.category || 'Footwear';
 
-      let html = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:12px; padding:10px; width:100%;">`;
+        let p = 0;
+        let breakdownByColorHtml = '';
 
-      html += filtered.map(it => {
-        let mainImg = it.photo || (it.colorData && Object.values(it.colorData)[0] && Object.values(it.colorData)[0].photo) || 'https://via.placeholder.com/150';
-        
-        let stockBreakdown = '';
-        let totalQty = 0;
-        if (it.colorData) {
-          for (let col in it.colorData) {
-            let sizes = it.colorData[col].sizes || {};
-            let sizeStr = [];
-            for (let sz in sizes) {
-              let q = sizes[sz] || 0;
-              totalQty += q;
-              if (q > 0) sizeStr.push(`Sz ${sz}: ${q}`);
+        if (itemType === 'general') {
+          p = Number(it.generalQty) || 0;
+          breakdownByColorHtml = `<span class="size-badge ${p > 2 ? 'size-in' : 'size-low'}">${p} Pcs</span>`;
+        } else if (it.colorData) {
+          for (let c in it.colorData) {
+            const cData = it.colorData[c];
+            const cSizes = cData.sizes || {};
+            let cPairs = 0;
+            let cBadges = [];
+            for (let sz in cSizes) {
+              const q = Number(cSizes[sz]) || 0;
+              cPairs += q;
+              p += q;
+              if (q > 0) cBadges.push(`${sz}:${q}`);
             }
-            if (sizeStr.length > 0) {
-              stockBreakdown += `<div style="font-size:11px; color:#475569;"><b>${col}:</b> ${sizeStr.join(', ')}</div>`;
-            }
+            const hasVideo = (cData.media || []).some(m => m.type === 'video') || !!cData.video;
+            breakdownByColorHtml += `
+              <div style="margin-bottom:3px;">
+                <b style="color:#4f46e5; font-size:11px;">● ${c} (${cPairs} Jodi) ${hasVideo?'🎬':''}:</b> 
+                <small style="color:#334155;">${cBadges.join(', ') || 'Khatam'}</small>
+              </div>
+            `;
           }
         }
 
-        return `
-          <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04); display:flex; flex-direction:column; justify-content:space-between;">
-            <div>
-              <div style="position:relative; text-align:center; background:#f8fafc; border-radius:8px; padding:6px; margin-bottom:8px;">
-                <img src="${mainImg}" style="width:100%; height:130px; object-fit:contain; cursor:pointer; border-radius:6px;" onclick="openCheckPopup('${it.id}')" title="Badi photo aur stock dekhein">
-                <span style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; font-size:9px; padding:2px 6px; border-radius:4px;">${it.category || 'General'}</span>
-              </div>
-              <h4 style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
-              <p style="font-size:11px; color:#64748b; margin-bottom:6px;">Brand: <b>${it.brand}</b></p>
-              
-              <div style="background:#f1f5f9; padding:6px; border-radius:6px; margin-bottom:8px; max-height:75px; overflow-y:auto;">
-                ${stockBreakdown || '<small style="color:#94a3b8;">No Stock</small>'}
-              </div>
+        totalStockUnits += p;
+        totalCost += (p * (it.cost || 0));
+        totalTagValue += (p * (it.price || 0));
+        if (p <= 3) lowStock++;
+
+        if (catFlt !== 'ALL' && !itemCat.toLowerCase().includes(catFlt.toLowerCase())) return;
+        if (search && !it.name.toLowerCase().includes(search) && !it.brand.toLowerCase().includes(search)) return;
+
+        let mainImg = it.photo || 'https://via.placeholder.com/50';
+
+        tableHtml += `<tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="${mainImg}" class="shoe-img" onclick="openCheckPopup('${it.id}')" style="cursor:pointer;" title="Stock Details Dekhein">
+              <div><b>${it.name}</b><br><span class="cat-chip">${itemCat}</span></div>
             </div>
-
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:11px; color:#64748b;">Stock: <b style="${totalQty<=3?'color:#ef4444;':'color:#0f172a;'}">${totalQty} Jodi</b></span>
-                <span style="font-size:14px; font-weight:900; color:#10b981;">₹${it.price}</span>
-              </div>
-
-              <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px;">
-                <button class="btn btn-amber" style="padding:5px 0; font-size:11px;" onclick="openCheckPopup('${it.id}')" title="Stock">📦</button>
-                <button class="btn btn-green" style="padding:5px 0; font-size:11px;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'), null, null)" title="Bechein">🛒</button>
-                <button class="btn btn-indigo" style="padding:5px 0; font-size:11px;" onclick="editShoe('${it.id}')" title="Edit">✏️</button>
-                <button class="btn btn-red" style="padding:5px 0; font-size:11px;" onclick="deleteShoe('${it.id}')" title="Delete">🗑️</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      html += `</div>`;
-      container.innerHTML = html;
-    }
+          </td>
+          <td><b>${it.brand}</b></td>
+          <td>${breakdownByColorHtml || '<small style="color:#94a3b8;">No Stock</small>'}</td>
+          <td><b style="${p<=3?'color:#ef4444;':'color:#0f172a;'}">${p} Jodi</b></td>
+          <td><b style="color:#10b981;">₹${it.price}</b></td>
+          <td style="text-align:right;">
+            <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="openCheckPopup('${it.id}')">Stock</button>
+            <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'), null, null)">🛒 Bechein</button>
+            <button class="btn btn-indigo" style="padding:4px 8px; font-size:11px;" onclick="editShoe('${it.id}')">✏️</button>
+            <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe('${it.id}')">🗑️</button>
+          </td>
+        </tr>`;
+      });
 
       document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi item nahi mila.</td></tr>';
       document.getElementById('dTotalPairs').innerText = totalStockUnits;
@@ -3931,21 +3929,6 @@ function renderActiveBillItemsList() {
         });
       }
     }
-
-    <style>
-  /* Purani table ko chupakar seedha Grid Cards me badalna */
-  table#shoeTable, div[style*="overflow-x:auto;"] table {
-    display: none !important;
-  }
-  
-  /* Admin grid container style */
-  #adminGridContainer {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-    gap: 12px !important;
-    padding: 10px !important;
-    width: 100% !important;
-  }
   </script>
 </body>
 </html>
