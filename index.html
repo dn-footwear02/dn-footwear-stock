@@ -2610,7 +2610,7 @@
         tableHtml += `<tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-              <img src="${mainImg}" class="shoe-img">
+              <img src="${mainImg}" class="shoe-img" onclick="openCheckPopup('${it.id}')" style="cursor:pointer;" title="Stock Details Dekhein">
               <div><b>${it.name}</b><br><span class="cat-chip">${itemCat}</span></div>
             </div>
           </td>
