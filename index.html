@@ -108,7 +108,7 @@
     .thumb-item.active { border-color: #4f46e5; }
     .video-thumb-badge { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.8); color: white; font-size: 8px; padding: 1px 3px; border-radius: 3px; font-weight: bold; }
 
-    .shoe-card- { padding: 14px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+    .shoe-card-body { padding: 14px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
 
     .color-chip-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; margin: 2px; background: white; transition: 0.15s; }
     .color-chip-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; box-shadow: 0 0 0 1.5px #4f46e5; }
@@ -177,7 +177,7 @@
     }
 
    @media print {
-       * {
+      body * {
         visibility: hidden !important;
       }
       #receiptModal, #receiptModal * {
@@ -205,7 +205,7 @@
     }
   </style>
 </head>
-<>
+<body>
 
   <!-- HEADER -->
   <header>
@@ -410,7 +410,7 @@
             <th style="text-align:right;">Actions</th>
           </tr>
         </thead>
-        <t id="inventoryRows"></t>
+        <tbody id="inventoryRows"></tbody>
       </table>
     </div>
 
@@ -503,7 +503,7 @@
               <th style="padding:8px; text-align:right;">Action</th>
             </tr>
           </thead>
-          <t id="lowStockTable"></t>
+          <tbody id="lowStockTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -646,7 +646,7 @@
               <th style="text-align:right;">Action</th>
             </tr>
           </thead>
-          <t id="onlineOrdersTable"></t>
+          <tbody id="onlineOrdersTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -679,7 +679,7 @@
               <th style="padding:8px; text-align:right;">Action</th>
             </tr>
           </thead>
-          <t id="udhaarTable"></t>
+          <tbody id="udhaarTableBody"></tbody>
         </table>
       </div>
 
@@ -758,7 +758,7 @@
                 <th style="padding:8px 6px; text-align:right;">Hatao</th>
               </tr>
             </thead>
-            <t id="reportTable"></t>
+            <tbody id="reportTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -1081,9 +1081,9 @@
               <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
             </tr>
           </thead>
-          <t id="rReceiptTable">
+          <tbody id="rReceiptTableBody">
             <!-- Yahan saare items alag-alag row me aayenge -->
-          </t>
+          </tbody>
         </table>
         
               <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
@@ -1840,28 +1840,12 @@
     }
 
     function openSalesReportModal() {
-      const modal = document.getElementById('salesReportModal'); // Ya aapke report modal ki jo bhi ID ho
-      if (modal) {
-        modal.style.display = 'flex';
-        if (typeof calculateSalesReport === 'function') calculateSalesReport();
-      } else {
-        alert("Sales Report modal HTML me nahi mil raha hai!");
-      }
+      setReportPeriod('today');
+      document.getElementById('salesReportModal').style.display = 'flex';
     }
 
     function closeSalesReportModal() {
-      const modal = document.getElementById('salesReportModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function openBarcodeCheckModal() {
-      const modal = document.getElementById('barcodeCheckModal'); // Ya stock warning modal ki ID
-      if (modal) {
-        modal.style.display = 'flex';
-      } else {
-        // Agar modal nahi hai toh direct alert ya table filter kar sakte hain
-        alert("Barcode check modal open ho raha hai...");
-      }
+      document.getElementById('salesReportModal').style.display = 'none';
     }
 
     function setReportPeriod(period) {
@@ -2626,7 +2610,7 @@
         tableHtml += `<tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-            <img src="${mainImg}" class="shoe-img" onclick="openCheckPopup('${it.id}')" style="cursor:pointer;" title="Stock Details Dekhein">
+              <img src="${mainImg}" class="shoe-img">
               <div><b>${it.name}</b><br><span class="cat-chip">${itemCat}</span></div>
             </div>
           </td>
