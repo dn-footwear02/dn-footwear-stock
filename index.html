@@ -1840,12 +1840,28 @@
     }
 
     function openSalesReportModal() {
-      setReportPeriod('today');
-      document.getElementById('salesReportModal').style.display = 'flex';
+      const modal = document.getElementById('salesReportModal'); // Ya aapke report modal ki jo bhi ID ho
+      if (modal) {
+        modal.style.display = 'flex';
+        if (typeof calculateSalesReport === 'function') calculateSalesReport();
+      } else {
+        alert("Sales Report modal HTML me nahi mil raha hai!");
+      }
     }
 
     function closeSalesReportModal() {
-      document.getElementById('salesReportModal').style.display = 'none';
+      const modal = document.getElementById('salesReportModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openBarcodeCheckModal() {
+      const modal = document.getElementById('barcodeCheckModal'); // Ya stock warning modal ki ID
+      if (modal) {
+        modal.style.display = 'flex';
+      } else {
+        // Agar modal nahi hai toh direct alert ya table filter kar sakte hain
+        alert("Barcode check modal open ho raha hai...");
+      }
     }
 
     function setReportPeriod(period) {
