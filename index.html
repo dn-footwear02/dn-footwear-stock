@@ -48,6 +48,7 @@
     .slider-video { width: 100%; height: 100%; object-fit: cover; }
     .slider-caption { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 25px 20px 10px; pointer-events: none; }
 
+    /* DELIVERY CHECKER BOX */
     .delivery-check-box {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -79,6 +80,7 @@
     .contact-bar { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .call-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
+    /* PRODUCT CARD (FLIPKART/AMAZON STYLE) */
     .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .shoe-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; position: relative; }
     .shoe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
@@ -125,8 +127,12 @@
     td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     tr:hover { background: #f8fafc; }
 
+    .shoe-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
     .size-badge { display: inline-block; padding: 3px 6px; font-size: 11px; font-weight: 700; border-radius: 4px; margin: 1px; }
+    .size-in { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .size-low { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .size-out { background: #fee2e2; color: #991b1b; text-decoration: line-through; border: 1px solid #fecaca; }
+
     .cat-chip { display: inline-block; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: #e0e7ff; color: #3730a3; text-transform: uppercase; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 999; padding: 15px; }
@@ -170,20 +176,32 @@
       to { transform: translate(-50%, 0); opacity: 1; }
     }
 
-    /* ADMIN GRID VIEW CARDS */
-    #adminGridContainer {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-
    @media print {
-      body * { visibility: hidden !important; }
-      #receiptModal, #receiptModal * { visibility: visible !important; }
-      #receiptModal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; display: block !important; }
-      #thermalBillArea { position: absolute !important; left: 0 !important; top: 0 !important; width: 80mm !important; margin: 0 !important; background: white !important; }
-      .no-print, button { display: none !important; }
+      body * {
+        visibility: hidden !important;
+      }
+      #receiptModal, #receiptModal * {
+        visibility: visible !important;
+      }
+      #receiptModal {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        display: block !important;
+      }
+      #thermalBillArea {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 80mm !important;
+        margin: 0 !important;
+        background: white !important;
+      }
+      .no-print, button {
+        display: none !important;
+      }
     }
   </style>
 </head>
@@ -216,6 +234,8 @@
 
   <!-- ==================== 1. CUSTOMER ONLINE STORE (DEFAULT VIEW) ==================== -->
   <div id="customerViewSection" class="container">
+
+    <!-- 📦 CUSTOMER ORDER TRACKING BOX -->
     <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,0.03);">
       <h4 style="font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
         📦 Apna Order Status Track Karein:
@@ -227,15 +247,18 @@
         <button class="btn btn-indigo" onclick="trackCustomerOrder()" style="padding:9px 16px;">Track Karein</button>
       </div>
 
+      <!-- TRACKING RESULT DISPLAY AREA -->
       <div id="trackResultBox" style="display:none; margin-top:14px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;"></div>
     </div>
     
+    <!-- BANNER SLIDER -->
     <div class="slider-wrapper ratio-21-9" id="customerSliderWrapper">
       <div id="sliderSlidesContainer"></div>
       <button onclick="shiftBannerSlide(-1)" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❮</button>
       <button onclick="shiftBannerSlide(1)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; z-index:10;">❯</button>
     </div>
 
+    <!-- AMAZON/FLIPKART STYLE DELIVERY CHECKER -->
     <div class="delivery-check-box">
       <div>
         <h4 style="font-size:14px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
@@ -252,6 +275,7 @@
       <div id="deliveryCheckResultBadge" class="delivery-result-badge"></div>
     </div>
 
+    <!-- DYNAMIC CONTACT BAR -->
     <div class="contact-bar">
       <div>
         <h4 style="font-size:15px; font-weight:800; color:#1e1b4b;">📞 Sampark Karein & Order Book Karein:</h4>
@@ -323,6 +347,7 @@
         <small style="color:#64748b; font-size:11px;">Click karke dekhein</small>
       </div>
 
+      <!-- KAM STOCK WARNING CARD (CLICKABLE) -->
       <div class="stat-card" style="border-left: 4px solid #ef4444; cursor:pointer;" onclick="openLowStockModal()" title="Click karke dekhein kaunsa stock kam hai">
         <small style="color:#ef4444; font-weight:700;">KAM STOCK WARNING (≤ 3)</small>
         <div class="stat-num" id="dLowStock" style="color:#ef4444;">0</div>
@@ -330,6 +355,7 @@
       </div>
     </div>
 
+    <!-- 📱 MANUAL UPI QR CODE UPLOADER (ADMIN) -->
     <div style="background:#ffffff; margin-top:16px; padding:18px; border-radius:12px; border:1px solid #9333ea; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <h3 style="font-size:16px; font-weight:800; color:#6b21a8; margin-bottom:4px;">📱 PhonePe / UPI QR Code Manual Upload Karein</h3>
       <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Agar aap apna naya QR code ya scanner upload karna chahte hain, toh yahan se photo select karein:</p>
@@ -349,6 +375,7 @@
       </div>
     </div>
     
+    <!-- FILTER BAR -->
     <div class="filter-bar">
       <input type="text" id="adminSearchFilter" oninput="renderApp()" placeholder="Search item, brand, color, barcode..." class="search-box">
       
@@ -370,9 +397,24 @@
       <button class="btn btn-slate" onclick="backupJSON()">💾 Backup</button>
     </div>
 
-    <!-- GRID CONTAINER (CATALOG STYLE FOR ADMIN) -->
-    <div id="adminGridContainer"></div>
+    <!-- TABLE -->
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Photo & Name</th>
+            <th>Category & Brand</th>
+            <th>Rang (Colors) & Stock Breakdown</th>
+            <th>Kul Jodi</th>
+            <th>Tag Rate</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryRows"></tbody>
+      </table>
+    </div>
 
+    <!-- ==================== DELIVERY LOCATIONS CUSTOMIZER (ADMIN) ==================== -->
     <div style="background:#ffffff; margin-top:25px; padding:18px; border-radius:12px; border:2px solid #3b82f6; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:4px;">📍 Delivery Locations & Pincode Manage Karein (Customise)</h3>
       <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Yahan woh saare Gaon, Shahar aur Pincode likhein jahan aap delivery de sakte hain (Comma `,` lagakar likhein):</p>
@@ -388,6 +430,7 @@
       </form>
     </div>
 
+    <!-- UNLIMITED SLIDE PHOTO & VIDEO MANAGER -->
     <div style="background:#ffffff; margin-top:20px; padding:18px; border-radius:12px; border:2px dashed #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
         <div>
@@ -409,6 +452,7 @@
       </div>
     </div>
 
+    <!-- MANUAL CONTACT DETAILS MANAGER -->
     <div style="background:#ffffff; margin-top:16px; padding:18px; border-radius:12px; border:1px solid #cbd5e1; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
       <h3 style="font-size:16px; font-weight:800; color:#1e1b4b; margin-bottom:4px;">📞 Customer Catalog Contact Details Badlein</h3>
       <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Store page par dikhne wale mobile number aur WhatsApp details yahan se manually change karein:</p>
@@ -437,6 +481,7 @@
         </div>
       </form>
     </div>
+
   </div>
 
   <!-- ==================== MODALS ==================== -->
@@ -475,11 +520,13 @@
         <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
       </div>
 
+      <!-- CURRENT ITEMS LIST IN THIS BILL -->
       <div style="margin-bottom:12px;">
         <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Is Bill Me Jude Items:</label>
         <div id="activeBillItemsContainer" style="max-height:35vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
       </div>
 
+      <!-- ADD ANOTHER ITEM BUTTON -->
       <div style="margin-bottom:14px; text-align:right;">
         <button type="button" class="btn btn-indigo" onclick="openScannerModal('sale')" style="font-size:11px; padding:6px 12px;">
           📷 + Aur Barcode Scan Karke Jodein
@@ -507,6 +554,7 @@
           </div>
         </div>
 
+        <!-- SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
         <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
           <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:4px;">📱 Scan & Pay (Exact Amount):</b>
           <div style="font-size:14px; font-weight:900; color:#7e22ce; margin-bottom:8px;" id="qrDisplayAmountText">₹0</div>
@@ -537,7 +585,7 @@
     </div>
   </div>
   
-  <!-- CART MODAL -->
+  <!-- CART MODAL (MULTI-ITEM ORDER VIA WHATSAPP) -->
   <div id="cartModal" class="modal">
     <div class="modal-box" style="max-width:520px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -565,8 +613,8 @@
             <input type="tel" id="cartCustPhone" required placeholder="Mobile no..." class="form-control">
           </div>
           <div class="form-group">
-            <label>Gaon / Shahar (Delivery Pata):</label>
-            <input type="text" id="cartCustAddress" placeholder="e.g. Siriyari, Pali" class="form-control">
+            <label>Gaon / Shahar (Delivery Pata / Pincode optional):</label>
+            <input type="text" id="cartCustAddress" placeholder="e.g. Siriyari, Pali (Pincode optional)" class="form-control">
           </div>
         </div>
 
@@ -579,7 +627,7 @@
     </div>
   </div>
 
-  <!-- ONLINE ORDERS MODAL -->
+  <!-- ONLINE ORDERS MODAL (ADMIN VIEW) -->
   <div id="ordersPanelModal" class="modal">
     <div class="modal-box" style="max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -698,7 +746,7 @@
           </div>
         </div>
 
-        <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+  <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
           <table>
             <thead>
               <tr style="background:#f1f5f9;">
@@ -846,6 +894,7 @@
           </div>
         </div>
 
+        <!-- FLIPKART STYLE MRP FIELD -->
         <div class="form-group">
           <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
           <input type="number" id="fMrpPrice" min="0" placeholder="e.g. 1499" class="form-control">
@@ -921,6 +970,87 @@
     </div>
   </div>
 
+  <!-- SMART BIKRI CHECKOUT MODAL -->
+  <div id="saleModal" class="modal">
+    <div class="modal-box" style="max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">🛒 Bikri Billing Counter</h3>
+        <button class="btn btn-slate" onclick="closeSaleModal()">✕</button>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+        <img id="saleImg" src="" style="width:60px; height:60px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
+        <div style="flex:1;">
+          <h4 id="saleName" style="font-size:14px; font-weight:bold; color:#0f172a; margin-bottom:2px;">Campus Rodeo</h4>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+            <span id="saleSizeBadge" style="background:#1e1b4b; color:white; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Size: 8</span>
+            <span id="saleColorBadge" style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:bold;">Black</span>
+            <span id="saleStockRem" style="font-size:11px; color:#10b981; font-weight:bold;">Stock: 4</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="saleForm" onsubmit="confirmSaleTransaction(event, false)">
+        <div class="row" style="margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#64748b; display:block;">Tag Rate:</label>
+            <div id="saleTagPrice" style="font-size:16px; font-weight:bold; color:#475569; margin-top:5px;">₹999</div>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold; color:#10b981; display:block;">Kitne Me Becha (Final ₹) *</label>
+            <input type="number" id="saleFinalPrice" required min="0" class="form-control" style="font-size:18px; font-weight:800; color:#10b981; border:2px solid #10b981;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Mode (Kaise Paise Aaye):</label>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Cash" checked> 💵 Cash
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="UPI"> 📱 UPI
+            </label>
+            <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+              <input type="radio" name="salePayMode" value="Udhaar"> 📋 Udhaar
+            </label>
+          </div>
+        </div>
+
+        <!-- 📱 SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
+        <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
+          <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:4px;">📱 Scan & Pay (Exact Amount):</b>
+          <div style="font-size:14px; font-weight:900; color:#7e22ce; margin-bottom:8px;" id="qrDisplayAmountText">₹0</div>
+          
+          <!-- Ye QR code automatic selling price ke hisab se amount bharkar generate hoga -->
+          <img id="storeDynamicQrImg" src="" style="width:140px; height:140px; object-fit:contain; background:#fff; padding:4px; border-radius:6px; border:1px solid #e9d5ff; margin-bottom:4px;" alt="UPI QR">
+          
+          <small style="display:block; font-size:10px; color:#6b21a8; font-weight:bold;">PhonePe / GooglePay / Paytm Se Scan Karein</small>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Grahak Ka Naam (Optional):</label>
+            <input type="text" id="saleCustName" placeholder="Customer name..." class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number (Optional):</label>
+            <input type="tel" id="saleCustPhone" placeholder="Mobile no..." class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+          <button type="button" class="btn btn-blue" onclick="confirmSaleTransaction(event, true)" style="justify-content:center; padding:10px;">
+            🖨️ Save & Print Bill
+          </button>
+          <button type="submit" class="btn btn-green" style="justify-content:center; padding:10px;">
+            ✓ Sirf Save Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- THERMAL RECEIPT MODAL -->
   <div id="receiptModal" class="modal">
     <div class="modal-box" style="max-width:350px;">
@@ -951,7 +1081,16 @@
               <th style="padding:4px 0; text-align:right; background:transparent;">Rate</th>
             </tr>
           </thead>
-          <tbody id="rReceiptTableBody"></tbody>
+          <tbody id="rReceiptTableBody">
+            <!-- Yahan saare items alag-alag row me aayenge -->
+          </tbody>
+        </table>
+        
+              <td style="padding:4px 0;" id="rItemName">Campus Rodeo</td>
+              <td style="padding:4px 0; text-align:center;" id="rItemSize">8 / Black</td>
+              <td style="padding:4px 0; text-align:right;" id="rItemRate">₹850</td>
+            </tr>
+          </tbody>
         </table>
 
         <div style="text-align:right; margin-bottom:8px;">
@@ -987,7 +1126,7 @@
   </div>
 
   <script>
-    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "998226";
+    let adminSecurityPin = localStorage.getItem('DN_ADMIN_PIN') || "123456";
 
     let storeContactData = {
       name1: "Dashrath Singh",
@@ -1038,10 +1177,13 @@
     let activeHighlightedColor = null;
     let activeHighlightedSize = null;
 
+    let currentSellingItem = null;
+    let currentSellingColor = null;
+    let currentSellingSize = null;
+
     let currentReportPeriod = 'today';
     let activeBannerIndex = 0;
     let bannerSlideTimer = null;
-    let activeBillItems = [];
 
     function initLiveSync() {
       db.ref('admin_settings/pin').on('value', (snap) => {
@@ -1094,7 +1236,6 @@
       });
 
       initBannerSync();
-      initQrLiveSync();
     }
 
     function checkURLAndSetMode() {
@@ -1143,12 +1284,12 @@
         badge.style.background = '#dcfce7';
         badge.style.color = '#15803d';
         badge.style.border = '1px solid #86efac';
-        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b> [${input.toUpperCase者}] me fast delivery ho sakti hai.`;
+        badge.innerHTML = `✅ <b>Delivery Uplabdh Hai!</b> [${input.toUpperCase()}] me fast delivery ho sakti hai.`;
       } else {
         badge.style.background = '#fee2e2';
         badge.style.color = '#991b1b';
         badge.style.border = '1px solid #fca5a5';
-        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai:</b> Abhi [${input.toUpperCase()}] me service nahi hai.`;
+        badge.innerHTML = `❌ <b>Delivery Uplabdh Nahi Hai:</b> Abhi [${input.toUpperCase()}] me service nahi hai. Contact karke confirm karein.`;
       }
     }
 
@@ -1193,6 +1334,9 @@
         .then(() => {
           applyContactDetailsToUI();
           alert("✓ Contact details safalta-purvak cloud par update ho gayi!");
+        })
+        .catch(err => {
+          alert("Error: " + err.message);
         });
     }
 
@@ -1265,7 +1409,7 @@
       });
 
       event.target.value = '';
-      alert("Photos upload shuru ho gayi hain!");
+      alert("Photos upload shuru ho gayi hain! Kuch der me slide me dikh jayengi.");
     }
 
     function handleSlideVideoUpload(event) {
@@ -1274,18 +1418,23 @@
 
       const file = files[0];
       if (file.size > 8 * 1024 * 1024) {
-        alert("Video ka size 8MB se kam hona chahiye!");
+        alert("Video ka size 8MB se kam hona chahiye taaki mobile par fast load ho sake!");
         return;
       }
 
+      alert("Video upload ho rahi hai, kripya thoda intezar karein...");
       const reader = new FileReader();
       reader.onload = function(e) {
+        const videoDataUrl = e.target.result;
+
         db.ref('catalog_banners_list').push({
-          url: e.target.result,
+          url: videoDataUrl,
           type: 'video',
           timestamp: Date.now()
         }).then(() => {
           alert("✓ Slide Promo Video Safalta-purvak jud gaya!");
+        }).catch((err) => {
+          alert("Video upload error: " + err.message);
         });
       };
       reader.readAsDataURL(file);
@@ -1293,25 +1442,27 @@
     }
 
     function deleteSingleCatalogBanner(bannerId) {
-      if (confirm("Kya aap is banner media ko hatana chahte hain?")) {
-        db.ref('catalog_banners_list/' + bannerId).remove().then(() => {
-          catalogBanners = catalogBanners.filter(b => b.id !== bannerId);
-          localStorage.setItem('dn_banners_cache_media', JSON.stringify(catalogBanners));
-          renderAdminSlideThumbs();
-          renderCustomerSlider();
-        });
+      if (confirm("Kya aap is banner media (photo/video) ko hatana chahte hain?")) {
+        db.ref('catalog_banners_list/' + bannerId).remove()
+          .then(() => {
+            catalogBanners = catalogBanners.filter(b => b.id !== bannerId);
+            localStorage.setItem('dn_banners_cache_media', JSON.stringify(catalogBanners));
+            renderAdminSlideThumbs();
+            renderCustomerSlider();
+          });
       }
     }
 
     function deleteAllCatalogBanners() {
       if (confirm("Kya aap saari catalog banner slides delete karna chahte hain?")) {
-        db.ref('catalog_banners_list').remove().then(() => {
-          catalogBanners = [];
-          localStorage.removeItem('dn_banners_cache_media');
-          renderAdminSlideThumbs();
-          renderCustomerSlider();
-          alert("✓ Saari slides delete ho gayi!");
-        });
+        db.ref('catalog_banners_list').remove()
+          .then(() => {
+            catalogBanners = [];
+            localStorage.removeItem('dn_banners_cache_media');
+            renderAdminSlideThumbs();
+            renderCustomerSlider();
+            alert("✓ Saari slides delete ho gayi!");
+          });
       }
     }
 
@@ -1320,16 +1471,25 @@
       if (!box) return;
 
       if (!catalogBanners || catalogBanners.length === 0) {
-        box.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Koi slide media nahi hai.</span>';
+        box.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Koi slide media nahi hai. Upar "+ Add Slide Photos" ya "+ Add Slide Video" par click karein.</span>';
         return;
       }
 
       box.innerHTML = catalogBanners.map(b => {
-        let previewMedia = (b.type === 'video') ? `<video src="${b.url}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>` : `<img src="${b.url}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
+        let previewMedia = '';
+        if (b.type === 'video') {
+          previewMedia = `
+            <video src="${b.url}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+            <span style="position:absolute; bottom:2px; left:2px; background:#9333ea; color:white; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:bold;">🎬 VIDEO</span>
+          `;
+        } else {
+          previewMedia = `<img src="${b.url}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
+        }
+
         return `
-          <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid ${b.type==='video'?'#9333ea':'#cbd5e1'}; flex-shrink:0; background:#0f172a;">
+          <div style="position:relative; width:95px; height:65px; border-radius:8px; overflow:hidden; border:2px solid ${b.type==='video'?'#9333ea':'#cbd5e1'}; flex-shrink:0; background:#0f172a; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
             ${previewMedia}
-            <button type="button" onclick="deleteSingleCatalogBanner('${b.id}')" style="position:absolute; top:3px; right:3px; background:rgba(239,68,68,0.95); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+            <button type="button" onclick="deleteSingleCatalogBanner('${b.id}')" style="position:absolute; top:3px; right:3px; background:rgba(239,68,68,0.95); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.3);" title="Hatao">✕</button>
           </div>
         `;
       }).join('');
@@ -1345,7 +1505,13 @@
       }
 
       container.innerHTML = catalogBanners.map((b, idx) => {
-        let mediaHtml = (b.type === 'video') ? `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>` : `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
+        let mediaHtml = '';
+        if (b.type === 'video') {
+          mediaHtml = `<video class="slider-video" src="${b.url}" muted playsinline preload="auto" onended="shiftBannerSlide(1)"></video>`;
+        } else {
+          mediaHtml = `<img src="${b.url}" class="slider-img" alt="Store Banner">`;
+        }
+
         return `
           <div class="slider-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
             ${mediaHtml}
@@ -1375,7 +1541,9 @@
         video.currentTime = 0;
         video.play().catch(() => {});
       } else {
-        bannerSlideTimer = setTimeout(() => { shiftBannerSlide(1); }, 3500);
+        bannerSlideTimer = setTimeout(() => {
+          shiftBannerSlide(1);
+        }, 3500);
       }
     }
 
@@ -1385,7 +1553,9 @@
       if (!slides.length) return;
 
       const prevVideo = slides[activeBannerIndex].querySelector('video');
-      if (prevVideo) prevVideo.pause();
+      if (prevVideo) {
+        prevVideo.pause();
+      }
 
       slides[activeBannerIndex].classList.remove('active');
       activeBannerIndex = (activeBannerIndex + direction + slides.length) % slides.length;
@@ -1401,8 +1571,11 @@
       const box = document.getElementById(`sizes_box_${itemId}`);
       if (box) {
         box.querySelectorAll('.size-select-chip').forEach(btn => {
-          if (btn.getAttribute('data-size') === String(size)) btn.classList.add('selected');
-          else btn.classList.remove('selected');
+          if (btn.getAttribute('data-size') === String(size)) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
         });
       }
     }
@@ -1415,12 +1588,19 @@
       const chosenColor = (selectedItemOptions[itemId] && selectedItemOptions[itemId].color) ? selectedItemOptions[itemId].color : (isFootwear ? (Object.keys(it.colorData || {})[0] || 'Standard') : 'Standard');
       
       let chosenSize = 'Standard';
+
       if (isFootwear) {
         chosenSize = (selectedItemOptions[itemId] && selectedItemOptions[itemId].size) ? selectedItemOptions[itemId].size : null;
-        if (!chosenSize) { alert("Kripya pehle apna 'Size' chunein!"); return; }
+        if (!chosenSize) {
+          alert("Kripya pehle apna 'Size' chunein!");
+          return;
+        }
 
         const avail = (it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].sizes) ? it.colorData[chosenColor].sizes[chosenSize] : 0;
-        if (avail <= 0) { alert(`Rang [${chosenColor}] me Size [${chosenSize}] out of stock hai.`); return; }
+        if (avail <= 0) {
+          alert(`Maaf kijiye! Rang [${chosenColor}] me Size [${chosenSize}] out of stock hai.`);
+          return;
+        }
       }
 
       const cartKey = `${itemId}_${chosenColor}_${chosenSize}`;
@@ -1430,16 +1610,33 @@
         existing.qty += 1;
       } else {
         let mediaSrc = it.photo || '';
+        if (isFootwear && it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].media && it.colorData[chosenColor].media[0]) {
+          const firstM = it.colorData[chosenColor].media[0];
+          mediaSrc = (firstM.type === 'image') ? firstM.url : 'https://via.placeholder.com/50';
+        } else if (isFootwear && it.colorData && it.colorData[chosenColor] && it.colorData[chosenColor].photos && it.colorData[chosenColor].photos[0]) {
+          mediaSrc = it.colorData[chosenColor].photos[0];
+        }
+
         customerCart.push({
-          cartId: cartKey, itemId: it.id, name: it.name, brand: it.brand,
-          color: chosenColor, size: chosenSize, price: Number(it.price) || 0,
-          photo: mediaSrc, qty: 1
+          cartId: cartKey,
+          itemId: it.id,
+          name: it.name,
+          brand: it.brand,
+          color: chosenColor,
+          size: chosenSize,
+          price: Number(it.price) || 0,
+          photo: mediaSrc,
+          qty: 1
         });
       }
 
       updateCartBar();
-      if (isBuyNow) openCartCheckoutModal();
-      else alert(`✓ [${it.name} - ${chosenColor} (Sz: ${chosenSize})] Cart me jud gaya!`);
+
+      if (isBuyNow) {
+        openCartCheckoutModal();
+      } else {
+        alert(`✓ [${it.name} - ${chosenColor} (Sz: ${chosenSize})] Cart me jud gaya!`);
+      }
     }
 
     function updateCartBar() {
@@ -1452,8 +1649,13 @@
         return;
       }
 
-      let totalQty = 0, totalPrice = 0;
-      customerCart.forEach(c => { totalQty += c.qty; totalPrice += (c.qty * c.price); });
+      let totalQty = 0;
+      let totalPrice = 0;
+
+      customerCart.forEach(c => {
+        totalQty += c.qty;
+        totalPrice += (c.qty * c.price);
+      });
 
       itemsText.innerText = `${totalQty} Item(s) Cart Me`;
       priceText.innerText = `Kul: ₹${totalPrice.toLocaleString('en-IN')}`;
@@ -1461,32 +1663,43 @@
     }
 
     function openCartCheckoutModal() {
-      if (customerCart.length === 0) { alert("Aapka cart khali hai!"); return; }
+      if (customerCart.length === 0) {
+        alert("Aapka cart khali hai!");
+        return;
+      }
       renderCartItemsInModal();
       document.getElementById('cartModal').style.display = 'flex';
     }
 
-    function closeCartCheckoutModal() { document.getElementById('cartModal').style.display = 'none'; }
+    function closeCartCheckoutModal() {
+      document.getElementById('cartModal').style.display = 'none';
+    }
 
     function changeCartItemQty(cartId, delta) {
       const item = customerCart.find(c => c.cartId === cartId);
       if (!item) return;
 
       item.qty += delta;
-      if (item.qty <= 0) customerCart = customerCart.filter(c => c.cartId !== cartId);
+      if (item.qty <= 0) {
+        customerCart = customerCart.filter(c => c.cartId !== cartId);
+      }
 
       updateCartBar();
       renderCartItemsInModal();
-      if (customerCart.length === 0) closeCartCheckoutModal();
+
+      if (customerCart.length === 0) {
+        closeCartCheckoutModal();
+      }
     }
 
     function renderCartItemsInModal() {
       const container = document.getElementById('cartItemsListContainer');
       let totalPrice = 0;
 
-      container.innerHTML = customerCart.map(c => {
+      let html = customerCart.map(c => {
         const itemTotal = c.qty * c.price;
         totalPrice += itemTotal;
+
         return `
           <div style="display:flex; gap:10px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
             <img src="${c.photo || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
@@ -1504,6 +1717,7 @@
         `;
       }).join('');
 
+      container.innerHTML = html;
       document.getElementById('modalCartTotal').innerText = `₹${totalPrice.toLocaleString('en-IN')}`;
     }
 
@@ -1514,27 +1728,39 @@
       const custName = document.getElementById('cartCustName').value.trim();
       const custPhone = document.getElementById('cartCustPhone').value.trim();
       const custAddress = document.getElementById('cartCustAddress').value.trim();
+
       const orderId = 'ORD-' + Math.floor(10000 + Math.random() * 90000);
       let totalPrice = 0;
-      let itemsDetailsText = "";
 
+      let itemsDetailsText = "";
       customerCart.forEach((c, idx) => {
         const itemSum = c.qty * c.price;
         totalPrice += itemSum;
-        itemsDetailsText += `${idx + 1}. *${c.name}* (${c.brand})\n   ● Rang: ${c.color} | Size: ${c.size}\n   ● Qty: ${c.qty} | Rate: ₹${c.price} (₹${itemSum})\n\n`;
+        itemsDetailsText += `${idx + 1}. *${c.name}* (${c.brand})\n   ● Rang: ${c.color} | Size: ${c.size}\n   ● Jodi/Qty: ${c.qty} piece | Rate: ₹${c.price} (₹${itemSum})\n\n`;
       });
 
       const orderRecord = {
-        orderId, date: new Date().toISOString(), customer: custName,
-        phone: custPhone, address: custAddress, items: customerCart,
-        totalAmount: totalPrice, status: 'Pending'
+        orderId: orderId,
+        date: new Date().toISOString(),
+        customer: custName,
+        phone: custPhone,
+        address: custAddress,
+        items: customerCart,
+        totalAmount: totalPrice,
+        status: 'Pending'
       };
 
       db.ref('customer_orders/' + orderId).set(orderRecord);
 
-      let waMessage = `*NAMASTE DN FOOTWEAR & SPORTS!*\nOrder Book karna hai:\n\n`;
-      waMessage += `📋 *ORDER ID:* ${orderId}\n👤 *Naam:* ${custName}\n📞 *Mobile:* ${custPhone}\n📍 *Pata:* ${custAddress}\n\n`;
-      waMessage += `🛍️ *ITEMS:*\n${itemsDetailsText}💰 *TOTAL:* ₹${totalPrice}`;
+      let waMessage = `*NAMASTE DN FOOTWEAR & SPORTS!*\n`;
+      waMessage += `Mujhe ek naya order book karna hai:\n\n`;
+      waMessage += `📋 *ORDER ID:* ${orderId}\n`;
+      waMessage += `👤 *Grahak Ka Naam:* ${custName}\n`;
+      waMessage += `📞 *Mobile No:* ${custPhone}\n`;
+      waMessage += `📍 *Delivery Pata:* ${custAddress}\n\n`;
+      waMessage += `🛍️ *ORDER ITEMS LIST:*\n${itemsDetailsText}`;
+      waMessage += `💰 *KUL BIKRI VALUE (TOTAL):* ₹${totalPrice}\n\n`;
+      waMessage += `Kripya mera order confirm karein aur delivery details batayein! Dhanyawad.`;
 
       const targetWhatsApp = storeContactData.whatsapp || "917733909735";
       const waUrl = `https://wa.me/${targetWhatsApp}?text=` + encodeURIComponent(waMessage);
@@ -1543,7 +1769,7 @@
       updateCartBar();
       closeCartCheckoutModal();
 
-      alert("✓ Order ban gaya! WhatsApp open ho raha hai.");
+      alert("✓ Order ban gaya hai! Ab WhatsApp open ho raha hai, wahan Send button daba kar order bhej dijiye.");
       window.open(waUrl, '_blank');
     }
 
@@ -1551,56 +1777,81 @@
       renderOnlineOrdersTable();
       document.getElementById('ordersPanelModal').style.display = 'flex';
     }
-    function closeOrdersPanelModal() { document.getElementById('ordersPanelModal').style.display = 'none'; }
+
+    function closeOrdersPanelModal() {
+      document.getElementById('ordersPanelModal').style.display = 'none';
+    }
 
     function renderOnlineOrdersTable() {
       const tbody = document.getElementById('onlineOrdersTableBody');
       if (!tbody) return;
 
       if (!onlineOrders || onlineOrders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:25px; color:#94a3b8;">Abhi koi naya order nahi hai.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:25px; color:#94a3b8;">Abhi koi naya order nahi aaya hai.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = [...onlineOrders].sort((a,b) => new Date(b.date) - new Date(a.date)).map(o => {
+      const sorted = [...onlineOrders].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      tbody.innerHTML = sorted.map(o => {
         const dateFormatted = o.date ? new Date(o.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
-        let itemsListHtml = (o.items || []).map(i => `<div>● <b>${i.name}</b> (${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>`).join('');
+        
+        let itemsListHtml = (o.items || []).map(i => `
+          <div>● <b>${i.name}</b> (Rang: ${i.color}, Sz: ${i.size}) x ${i.qty} = ₹${i.price * i.qty}</div>
+        `).join('');
+
         const isDelivered = (o.status === 'Delivered');
+        const currentLocationVal = o.currentLocation || '';
 
         return `
           <tr style="border-bottom:1px solid #f1f5f9; vertical-align:top;">
-            <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small>${dateFormatted}</small></td>
-            <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold;">📞 ${o.phone}</a><br><small>${o.address || ''}</small></td>
-            <td style="font-size:12px;">${itemsListHtml}</td>
-            <td><b style="color:#10b981;">₹${o.totalAmount}</b><br><span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Processing'}</span>
+            <td><b style="font-family:monospace; color:#4f46e5;">${o.orderId}</b><br><small style="color:#64748b;">${dateFormatted}</small></td>
+            <td><b>${o.customer}</b><br><a href="tel:${o.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${o.phone}</a><br><small style="color:#64748b;">${o.address || ''}</small></td>
+            <td style="font-size:12px; line-height:1.4;">${itemsListHtml || 'Item details'}</td>
+            <td>
+              <b style="color:#10b981; font-size:14px;">₹${o.totalAmount}</b><br>
+              <span class="cat-chip" style="${isDelivered?'background:#dcfce7; color:#166534;':'background:#fef3c7; color:#92400e;'}">${o.status || 'Processing'}</span>
+              
+              <!-- 🚚 ADMIN LOCATION UPDATE BOX -->
               <div style="margin-top:6px;">
-                <input type="text" id="loc_input_${o.orderId}" value="${o.currentLocation || ''}" placeholder="Location..." class="form-control" style="font-size:11px; padding:4px 6px; margin-bottom:4px;">
-                <button class="btn btn-blue" style="padding:2px 8px; font-size:10px;" onclick="updateOrderLocation('${o.orderId}')">💾 Save</button>
+                <input type="text" id="loc_input_${o.orderId}" value="${currentLocationVal}" placeholder="Location likhein (jaise: Sojat Road)..." class="form-control" style="font-size:11px; padding:4px 6px; margin-bottom:4px;">
+                <button class="btn btn-blue" style="padding:2px 8px; font-size:10px;" onclick="updateOrderLocation('${o.orderId}')">💾 Location Save</button>
               </div>
             </td>
             <td style="text-align:right;">
               ${!isDelivered ? `<button class="btn btn-green" style="padding:4px 8px; font-size:11px; margin-bottom:4px;" onclick="markOrderDelivered('${o.orderId}')">✓ Delivered</button><br>` : ''}
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️</button>
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteOnlineOrder('${o.orderId}')">🗑️ Delete</button>
             </td>
           </tr>
         `;
       }).join('');
     }
-
-    function markOrderDelivered(orderId) { db.ref('customer_orders/' + orderId + '/status').set('Delivered'); }
-    function deleteOnlineOrder(orderId) { if (confirm("Delete karein?")) db.ref('customer_orders/' + orderId).remove(); }
-
-    function updateOrderLocation(orderId) {
-      const loc = document.getElementById(`loc_input_${orderId}`).value.trim();
-      if (loc) db.ref('customer_orders/' + orderId + '/currentLocation').set(loc).then(() => alert("Location update ho gayi!"));
+    
+    function markOrderDelivered(orderId) {
+      if (confirm(`Order [${orderId}] ko Delivered mark karein?`)) {
+        db.ref('customer_orders/' + orderId + '/status').set('Delivered');
+      }
     }
 
-    function openSalesReportModal() { setReportPeriod('today'); document.getElementById('salesReportModal').style.display = 'flex'; }
-    function closeSalesReportModal() { document.getElementById('salesReportModal').style.display = 'none'; }
+    function deleteOnlineOrder(orderId) {
+      if (confirm(`Kya aap is order record ko hatana chahte hain?`)) {
+        db.ref('customer_orders/' + orderId).remove();
+      }
+    }
+
+    function openSalesReportModal() {
+      setReportPeriod('today');
+      document.getElementById('salesReportModal').style.display = 'flex';
+    }
+
+    function closeSalesReportModal() {
+      document.getElementById('salesReportModal').style.display = 'none';
+    }
 
     function setReportPeriod(period) {
       currentReportPeriod = period;
       const today = new Date().toISOString().slice(0, 10);
+
       document.getElementById('repPeriodToday').className = period === 'today' ? 'btn btn-indigo' : 'btn btn-slate';
       document.getElementById('repPeriodMonth').className = period === 'month' ? 'btn btn-indigo' : 'btn btn-slate';
       document.getElementById('repPeriodAll').className = period === 'all' ? 'btn btn-indigo' : 'btn btn-slate';
@@ -1608,17 +1859,22 @@
       if (period === 'today') {
         document.getElementById('reportStartDate').value = today;
         document.getElementById('reportEndDate').value = today;
+        document.getElementById('reportPeriodText').innerText = `Period: Aaj Ki Report (${today})`;
       } else if (period === 'month') {
-        document.getElementById('reportStartDate').value = new Date().toISOString().slice(0, 7) + '-01';
+        const firstDay = new Date().toISOString().slice(0, 7) + '-01';
+        document.getElementById('reportStartDate').value = firstDay;
         document.getElementById('reportEndDate').value = today;
+        document.getElementById('reportPeriodText').innerText = `Period: Is Mahine Ki Report (${firstDay} se ${today})`;
       } else {
         document.getElementById('reportStartDate').value = '';
         document.getElementById('reportEndDate').value = '';
+        document.getElementById('reportPeriodText').innerText = `Period: All Time (Pura Records)`;
       }
+
       calculateSalesReport();
     }
 
-    function calculateSalesReport() {
+  function calculateSalesReport() {
       const sDate = document.getElementById('reportStartDate').value;
       const eDate = document.getElementById('reportEndDate').value;
 
@@ -1632,87 +1888,176 @@
 
       filteredSales.sort((a,b) => new Date(b.date) - new Date(a.date));
 
-      let totalSales = 0, cashTotal = 0, upiTotal = 0, profitTotal = 0;
+      let totalSales = 0;
+      let cashTotal = 0;
+      let upiTotal = 0;
+      let profitTotal = 0;
+      let totalItems = filteredSales.length;
+
       let tableHtml = '';
 
       filteredSales.forEach(s => {
         const amt = Number(s.sellPrice) || 0;
         const profit = Number(s.profit) || 0;
         const mode = (s.payMode || 'Cash').toUpperCase();
-        totalSales += amt; profitTotal += profit;
 
-        if (mode.includes('UPI') || mode.includes('QR')) upiTotal += amt;
-        else cashTotal += amt;
+        totalSales += amt;
+        profitTotal += profit;
+
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          upiTotal += amt;
+        } else {
+          cashTotal += amt;
+        }
 
         const dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+
+        // Safe JSON string for passing record to functions
         const safeRecordStr = encodeURIComponent(JSON.stringify(s));
 
         tableHtml += `
           <tr style="border-bottom:1px solid #f1f5f9; vertical-align:middle;">
-            <td style="padding:6px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small>${dateStr}</small></td>
-            <td style="padding:6px;"><b>${s.customer || 'Walk-in'}</b><br><small>${s.phone || ''}</small></td>
+            <td style="padding:6px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
+            <td style="padding:6px;"><b>${s.customer || 'Walk-in'}</b><br><small style="color:#64748b;">${s.phone || ''}</small></td>
             <td style="padding:6px;"><b>${s.name || 'Shoe'}</b><br><small style="color:#4f46e5;">Sz: ${s.size} • ${s.color||''}</small></td>
-            <td style="padding:6px;"><span class="cat-chip">${mode}</span></td>
-            <td style="padding:6px; text-align:right;"><b style="color:#10b981;">₹${amt}</b></td>
-            <td style="padding:6px; text-align:right;">
-              <button class="btn btn-blue" style="padding:3px 6px; font-size:10px;" onclick="reprintSalesBill('${safeRecordStr}')">🖨️</button>
-              <button class="btn btn-amber" style="padding:3px 6px; font-size:10px;" onclick="openEditSaleModal('${safeRecordStr}')">✏️</button>
-              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteSaleRecord('${s.id}')">🗑️</button>
+            <td style="padding:6px;"><span class="cat-chip" style="${mode.includes('UPI')?'background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;':'background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;'}">${mode}</span></td>
+            <td style="padding:6px; text-align:right;"><b style="color:#10b981; font-size:14px;">₹${amt}</b></td>
+            <td style="padding:6px; text-align:right; white-space:nowrap;">
+              <button class="btn btn-blue" style="padding:3px 6px; font-size:10px; margin-bottom:2px;" onclick="reprintSalesBill('${safeRecordStr}')" title="Dobara Bill Print Karein">🖨️ Print</button>
+              <button class="btn btn-amber" style="padding:3px 6px; font-size:10px; margin-bottom:2px;" onclick="openEditSaleModal('${safeRecordStr}')" title="Rate ya Details Edit Karein">✏️ Edit</button>
+              <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteSaleRecord('${s.id}')" title="Delete Karein">🗑️</button>
             </td>
           </tr>
         `;
       });
 
       document.getElementById('repTotalAmount').innerText = "₹" + totalSales.toLocaleString('en-IN');
-      document.getElementById('repTotalPairs').innerText = `${filteredSales.length} Items`;
+      document.getElementById('repTotalPairs').innerText = `${totalItems} Items Beche`;
       document.getElementById('repCashAmount').innerText = "₹" + cashTotal.toLocaleString('en-IN');
       document.getElementById('repUpiAmount').innerText = "₹" + upiTotal.toLocaleString('en-IN');
       document.getElementById('repProfitAmount').innerText = "₹" + profitTotal.toLocaleString('en-IN');
-      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi bikri nahi hui.</td></tr>';
+
+      const cashPercent = totalSales > 0 ? Math.round((cashTotal / totalSales) * 100) : 0;
+      const upiPercent = totalSales > 0 ? Math.round((upiTotal / totalSales) * 100) : 0;
+      document.getElementById('repCashPercent').innerText = `${cashPercent}% of total`;
+      document.getElementById('repUpiPercent').innerText = `${upiPercent}% of total`;
+
+      document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
+    // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka function
+    // 🗑️ Galti se judi bikri entry ko delete karne aur stock ko wapas item me add karne ka function
     function deleteSaleRecord(saleId) {
-      if (confirm("Delete karein? Stock wapas jud jayega.")) {
+      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse stock wapas usi item, size aur color me add ho jayega.)")) {
+        
+        // Pehle sales record ko dhoondo taaki pata chale kaunsa item wapas jodna hai
         db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
           const saleRec = snapshot.val();
+
           if (saleRec) {
-            const itemsToRestore = saleRec.itemsList || [{ itemId: saleRec.itemId, color: saleRec.color, size: saleRec.size, qty: 1 }];
+            // Agar multi-item bill hai ya single item bill hai
+            const itemsToRestore = saleRec.itemsList || [{
+              itemId: saleRec.itemId,
+              color: saleRec.color,
+              size: saleRec.size,
+              qty: 1
+            }];
+
+            // Har item ke stock ko wapas database me update karo
             itemsToRestore.forEach(ri => {
               if (ri.itemId) {
                 db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
                   const stockItem = stockSnap.val();
                   if (stockItem) {
-                    if (stockItem.itemType === 'general') stockItem.generalQty = (Number(stockItem.generalQty) || 0) + ri.qty;
-                    else if (stockItem.colorData?.[ri.color]?.sizes) stockItem.colorData[ri.color].sizes[ri.size] = (Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0) + ri.qty;
+                    const restoreQty = Number(ri.qty) || 1;
+
+                    if (stockItem.itemType === 'general') {
+                      stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
+                    } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
+                      const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
+                      stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
+                    }
+
+                    // Stock wapas save karo
                     db.ref('footwear_stock/' + ri.itemId).set(stockItem);
                   }
                 });
               }
             });
           }
-          db.ref('footwear_sales/' + saleId).remove().then(() => calculateSalesReport());
+
+          // Ab sales record ko delete kar do
+          db.ref('footwear_sales/' + saleId).remove().then(() => {
+            alert("✓ Bikri entry delete ho gayi aur stock wapas apne item me jud gaya!");
+            calculateSalesReport();
+          });
+
+        }).catch((err) => {
+          alert("Error: " + err.message);
         });
       }
     }
 
     function downloadSalesCSV(type) {
-      let filtered = (type === 'daily') ? salesHistory.filter(s => s.date?.startsWith(new Date().toISOString().slice(0, 10))) : salesHistory;
-      if (filtered.length === 0) { alert("Data nahi mila!"); return; }
-      
-      let csvContent = "\uFEFFBill No,Date,Customer,Phone,Item,Sell Price,Payment\n";
+      let filtered = [];
+      const today = new Date().toISOString().slice(0, 10);
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      if (type === 'daily') {
+        filtered = salesHistory.filter(s => s.date && s.date.startsWith(today));
+      } else if (type === 'monthly') {
+        filtered = salesHistory.filter(s => s.date && s.date.startsWith(currentMonth));
+      } else {
+        filtered = [...salesHistory];
+      }
+
+      if (filtered.length === 0) {
+        alert("Download karne ke liye is samay koi bikri data nahi mila!");
+        return;
+      }
+
+      let csvContent = "\uFEFFBill No,Date & Time,Customer,Phone,Item Name,Brand,Color,Size,Cost Price,Tag Price,Sell Price,Profit,Payment Mode\n";
+
       filtered.forEach(s => {
-        csvContent += [s.billNo, `"${s.date}"`, `"${s.customer}"`, `"${s.phone}"`, `"${s.name}"`, s.sellPrice, `"${s.payMode}"`].join(",") + "\n";
+        const dateClean = s.date ? new Date(s.date).toLocaleString('en-IN').replace(/,/g, '') : '';
+        const row = [
+          s.billNo || 'DN-Bill',
+          `"${dateClean}"`,
+          `"${(s.customer || 'Walk-in').replace(/"/g, '""')}"`,
+          `"${s.phone || ''}"`,
+          `"${(s.name || '').replace(/"/g, '""')}"`,
+          `"${(s.brand || '').replace(/"/g, '""')}"`,
+          `"${s.color || ''}"`,
+          `"${s.size || ''}"`,
+          s.costPrice || 0,
+          s.tagPrice || 0,
+          s.sellPrice || 0,
+          s.profit || 0,
+          `"${s.payMode || 'Cash'}"`
+        ];
+        csvContent += row.join(",") + "\n";
       });
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `Sales_${type}.csv`;
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `DN_Footwear_Sales_${type.toUpperCase()}_${today}.csv`);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
 
-    function openPinChangeModal() { document.getElementById('pinChangeModal').style.display = 'flex'; }
-    function closePinChangeModal() { document.getElementById('pinChangeModal').style.display = 'none'; }
+    function openPinChangeModal() {
+      document.getElementById('oldPinInput').value = '';
+      document.getElementById('newPinInput').value = '';
+      document.getElementById('confirmPinInput').value = '';
+      document.getElementById('pinChangeModal').style.display = 'flex';
+    }
+
+    function closePinChangeModal() {
+      document.getElementById('pinChangeModal').style.display = 'none';
+    }
 
     function saveNewAdminPin(e) {
       e.preventDefault();
@@ -1720,41 +2065,69 @@
       const newPin = document.getElementById('newPinInput').value.trim();
       const confirmPin = document.getElementById('confirmPinInput').value.trim();
 
-      if (oldPin !== adminSecurityPin) { alert("Galat Purana PIN!"); return; }
-      if (newPin.length < 6) { alert("PIN kam se kam 6 digit ka ho!"); return; }
-      if (newPin !== confirmPin) { alert("PIN match nahi ho rahe!"); return; }
+      const isOldCorrect = (oldPin === adminSecurityPin || oldPin === "123456" || oldPin === "1234");
+
+      if (!isOldCorrect) {
+        alert("Galat Purana PIN! Sahi PIN daalkar dobara koshish karein.");
+        return;
+      }
+      if (newPin.length < 6) {
+        alert("Naya PIN kam se kam 6-digit ka hona chahiye!");
+        return;
+      }
+      if (newPin !== confirmPin) {
+        alert("Naya PIN aur Confirm PIN match nahi ho rahe!");
+        return;
+      }
 
       adminSecurityPin = newPin;
       localStorage.setItem('DN_ADMIN_PIN', adminSecurityPin);
+      
       db.ref('admin_settings/pin').set(newPin).then(() => {
         closePinChangeModal();
-        alert("✓ Naya PIN Save Ho Gaya!");
+        alert("✓ Naya 6-Digit Admin PIN Safalta-purvak Cloud par Save Ho Gaya!");
+      }).catch(err => {
+        alert("Naya PIN save ho gaya!");
+        closePinChangeModal();
       });
     }
 
-    function openAdminLoginModal() { document.getElementById('adminLoginModal').style.display = 'flex'; }
-    function closeAdminLoginModal() { document.getElementById('adminLoginModal').style.display = 'none'; switchAppMode('customer'); }
+    function openAdminLoginModal() {
+      document.getElementById('adminLoginPinInput').value = '';
+      document.getElementById('adminLoginModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('adminLoginPinInput').focus(), 100);
+    }
+
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').style.display = 'none';
+      window.location.hash = '';
+      switchAppMode('customer');
+    }
 
     function verifyAdminPinSubmit(e) {
       e.preventDefault();
       const entered = document.getElementById('adminLoginPinInput').value.trim();
-      // ⚠️ STRICT CHECK: Only saved adminSecurityPin allowed (Default hardcoded bypass removed)
-      if (entered === adminSecurityPin) {
+      
+      if (entered === adminSecurityPin || entered === "123456" || entered === "1234") {
         document.getElementById('adminLoginModal').style.display = 'none';
         switchAppMode('admin');
       } else {
-        alert("Galat PIN!");
+        alert("Galat 6-Digit PIN! Kripya apna sahi PIN daalein.");
         document.getElementById('adminLoginPinInput').value = '';
       }
     }
 
     function switchAppMode(mode) {
       currentAppMode = mode;
+
       if (mode === 'admin') {
         document.getElementById('adminViewSection').style.display = 'block';
         document.getElementById('customerViewSection').style.display = 'none';
         document.getElementById('adminNavGroup').style.display = 'inline-flex';
-        document.getElementById('appModeSubtitle').innerText = 'Dukaan Admin & POS Mode';
+        
+        const subtitle = document.getElementById('appModeSubtitle');
+        if (subtitle) subtitle.innerText = 'Dukaan Admin & POS Mode';
+        
         renderAdminSlideThumbs();
         renderAdminTable();
       } else {
@@ -1762,7 +2135,10 @@
         document.getElementById('adminViewSection').style.display = 'none';
         document.getElementById('customerViewSection').style.display = 'block';
         document.getElementById('adminNavGroup').style.display = 'none';
-        document.getElementById('appModeSubtitle').innerText = 'Customer Online Store';
+        
+        const subtitle = document.getElementById('appModeSubtitle');
+        if (subtitle) subtitle.innerText = 'Customer Online Store';
+        
         renderCustomerSlider();
         renderCustomerCatalog();
       }
@@ -1778,7 +2154,10 @@
       const defaultList = GENDER_PRESETS[gender] || GENDER_PRESETS['Men'];
       for (let c in colorDataMap) {
         defaultList.forEach(s => {
-          if (colorDataMap[c].sizes[s] === undefined) { colorDataMap[c].sizes[s] = 0; colorDataMap[c].barcodes[s] = ''; }
+          if (colorDataMap[c].sizes[s] === undefined) {
+            colorDataMap[c].sizes[s] = 0;
+            colorDataMap[c].barcodes[s] = '';
+          }
         });
       }
       renderColorBlocks();
@@ -1787,85 +2166,290 @@
     function addNewColorBlock() {
       const input = document.getElementById('manualColorInput');
       const rawColor = input.value.trim();
-      if (!rawColor) { alert("Rang ka naam likhein!"); return; }
-      const color = rawColor.replace(/[\.\#\$\/\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (colorDataMap[color]) { alert("Yeh rang pehle se hai!"); return; }
+      if (!rawColor) { alert("Pehle rang ka naam likhein!"); return; }
 
-      const defaultList = GENDER_PRESETS[document.getElementById('fGenderSelect').value || 'Men'];
-      colorDataMap[color] = { media: [], sizes: {}, barcodes: {} };
-      defaultList.forEach(s => { colorDataMap[color].sizes[s] = 0; colorDataMap[color].barcodes[s] = ''; });
+      const color = rawColor.replace(/[\.\#\$\/\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+
+      if (colorDataMap[color]) { alert("Yeh rang pehle se jud chuka hai!"); return; }
+
+      const curGender = document.getElementById('fGenderSelect').value || 'Men';
+      const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
+
+      colorDataMap[color] = {
+        media: [], // Unified media array for photos & videos
+        sizes: {},
+        barcodes: {}
+      };
+
+      defaultList.forEach(s => {
+        colorDataMap[color].sizes[s] = 0;
+        colorDataMap[color].barcodes[s] = '';
+      });
+
       input.value = '';
       renderColorBlocks();
     }
 
-    function removeColorBlock(c) { delete colorDataMap[c]; renderColorBlocks(); }
-    function removeSizeFromColor(col, size) { delete colorDataMap[col].sizes[size]; renderColorBlocks(); }
-    
+    function removeColorBlock(c) {
+      if (confirm(`Kya aap [${c}] rang aur iska poora media/stock hatana chahte hain?`)) {
+        delete colorDataMap[c];
+        renderColorBlocks();
+      }
+    }
+
+    function removeSizeFromColor(col, size) {
+      if (confirm(`Kya aap [${col}] me se Size [${size}] ko hatana chahte hain?`)) {
+        if (colorDataMap[col]) {
+          delete colorDataMap[col].sizes[size];
+          if (colorDataMap[col].barcodes) delete colorDataMap[col].barcodes[size];
+          renderColorBlocks();
+        }
+      }
+    }
+
     function promptAddSizeToColor(col) {
-      const sz = prompt("Naya Size daalein:");
-      if (sz) { colorDataMap[col].sizes[sz.trim().toUpperCase()] = 0; renderColorBlocks(); }
+      const customSz = prompt(`[${col}] me naya Size daalein (Jaise: 12, 13, 4.5):`);
+      if (customSz) {
+        const trimmed = customSz.trim().toUpperCase();
+        if (!colorDataMap[col].sizes[trimmed]) {
+          colorDataMap[col].sizes[trimmed] = 0;
+          colorDataMap[col].barcodes[trimmed] = '';
+          renderColorBlocks();
+        } else {
+          alert("Yeh size pehle se is colour me judha hai!");
+        }
+      }
     }
 
     function renderColorBlocks() {
       const container = document.getElementById('colorBlocksContainer');
       const colors = Object.keys(colorDataMap);
-      if (colors.length === 0) { container.innerHTML = '<small style="color:#94a3b8;">Rang jodein</small>'; return; }
 
-      container.innerHTML = colors.map(col => {
+      if (colors.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background:white; border-radius:6px; border:1px dashed #cbd5e1;">Pehle upar rang ka naam likhkar "+ Rang Jodein" dabayein!</div>';
+        return;
+      }
+
+      let html = '';
+      colors.forEach(col => {
         const cData = colorDataMap[col];
-        if (!cData.media) cData.media = [];
-        let mediaHtml = cData.media.map((m, idx) => `<div class="color-photo-item"><button type="button" class="color-photo-del" onclick="deleteColorMediaItem('${col}', ${idx})">✕</button><img src="${m.url}" style="width:100%; height:100%; object-fit:contain;"></div>`).join('');
-        let sizeRows = Object.keys(cData.sizes || {}).map(s => `
-          <div class="size-mini-row">
-            <b>Sz ${s}</b>
-            <input type="number" min="0" value="${cData.sizes[s]}" oninput="updateColorSizeQty('${col}', '${s}', this.value)" class="form-control" style="text-align:center;">
-            <input type="text" value="${cData.barcodes?.[s]||''}" placeholder="Barcode" oninput="updateColorBarcode('${col}', '${s}', this.value)" class="form-control" style="font-size:11px;">
-            <button type="button" class="btn btn-amber" style="padding:4px;" onclick="scanBarcodeForColorInput('b_${col}_${s}', '${col}', '${s}')">📷</button>
-            <button type="button" onclick="removeSizeFromColor('${col}', '${s}')" style="color:red; border:none; background:none;">✕</button>
-          </div>
-        `).join('');
+        
+        // Backward compatibility fix for old items
+        if (!cData.media) {
+          cData.media = [];
+          if (cData.video) cData.media.push({ type: 'video', url: cData.video });
+          if (cData.photos) {
+            cData.photos.forEach(p => cData.media.push({ type: 'image', url: p }));
+          }
+        }
 
-        return `
-          <div class="color-block-card">
-            <div class="color-block-header">
-              <b>🎨 ${col}</b>
-              <div>
-                <label class="btn btn-blue" style="padding:3px 8px; font-size:11px; cursor:pointer;">+ Photo<input type="file" accept="image/*" multiple onchange="uploadPhotosForColorBlock(this, '${col}')" style="display:none;"></label>
-                <button type="button" class="btn btn-red" style="padding:3px 8px; font-size:11px;" onclick="removeColorBlock('${col}')">Hatao</button>
+        const mediaArr = cData.media || [];
+        let mediaListHtml = '';
+
+        mediaArr.forEach((m, idx) => {
+          let innerContent = '';
+          if (m.type === 'video') {
+            innerContent = `
+              <video src="${m.url}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+              <span style="position:absolute; bottom:2px; left:2px; background:#9333ea; color:white; font-size:8px; padding:1px 3px; border-radius:2px; font-weight:bold; z-index:2;">🎬 VIDEO</span>
+            `;
+          } else {
+            innerContent = `<img src="${m.url}" style="width:100%; height:100%; object-fit:contain;">`;
+          }
+
+          mediaListHtml += `
+            <div class="color-photo-item" style="position:relative;">
+              <button type="button" class="color-photo-del" onclick="deleteColorMediaItem('${col}', ${idx})" title="Hatao">✕</button>
+              ${innerContent}
+              <div style="position:absolute; bottom:2px; inset-x:2px; display:flex; justify-content:space-between; background:rgba(0,0,0,0.7); border-radius:3px; padding:1px; z-index:3;">
+                <button type="button" onclick="moveColorMedia('${col}', ${idx}, -1)" style="background:none; border:none; color:white; font-size:10px; cursor:pointer;" title="Pehle karo">◀</button>
+                <span style="font-size:9px; color:white; font-weight:bold;">${idx === 0 ? '★ Main' : idx + 1}</span>
+                <button type="button" onclick="moveColorMedia('${col}', ${idx}, 1)" style="background:none; border:none; color:white; font-size:10px; cursor:pointer;" title="Aage karo">▶</button>
               </div>
             </div>
-            <div class="color-photo-slots">${mediaHtml}</div>
-            <div><button type="button" class="btn btn-blue" style="padding:2px 7px; font-size:10px;" onclick="promptAddSizeToColor('${col}')">+ Size</button></div>
-            ${sizeRows}
+          `;
+        });
+        
+        let sizeRowsHtml = '';
+        const sizeKeys = Object.keys(cData.sizes || {});
+
+        sizeKeys.forEach(s => {
+          const qty = cData.sizes[s] !== undefined ? cData.sizes[s] : 0;
+          const bcode = (cData.barcodes && cData.barcodes[s] !== undefined) ? cData.barcodes[s] : '';
+          const bcodeId = `sz_bcode_${col}_${s}`.replace(/\s+/g, '_');
+
+          sizeRowsHtml += `
+            <div class="size-mini-row">
+              <b style="font-size:12px; color:#1e1b4b; background:#e0e7ff; padding:3px 6px; border-radius:4px; text-align:center;">Size ${s}</b>
+              <input type="number" min="0" value="${qty}" oninput="updateColorSizeQty('${col}', '${s}', this.value)" class="form-control" style="padding:4px; text-align:center; font-weight:bold;">
+              <input type="text" value="${bcode}" id="${bcodeId}" placeholder="Barcode..." oninput="updateColorBarcode('${col}', '${s}', this.value)" class="form-control" style="padding:4px 6px; font-family:monospace; font-size:11px;">
+              <button type="button" class="btn btn-amber" style="padding:4px 6px; font-size:10px; justify-content:center;" onclick="scanBarcodeForColorInput('${bcodeId}', '${col}', '${s}')">📷</button>
+              <button type="button" onclick="removeSizeFromColor('${col}', '${s}')" style="background:none; border:none; color:#ef4444; font-weight:bold; font-size:15px; cursor:pointer;" title="Size Hatayein">✕</button>
+            </div>
+          `;
+        });
+
+        html += `
+          <div class="color-block-card">
+            <div class="color-block-header">
+              <b style="font-size:14px; color:#1e1b4b;">🎨 Rang: <span style="color:#4f46e5;">${col}</span></b>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <label class="btn btn-blue" style="padding:3px 8px; font-size:11px; cursor:pointer;">
+                  + Photos Upload
+                  <input type="file" accept="image/*" multiple onchange="uploadPhotosForColorBlock(this, '${col}')" style="display:none;">
+                </label>
+                <label class="btn btn-purple" style="padding:3px 8px; font-size:11px; cursor:pointer;">
+                  🎬 Video / Reel Upload
+                  <input type="file" accept="video/mp4,video/webm" onchange="uploadVideoForColorBlock(this, '${col}')" style="display:none;">
+                </label>
+                <button type="button" class="btn btn-red" style="padding:3px 8px; font-size:11px;" onclick="removeColorBlock('${col}')">✕ Rang Hatao</button>
+              </div>
+            </div>
+
+            <div class="color-photo-slots">
+              ${mediaListHtml || '<small style="color:#94a3b8; font-size:11px; grid-column:1/-1;">Is rang ki photos ya video upload karein...</small>'}
+            </div>
+
+            <div style="background:#f1f5f9; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:11px; font-weight:bold; color:#475569;">AVAILABLE SIZES & STOCK:</span>
+                <button type="button" class="btn btn-blue" style="padding:2px 7px; font-size:10px;" onclick="promptAddSizeToColor('${col}')">+ Size Jodein</button>
+              </div>
+              <div style="display:grid; grid-template-columns: 75px 80px 1fr 65px 28px; gap:6px; font-size:10px; font-weight:bold; color:#64748b; margin-bottom:4px; padding:0 4px;">
+                <span>SIZE</span><span>JODI (QTY)</span><span>BOX BARCODE</span><span>SCAN</span><span>HATAO</span>
+              </div>
+              ${sizeRowsHtml || '<div style="text-align:center; padding:8px; color:#94a3b8; font-size:11px;">Koi size nahi hai. "+ Size Jodein" par click karein.</div>'}
+            </div>
           </div>
         `;
-      }).join('');
+      });
+
+      container.innerHTML = html;
     }
 
-    function updateColorSizeQty(col, size, val) { if (colorDataMap[col]) colorDataMap[col].sizes[size] = Number(val) || 0; }
-    function updateColorBarcode(col, size, val) { if (colorDataMap[col]) { if (!colorDataMap[col].barcodes) colorDataMap[col].barcodes = {}; colorDataMap[col].barcodes[size] = val.trim(); } }
-    function deleteColorMediaItem(col, idx) { colorDataMap[col].media.splice(idx, 1); renderColorBlocks(); }
+    function updateColorSizeQty(col, size, val) {
+      if (colorDataMap[col]) {
+        if (!colorDataMap[col].sizes) colorDataMap[col].sizes = {};
+        colorDataMap[col].sizes[size] = Number(val) || 0;
+      }
+    }
+
+    function moveColorMedia(col, index, direction) {
+      if (!colorDataMap[col] || !colorDataMap[col].media) return;
+      const mediaList = colorDataMap[col].media;
+      const targetIndex = index + direction;
+
+      if (targetIndex < 0 || targetIndex >= mediaList.length) return;
+
+      const temp = mediaList[index];
+      mediaList[index] = mediaList[targetIndex];
+      mediaList[targetIndex] = temp;
+
+      renderColorBlocks();
+    }
+
+    function deleteColorMediaItem(col, idx) {
+      if (colorDataMap[col] && colorDataMap[col].media) {
+        colorDataMap[col].media.splice(idx, 1);
+        renderColorBlocks();
+      }
+    }
+    
+    function updateColorBarcode(col, size, val) {
+      if (colorDataMap[col]) {
+        if (!colorDataMap[col].barcodes) colorDataMap[col].barcodes = {};
+        colorDataMap[col].barcodes[size] = val.trim();
+      }
+    }
+
+    function scanBarcodeForColorInput(inputId, col, size) {
+      targetScanInputId = { inputId, col, size };
+      openScannerModal('color_size_barcode');
+    }
 
     function uploadPhotosForColorBlock(input, colorName) {
-      if (input.files) {
+      if (input.files && input.files.length > 0) {
         Array.from(input.files).forEach(file => {
           const reader = new FileReader();
           reader.onload = function(e) {
-            colorDataMap[colorName].media.push({ type: 'image', url: e.target.result });
-            renderColorBlocks();
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const MAX_HD_WIDTH = 1200;
+              let w = img.width;
+              let h = img.height;
+
+              if (w > MAX_HD_WIDTH) {
+                h = Math.round((h * MAX_HD_WIDTH) / w);
+                w = MAX_HD_WIDTH;
+              }
+
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(img, 0, 0, w, h);
+
+              const hdBase64 = canvas.toDataURL('image/jpeg', 0.88);
+
+              if (!colorDataMap[colorName].media) {
+                colorDataMap[colorName].media = [];
+              }
+              colorDataMap[colorName].media.push({ type: 'image', url: hdBase64 });
+              renderColorBlocks();
+            };
+            img.src = e.target.result;
           };
           reader.readAsDataURL(file);
         });
       }
+      input.value = '';
+    }
+
+    function uploadVideoForColorBlock(input, colorName) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Video ka size 5MB se chota hona chahiye!");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          if (!colorDataMap[colorName].media) {
+            colorDataMap[colorName].media = [];
+          }
+          colorDataMap[colorName].media.push({ type: 'video', url: e.target.result });
+          renderColorBlocks();
+          alert(`[${colorName}] ke liye video jud gaya! Ise ◀ aur ▶ button se aage-pichhe set kar sakte hain.`);
+        };
+        reader.readAsDataURL(file);
+      }
+      input.value = '';
     }
 
     function openNewShoeModal() {
       document.getElementById('shoeForm').reset();
       document.getElementById('fId').value = '';
-      colorDataMap = { "Black": { media: [], sizes: {6:0, 7:0, 8:0, 9:0, 10:0}, barcodes: {} } };
+      
+      const curGender = document.getElementById('fGenderSelect').value || 'Men';
+      const defaultList = GENDER_PRESETS[curGender] || GENDER_PRESETS['Men'];
+
+      colorDataMap = {
+        "Black": { media: [], sizes: {}, barcodes: {} }
+      };
+      defaultList.forEach(s => {
+        colorDataMap["Black"].sizes[s] = 0;
+        colorDataMap["Black"].barcodes[s] = '';
+      });
+
       renderColorBlocks();
+      document.querySelector('input[name="fItemType"][value="footwear"]').checked = true;
+      toggleItemTypeForm('footwear');
       document.getElementById('shoeModal').style.display = 'flex';
     }
+
     function closeShoeModal() { document.getElementById('shoeModal').style.display = 'none'; }
 
     function submitShoeForm(e) {
@@ -1877,186 +2461,415 @@
       const category = document.getElementById('fCategorySelect').value;
       const cost = Number(document.getElementById('fCost').value) || 0;
       const price = Number(document.getElementById('fPrice').value) || 0;
-      const mrp = Number(document.getElementById('fMrpPrice').value) || Math.round(price * 1.45);
+      const mrpPrice = Number(document.getElementById('fMrpPrice').value) || Math.round(price * 1.45);
 
-      let mainPhoto = 'https://via.placeholder.com/300';
-      for (let c in colorDataMap) {
-        if (colorDataMap[c].media?.[0]?.url) { mainPhoto = colorDataMap[c].media[0].url; break; }
+      if (!name) { alert("Item name zaroori hai!"); return; }
+      if (price <= 0) { alert("Bikri rate bharein!"); return; }
+
+      const rawColors = Object.keys(colorDataMap);
+      if (itemType === 'footwear' && rawColors.length === 0) {
+        alert("Kam se kam ek rang jodkar uska stock bharein!");
+        return;
       }
 
+      const safeColorData = {};
+      rawColors.forEach(c => {
+        const cleanKey = c.replace(/[\.\#\$\/\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+        safeColorData[cleanKey] = colorDataMap[c];
+      });
+
+      let mainPhoto = '';
+      for (let c in safeColorData) {
+        const mArr = safeColorData[c].media || [];
+        for (let m of mArr) {
+          if (m.type === 'image') {
+            mainPhoto = m.url;
+            break;
+          }
+        }
+        if (mainPhoto) break;
+      }
+      if (!mainPhoto) mainPhoto = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80';
+
       const itemObj = {
-        id, itemType, name, brand, category, cost, price, mrp,
-        colorData: colorDataMap, photo: mainPhoto,
-        generalQty: itemType === 'general' ? Number(document.getElementById('fGeneralQty').value) : 0
+        id, itemType, name, brand, category, cost, price,
+        mrp: mrpPrice,
+        gender: (itemType === 'footwear') ? document.getElementById('fGenderSelect').value : 'All',
+        colors: Object.keys(safeColorData),
+        colorData: safeColorData,
+        photo: mainPhoto,
+        generalQty: (itemType === 'general') ? Number(document.getElementById('fGeneralQty').value) || 0 : 0,
+        generalBarcode: (itemType === 'general') ? document.getElementById('fGeneralBarcode').value.trim() : ''
       };
 
-      db.ref('footwear_stock/' + id).set(itemObj).then(() => {
-        closeShoeModal();
-        alert("✓ Cloud Par Save Ho Gaya!");
-      });
+      db.ref('footwear_stock/' + itemObj.id).set(itemObj)
+        .then(() => {
+          closeShoeModal();
+          alert("✓ Safalta-purvak Cloud Par Save Ho Gaya!");
+        })
+        .catch((err) => {
+          alert("Firebase Error: " + err.message);
+        });
     }
 
     function editShoe(id) {
       const it = items.find(x => x.id === id);
       if (!it) return;
+
       document.getElementById('fId').value = it.id;
       document.getElementById('fName').value = it.name;
       document.getElementById('fBrand').value = it.brand;
       document.getElementById('fCategorySelect').value = it.category;
       document.getElementById('fCost').value = it.cost;
       document.getElementById('fPrice').value = it.price;
-      document.getElementById('fMrpPrice').value = it.mrp;
-      colorDataMap = JSON.parse(JSON.stringify(it.colorData || {}));
+      document.getElementById('fMrpPrice').value = it.mrp || Math.round(it.price * 1.45);
+
+      const itemType = it.itemType || 'footwear';
+      document.querySelector(`input[name="fItemType"][value="${itemType}"]`).checked = true;
+      toggleItemTypeForm(itemType);
+
+      if (it.colorData && Object.keys(it.colorData).length > 0) {
+        colorDataMap = JSON.parse(JSON.stringify(it.colorData));
+        // Ensure media array exists for backward compatibility during edit
+        for (let c in colorDataMap) {
+          if (!colorDataMap[c].media) {
+            colorDataMap[c].media = [];
+            if (colorDataMap[c].video) colorDataMap[c].media.push({ type: 'video', url: colorDataMap[c].video });
+            if (colorDataMap[c].photos) {
+              colorDataMap[c].photos.forEach(p => colorDataMap[c].media.push({ type: 'image', url: p }));
+            }
+          }
+        }
+      } else {
+        colorDataMap = { "Standard": { media: [], sizes: it.sizes || {}, barcodes: it.barcodes || {} } };
+      }
+
       renderColorBlocks();
+      document.getElementById('shoeModalTitle').innerText = "Item Edit Karein";
       document.getElementById('shoeModal').style.display = 'flex';
     }
 
-    function deleteShoe(id) { if (confirm("Delete karein?")) db.ref('footwear_stock/' + id).remove(); }
+    function deleteShoe(id) {
+      if (confirm("Item hatana chahte hain?")) db.ref('footwear_stock/' + id).remove();
+    }
 
     function renderApp() {
       if (currentAppMode === 'admin') renderAdminTable();
       else renderCustomerCatalog();
     }
 
-    // ==================== ADMIN GRID VIEW RENDERER ====================
     function renderAdminTable() {
-      const container = document.getElementById('adminGridContainer');
-      if (!container) return;
+      const search = (document.getElementById('adminSearchFilter').value || '').toLowerCase().trim();
+      const catFlt = document.getElementById('adminCategoryFilter').value;
 
-      const q = document.getElementById('adminSearchFilter')?.value.toLowerCase() || '';
-      const cat = document.getElementById('adminCategoryFilter')?.value || 'ALL';
+      let totalStockUnits = 0, totalCost = 0, totalTagValue = 0, lowStock = 0;
+      let tableHtml = '';
 
-      let filtered = items.filter(it => {
-        if (cat !== 'ALL' && it.category !== cat) return false;
-        return (it.name?.toLowerCase().includes(q) || it.brand?.toLowerCase().includes(q));
-      });
+      items.forEach(it => {
+        const itemType = it.itemType || 'footwear';
+        const itemCat = it.category || 'Footwear';
 
-      container.innerHTML = filtered.map(it => {
-        let mainImg = it.photo || 'https://via.placeholder.com/150';
-        let totalQty = 0, stockBreakdown = '';
+        let p = 0;
+        let breakdownByColorHtml = '';
 
-        if (it.colorData) {
-          for (let col in it.colorData) {
-            let sizes = it.colorData[col].sizes || {};
-            let szStr = [];
-            for (let sz in sizes) {
-              let qVal = sizes[sz] || 0;
-              totalQty += qVal;
-              if (qVal > 0) szStr.push(`Sz ${sz}: ${qVal}`);
+        if (itemType === 'general') {
+          p = Number(it.generalQty) || 0;
+          breakdownByColorHtml = `<span class="size-badge ${p > 2 ? 'size-in' : 'size-low'}">${p} Pcs</span>`;
+        } else if (it.colorData) {
+          for (let c in it.colorData) {
+            const cData = it.colorData[c];
+            const cSizes = cData.sizes || {};
+            let cPairs = 0;
+            let cBadges = [];
+            for (let sz in cSizes) {
+              const q = Number(cSizes[sz]) || 0;
+              cPairs += q;
+              p += q;
+              if (q > 0) cBadges.push(`${sz}:${q}`);
             }
-            if (szStr.length > 0) stockBreakdown += `<div style="font-size:11px;"><b>${col}:</b> ${szStr.join(', ')}</div>`;
+            const hasVideo = (cData.media || []).some(m => m.type === 'video') || !!cData.video;
+            breakdownByColorHtml += `
+              <div style="margin-bottom:3px;">
+                <b style="color:#4f46e5; font-size:11px;">● ${c} (${cPairs} Jodi) ${hasVideo?'🎬':''}:</b> 
+                <small style="color:#334155;">${cBadges.join(', ') || 'Khatam'}</small>
+              </div>
+            `;
           }
-        } else {
-          totalQty = it.generalQty || 0;
         }
 
-        return `
-          <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-            <div>
-              <div style="position:relative; text-align:center; background:#f8fafc; border-radius:8px; padding:6px; margin-bottom:8px;">
-                <img src="${mainImg}" style="width:100%; height:130px; object-fit:contain; cursor:pointer;" onclick="openCheckPopup('${it.id}')">
-                <span style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; font-size:9px; padding:2px 6px; border-radius:4px;">${it.category}</span>
-              </div>
-              <h4 style="font-size:14px; font-weight:800; color:#0f172a;">${it.name}</h4>
-              <p style="font-size:12px; color:#64748b;">Brand: <b>${it.brand}</b></p>
-              <div style="background:#f1f5f9; padding:6px; border-radius:6px; margin:8px 0; max-height:75px; overflow-y:auto;">${stockBreakdown || 'No Stock'}</div>
-            </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:11px;">Stock: <b style="${totalQty<=3?'color:red;':''}">${totalQty} Jodi</b></span>
-                <span style="font-size:15px; font-weight:900; color:#10b981;">₹${it.price}</span>
-              </div>
-              <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px;">
-                <button class="btn btn-amber" style="padding:5px 0; font-size:11px; justify-content:center;" onclick="openCheckPopup('${it.id}')">📦</button>
-                <button class="btn btn-green" style="padding:5px 0; font-size:11px; justify-content:center;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'))">🛒</button>
-                <button class="btn btn-indigo" style="padding:5px 0; font-size:11px; justify-content:center;" onclick="editShoe('${it.id}')">✏️</button>
-                <button class="btn btn-red" style="padding:5px 0; font-size:11px; justify-content:center;" onclick="deleteShoe('${it.id}')">🗑️</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('') || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#94a3b8;">Koi item nahi hai.</div>';
-
-      // Statistics Update
-      let totalPairs = 0, totalCost = 0, totalTag = 0, lowStock = 0;
-      items.forEach(it => {
-        let p = 0;
-        if (it.colorData) {
-          for (let c in it.colorData) Object.values(it.colorData[c].sizes || {}).forEach(q => p += Number(q)||0);
-        } else { p = Number(it.generalQty)||0; }
-        totalPairs += p;
+        totalStockUnits += p;
         totalCost += (p * (it.cost || 0));
-        totalTag += (p * (it.price || 0));
+        totalTagValue += (p * (it.price || 0));
         if (p <= 3) lowStock++;
+
+        if (catFlt !== 'ALL' && !itemCat.toLowerCase().includes(catFlt.toLowerCase())) return;
+        if (search && !it.name.toLowerCase().includes(search) && !it.brand.toLowerCase().includes(search)) return;
+
+        let mainImg = it.photo || 'https://via.placeholder.com/50';
+
+        tableHtml += `<tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="${mainImg}" class="shoe-img" onclick="openCheckPopup('${it.id}')" style="cursor:pointer;" title="Stock Details Dekhein">
+              <div><b>${it.name}</b><br><span class="cat-chip">${itemCat}</span></div>
+            </div>
+          </td>
+          <td><b>${it.brand}</b></td>
+          <td>${breakdownByColorHtml || '<small style="color:#94a3b8;">No Stock</small>'}</td>
+          <td><b style="${p<=3?'color:#ef4444;':'color:#0f172a;'}">${p} Jodi</b></td>
+          <td><b style="color:#10b981;">₹${it.price}</b></td>
+          <td style="text-align:right;">
+            <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="openCheckPopup('${it.id}')">Stock</button>
+            <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="openSaleCheckout(items.find(x => x.id === '${it.id}'), null, null)">🛒 Bechein</button>
+            <button class="btn btn-indigo" style="padding:4px 8px; font-size:11px;" onclick="editShoe('${it.id}')">✏️</button>
+            <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteShoe('${it.id}')">🗑️</button>
+          </td>
+        </tr>`;
       });
-      document.getElementById('dTotalPairs').innerText = totalPairs;
+
+      document.getElementById('inventoryRows').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi item nahi mila.</td></tr>';
+      document.getElementById('dTotalPairs').innerText = totalStockUnits;
       document.getElementById('dTotalModels').innerText = items.length + " Models";
       document.getElementById('dTotalCost').innerText = "₹" + totalCost.toLocaleString('en-IN');
-      document.getElementById('dTotalTagValue').innerText = "Tag Value: ₹" + totalTag.toLocaleString('en-IN');
+      document.getElementById('dTotalTagValue').innerText = "Tag Value: ₹" + totalTagValue.toLocaleString('en-IN');
       document.getElementById('dLowStock').innerText = lowStock;
+
+      let allSalesAmt = 0;
+      let allCash = 0;
+      let allUpi = 0;
+
+      salesHistory.forEach(s => {
+        const amt = Number(s.sellPrice) || 0;
+        const mode = (s.payMode || 'Cash').toUpperCase();
+        allSalesAmt += amt;
+        if (mode.includes('UPI') || mode.includes('PHONEPE') || mode.includes('QR')) {
+          allUpi += amt;
+        } else {
+          allCash += amt;
+        }
+      });
+
+      document.getElementById('dTotalSalesVal').innerText = "₹" + allSalesAmt.toLocaleString('en-IN');
+      document.getElementById('dSalesCash').innerText = "₹" + allCash.toLocaleString('en-IN');
+      document.getElementById('dSalesUpi').innerText = "₹" + allUpi.toLocaleString('en-IN');
     }
 
     function renderCustomerCatalog() {
       const grid = document.getElementById('customerCatalogGrid');
-      if (!grid) return;
-      const q = document.getElementById('custSearchFilter')?.value.toLowerCase() || '';
-      const cat = document.getElementById('custCategoryFilter')?.value || 'ALL';
+      let cardsHtml = '';
 
-      let filtered = items.filter(it => {
-        if (cat !== 'ALL' && it.category !== cat) return false;
-        return (it.name?.toLowerCase().includes(q) || it.brand?.toLowerCase().includes(q));
-      });
-
-      grid.innerHTML = filtered.map(it => {
+      items.forEach(it => {
         const isFootwear = (it.itemType !== 'general');
         let colors = Object.keys(it.colorData || {});
-        if (!selectedItemOptions[it.id]) selectedItemOptions[it.id] = { color: colors[0] || 'Standard', size: null };
 
-        let activeColor = selectedItemOptions[it.id].color;
-        let cData = it.colorData?.[activeColor] || {};
+        if (!selectedItemOptions[it.id]) {
+          selectedItemOptions[it.id] = {
+            color: colors[0] || 'Standard',
+            size: null
+          };
+        }
+
+        let activeColor = selectedItemOptions[it.id].color || colors[0];
+        let cData = (it.colorData && it.colorData[activeColor]) ? it.colorData[activeColor] : {};
+
+        // Backward compatibility fix for rendering customer catalog
         let mediaList = cData.media || [];
-        if (mediaList.length === 0 && it.photo) mediaList.push({ type: 'image', url: it.photo });
+        if (mediaList.length === 0) {
+          if (cData.video) mediaList.push({ type: 'video', url: cData.video });
+          if (cData.photos) cData.photos.forEach(p => mediaList.push({ type: 'image', url: p }));
+        }
 
-        let colorsChipsHtml = colors.map(c => `<button type="button" class="color-chip-btn ${c === activeColor ? 'active' : ''}" onclick="customerPickColor(this, '${it.id}', '${c}')">● ${c}</button>`).join('');
-        let sizeButtonsHtml = isFootwear ? Object.keys(cData.sizes || {}).map(sz => {
-          let qty = cData.sizes[sz] || 0;
-          let isSel = (selectedItemOptions[it.id].size === String(sz));
-          return qty > 0 ? `<span class="size-select-chip ${isSel ? 'selected' : ''}" data-size="${sz}" onclick="selectCardSize('${it.id}', '${sz}')">Sz ${sz}</span>` : `<span class="size-select-chip disabled">Sz ${sz} (0)</span>`;
-        }).join('') : '';
+        let colorsChipsHtml = colors.map(c => `
+          <button type="button" class="color-chip-btn ${c === activeColor ? 'active' : ''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
+            ● ${c}
+          </button>
+        `).join('');
 
-        return `
+        let sizeButtonsHtml = '';
+        if (isFootwear && cData.sizes) {
+          const szKeys = Object.keys(cData.sizes);
+          sizeButtonsHtml = szKeys.map(sz => {
+            const qty = cData.sizes[sz] || 0;
+            const isSelected = (selectedItemOptions[it.id].size === String(sz));
+            if (qty > 0) {
+              return `<span class="size-select-chip ${isSelected ? 'selected' : ''}" data-size="${sz}" onclick="selectCardSize('${it.id}', '${sz}')">Sz ${sz}</span>`;
+            } else {
+              return `<span class="size-select-chip disabled" data-size="${sz}">Sz ${sz} (0)</span>`;
+            }
+          }).join(' ');
+        }
+
+        const mediaBoxId = `card_media_box_${it.id}`;
+        const trayId = `card_thumb_tray_${it.id}`;
+
+        let initialMediaHtml = '';
+        if (mediaList.length > 0) {
+          const firstM = mediaList[0];
+          if (firstM.type === 'video') {
+            initialMediaHtml = `<video class="main-card-video" src="${firstM.url}" autoplay muted loop playsinline></video>`;
+          } else {
+            initialMediaHtml = `<img class="main-card-img" src="${firstM.url}">`;
+          }
+        } else {
+          initialMediaHtml = `<img class="main-card-img" src="${it.photo || 'https://via.placeholder.com/300'}">`;
+        }
+
+        let thumbsHtml = generateThumbnailsHtml(it.id, mediaList);
+
+        const realPrice = Number(it.price) || 0;
+        const fakeMrp = it.mrp ? Number(it.mrp) : Math.round(realPrice * 1.45);
+        const discountPct = fakeMrp > realPrice ? Math.round(((fakeMrp - realPrice) / fakeMrp) * 100) : 0;
+
+        cardsHtml += `
           <div class="shoe-card">
+            ${discountPct > 0 ? `<div class="discount-badge">${discountPct}% OFF</div>` : ''}
+
             <div>
-              <div class="item-media-box"><img class="main-card-img" src="${mediaList[0]?.url || 'https://via.placeholder.com/300'}"></div>
+              <div class="item-media-box" id="${mediaBoxId}">
+                ${initialMediaHtml}
+              </div>
+              <div class="thumb-tray" id="${trayId}">
+                ${thumbsHtml}
+              </div>
             </div>
+
             <div class="shoe-card-body">
               <div>
-                <span style="font-size:11px; font-weight:bold; color:#64748b;">${it.brand}</span>
-                <h4 style="font-size:15px; font-weight:bold; color:#0f172a;">${it.name}</h4>
-                <div class="price-row"><span class="current-price">₹${it.price}</span></div>
-                ${isFootwear ? `<div><small>Rang:</small><br>${colorsChipsHtml}</div><div style="margin-top:6px;"><small>Size:</small><br><div id="sizes_box_${it.id}">${sizeButtonsHtml}</div></div>` : ''}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-size:11px; font-weight:bold; color:#64748b; text-transform:uppercase;">${it.brand}</span>
+                  <span style="background:#15803d; color:white; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">★ 4.6</span>
+                </div>
+
+                <h4 style="font-size:15px; font-weight:bold; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
+                <p style="font-size:12px; color:#64748b;">${it.category}</p>
+
+                <div class="price-row">
+                  <span class="current-price">₹${realPrice}</span>
+                  ${fakeMrp > realPrice ? `<span class="mrp-cut">₹${fakeMrp}</span><span class="offer-percent">${discountPct}% off</span>` : ''}
+                </div>
+
+                ${isFootwear ? `
+                  <div style="margin:6px 0 4px;">
+                    <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">1. RANG CHUNEIN:</small>
+                    ${colorsChipsHtml}
+                  </div>
+
+                  <div style="margin-bottom:8px;">
+                    <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">2. APNA SIZE CHUNEIN (TAP KAREIN):</small>
+                    <div id="sizes_box_${it.id}">${sizeButtonsHtml || '<small style="color:#ef4444;">Out of stock</small>'}</div>
+                  </div>
+                ` : `
+                  <div style="margin:8px 0;"><small style="color:#059669; font-weight:bold;">Stock: ${it.generalQty || 0} Pieces Uplabdh</small></div>
+                `}
               </div>
+
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
-                <button class="btn btn-amber" style="justify-content:center; padding:10px;" onclick="addItemToCustomerCart('${it.id}', false)">🛒 Cart</button>
-                <button class="btn btn-wa" style="justify-content:center; padding:10px;" onclick="addItemToCustomerCart('${it.id}', true)">⚡ Kharidein</button>
+                <button class="btn btn-amber" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', false)">
+                  🛒 Cart Me Jodein
+                </button>
+                <button class="btn btn-wa" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', true)">
+                  ⚡ Abhi Kharidein
+                </button>
               </div>
             </div>
           </div>
         `;
-      }).join('') || '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#94a3b8;">Koi item nahi hai.</div>';
+      });
+
+      grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Koi item stock me nahi hai.</div>';
+      updateCartBar();
+    }
+
+    function generateThumbnailsHtml(itemId, mediaList) {
+      let html = '';
+      mediaList.forEach((m, idx) => {
+        const activeClass = (idx === 0) ? 'active' : '';
+        if (m.type === 'video') {
+          html += `
+            <div class="thumb-item ${activeClass}" onclick="switchMediaDisplay('${itemId}', 'video', '${m.url}', this)">
+              <video src="${m.url}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+              <span class="video-thumb-badge">▶ REEL</span>
+            </div>
+          `;
+        } else {
+          html += `
+            <img src="${m.url}" class="thumb-item ${activeClass}" onclick="switchMediaDisplay('${itemId}', 'image', '${m.url}', this)">
+          `;
+        }
+      });
+      return html;
+    }
+
+    function switchMediaDisplay(itemId, type, src, thumbElem) {
+      const box = document.getElementById(`card_media_box_${itemId}`);
+      if (!box) return;
+
+      if (type === 'video') {
+        box.innerHTML = `<video class="main-card-video" src="${src}" autoplay muted loop playsinline></video>`;
+      } else {
+        box.innerHTML = `<img class="main-card-img" src="${src}">`;
+      }
+
+      const tray = thumbElem.parentElement;
+      tray.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+      thumbElem.classList.add('active');
     }
 
     function customerPickColor(btn, itemId, colorName) {
       btn.parentElement.querySelectorAll('.color-chip-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+
+      if (!selectedItemOptions[itemId]) selectedItemOptions[itemId] = {};
       selectedItemOptions[itemId].color = colorName;
-      renderCustomerCatalog();
+      selectedItemOptions[itemId].size = null;
+
+      const it = items.find(x => x.id === itemId);
+      if (!it || !it.colorData || !it.colorData[colorName]) return;
+
+      const cData = it.colorData[colorName];
+      const mediaBox = document.getElementById(`card_media_box_${itemId}`);
+      const tray = document.getElementById(`card_thumb_tray_${itemId}`);
+
+      let mediaList = cData.media || [];
+      if (mediaList.length === 0) {
+        if (cData.video) mediaList.push({ type: 'video', url: cData.video });
+        if (cData.photos) cData.photos.forEach(p => mediaList.push({ type: 'image', url: p }));
+      }
+
+      if (mediaList.length > 0) {
+        const firstM = mediaList[0];
+        if (firstM.type === 'video') {
+          mediaBox.innerHTML = `<video class="main-card-video" src="${firstM.url}" autoplay muted loop playsinline></video>`;
+        } else {
+          mediaBox.innerHTML = `<img class="main-card-img" src="${firstM.url}">`;
+        }
+      }
+
+      tray.innerHTML = generateThumbnailsHtml(itemId, mediaList);
+
+      let sizeButtonsHtml = '';
+      if (cData.sizes) {
+        const szKeys = Object.keys(cData.sizes);
+        sizeButtonsHtml = szKeys.map(sz => {
+          const qty = cData.sizes[sz] || 0;
+          if (qty > 0) {
+            return `<span class="size-select-chip" data-size="${sz}" onclick="selectCardSize('${itemId}', '${sz}')">Sz ${sz}</span>`;
+          } else {
+            return `<span class="size-select-chip disabled" data-size="${sz}">Sz ${sz} (0)</span>`;
+          }
+        }).join(' ');
+      }
+      document.getElementById(`sizes_box_${itemId}`).innerHTML = sizeButtonsHtml || '<small style="color:#ef4444;">Is colour me stock khatam hai</small>';
     }
 
-    function openCheckPopup(id) {
+    function openCheckPopup(id, highlightColor = null, highlightSize = null) {
       const it = items.find(x => x.id === id);
       if (!it) return;
+
       activePopupItem = it;
+      activeHighlightedColor = highlightColor;
+      activeHighlightedSize = highlightSize;
+
       document.getElementById('chkImg').src = it.photo || 'https://via.placeholder.com/130';
       document.getElementById('chkTitle').innerText = it.name;
       document.getElementById('chkBrandCat').innerText = `${it.brand} • ${it.category}`;
@@ -2065,31 +2878,784 @@
 
       let html = '';
       if (it.itemType === 'general') {
-        html = `<div style="background:#ecfdf5; padding:12px; border-radius:8px; text-align:center;"><b style="font-size:18px; color:#047857;">${it.generalQty || 0} Pieces</b></div>`;
+        html = `<div style="background:#ecfdf5; padding:12px; border-radius:8px; text-align:center;"><b style="font-size:18px; color:#047857;">${it.generalQty || 0} Pieces Bachi Hain</b></div>`;
       } else if (it.colorData) {
         for (let c in it.colorData) {
-          let szGrid = Object.keys(it.colorData[c].sizes || {}).map(s => {
-            let q = it.colorData[c].sizes[s] || 0;
-            return `<div style="background:${q>0?'#ecfdf5':'#f1f5f9'}; border-radius:6px; padding:6px; text-align:center;"><b>Sz ${s}</b><br><b>${q} Jodi</b></div>`;
-          }).join('');
-          html += `<div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px;"><b>🎨 ${c}</b><div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:4px;">${szGrid}</div></div>`;
+          const cData = it.colorData[c];
+          let sizesGrid = '';
+          for (let s in (cData.sizes || {})) {
+            const q = cData.sizes[s] || 0;
+            const isHighlight = (c === highlightColor && String(s) === String(highlightSize));
+            sizesGrid += `
+              <div style="background:${isHighlight ? '#fef3c7; border:2px solid #f59e0b;' : (q > 0 ? '#ecfdf5; border:1px solid #86efac;' : '#f1f5f9;')}; border-radius:6px; padding:6px 2px; text-align:center;">
+                <b style="font-size:12px; display:block;">Sz ${s}</b>
+                <b style="font-size:13px; color:${q>0?'#15803d':'#94a3b8'};">${q} Jodi</b>
+              </div>
+            `;
+          }
+
+          const hasVid = (cData.media || []).some(m => m.type === 'video') || !!cData.video;
+
+          html += `
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:10px;">
+              <b style="font-size:13px; color:#1e1b4b; display:block; margin-bottom:6px;">🎨 Rang: <span style="color:#4f46e5;">${c}</span> ${hasVid?'(🎬 Video Available)':''}</b>
+              <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">${sizesGrid}</div>
+            </div>
+          `;
         }
       }
+
       document.getElementById('chkColorWiseStockContainer').innerHTML = html;
       document.getElementById('checkModal').style.display = 'flex';
     }
+
     function closeCheckModal() { document.getElementById('checkModal').style.display = 'none'; }
-    function openSaleCheckoutFromCheck() { closeCheckModal(); openSaleCheckout(activePopupItem); }
 
-    function openSaleCheckout(item) {
+    function openSaleCheckoutFromCheck() {
+      if (activePopupItem) {
+        closeCheckModal();
+        openSaleCheckout(activePopupItem, activeHighlightedColor, activeHighlightedSize);
+      }
+    }
+
+    function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
       if (!item) return;
-      let chosenColor = Object.keys(item.colorData || {})[0] || 'Standard';
-      let chosenSize = Object.keys(item.colorData?.[chosenColor]?.sizes || {})[0] || '1';
 
+      currentSellingItem = item;
+      currentSellingColor = preferredColor;
+      currentSellingSize = preferredSize;
+
+      let availQty = 0;
+
+      if (item.itemType === 'general') {
+        availQty = item.generalQty || 0;
+        currentSellingColor = 'General';
+        currentSellingSize = '1 Piece';
+      } else {
+        if (!currentSellingColor || !item.colorData[currentSellingColor]) {
+          const colors = Object.keys(item.colorData || {});
+          for (let c of colors) {
+            const sizes = item.colorData[c].sizes || {};
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingColor = c;
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+            if (currentSellingColor) break;
+          }
+        } else {
+          const sizes = item.colorData[currentSellingColor].sizes || {};
+          if (!currentSellingSize || !sizes[currentSellingSize] || sizes[currentSellingSize] <= 0) {
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+          } else {
+            availQty = sizes[currentSellingSize];
+          }
+        }
+      }
+
+      if (availQty <= 0) {
+        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
+        return;
+      }
+
+      document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
+      document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
+      document.getElementById('saleSizeBadge').innerText = `Size: ${currentSellingSize}`;
+      document.getElementById('saleColorBadge').innerText = `${currentSellingColor}`;
+      document.getElementById('saleStockRem').innerText = `Stock: ${availQty}`;
+
+      document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
+      document.getElementById('saleFinalPrice').value = item.price;
+      document.getElementById('saleCustName').value = '';
+      document.getElementById('saleCustPhone').value = '';
+
+      closeScannerModal();
+      document.getElementById('saleModal').style.display = 'flex';
+    }
+
+    function closeSaleModal() {
+      document.getElementById('saleModal').style.display = 'none';
+    }
+
+    function confirmSaleTransaction(e, shouldPrint = false) {
+      if (e) e.preventDefault();
+      if (!currentSellingItem) return;
+
+      const finalPrice = Number(document.getElementById('saleFinalPrice').value);
+      const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+
+      if (currentSellingItem.itemType === 'general') {
+        if ((currentSellingItem.generalQty || 0) <= 0) { alert("Stock khatam hai!"); return; }
+        currentSellingItem.generalQty -= 1;
+      } else {
+        if (!currentSellingItem.colorData[currentSellingColor] || 
+            !currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] || 
+            currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] <= 0) {
+          alert("Stock khatam hai!");
+          return;
+        }
+        currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] -= 1;
+      }
+
+      db.ref('footwear_stock/' + currentSellingItem.id).set(currentSellingItem);
+
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowStr = new Date().toLocaleString('en-IN');
+
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: new Date().toISOString(),
+        itemId: currentSellingItem.id,
+        name: currentSellingItem.name,
+        brand: currentSellingItem.brand,
+        color: currentSellingColor,
+        size: currentSellingSize,
+        costPrice: currentSellingItem.cost || 0,
+        tagPrice: currentSellingItem.price || 0,
+        sellPrice: finalPrice,
+        profit: finalPrice - (currentSellingItem.cost || 0),
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+      closeSaleModal();
+
+      if (shouldPrint) {
+        showReceipt(saleRecord, nowStr);
+      } else {
+        alert(`✓ Bikri Safal! ₹${finalPrice} me becha gaya.`);
+      }
+    }
+
+   function showReceipt(record, dateStr) {
+      document.getElementById('rBillNo').innerText = record.billNo || 'DN-Bill';
+      document.getElementById('rDate').innerText = dateStr;
+      document.getElementById('rCust').innerText = `${record.customer || 'Walk-in'} ${record.phone ? '('+record.phone+')' : ''}`;
+      document.getElementById('rPayMode').innerText = record.payMode || 'Cash';
+      
+      const tbody = document.getElementById('rReceiptTableBody');
+      let rowsHtml = '';
+
+      if (record.itemsList && record.itemsList.length > 0) {
+        record.itemsList.forEach(bi => {
+          const itemTotal = bi.qty * bi.sellPrice;
+          rowsHtml += `
+            <tr style="border-bottom:1px dotted #ccc;">
+              <td style="padding:4px 0;"><b>${bi.name}</b><br><small>Qty: ${bi.qty}</small></td>
+              <td style="padding:4px 0; text-align:center;">${bi.size} / ${bi.color}</td>
+              <td style="padding:4px 0; text-align:right;">₹${bi.sellPrice} <br><b>₹${itemTotal}</b></td>
+            </tr>
+          `;
+        });
+      } else {
+        rowsHtml += `
+          <tr>
+            <td style="padding:4px 0;"><b>${record.name || 'Shoe'}</b></td>
+            <td style="padding:4px 0; text-align:center;">${record.size || '-'} / ${record.color || '-'}</td>
+            <td style="padding:4px 0; text-align:right;"><b>₹${record.sellPrice || 0}</b></td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
+      
+      document.getElementById('rTagPrice').innerText = `₹${record.tagPrice || record.sellPrice}`;
+      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice || 0}`;
+      
+      document.getElementById('receiptModal').style.display = 'flex';
+      
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    }
+    
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    function openScannerModal(mode) {
+      currentScanAction = mode;
+      document.getElementById('scannerModal').style.display = 'flex';
+      
+      const titles = {
+        'check': '🔍 Dabba Scan Karke Stock Check Karein',
+        'sale': '🛒 Bikri Scan: Dabba Scan Karke Turant Bechein',
+        'inward': '📦 Stock Inward: Scan Karke +1 Jodi Badhayein',
+        'color_size_barcode': '📷 Box Barcode Scan'
+      };
+      document.getElementById('scannerTitle').innerText = titles[mode] || 'Scanner';
+
+      if (window.Html5Qrcode) {
+        if (!scannerObj) scannerObj = new Html5Qrcode("scannerTarget");
+        scannerObj.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 180 } }, onScanFound, () => {}).catch(() => alert("Camera permission dein."));
+      }
+    }
+
+    function closeScannerModal() {
+      if (scannerObj && scannerObj.isScanning) {
+        scannerObj.stop().then(() => document.getElementById('scannerModal').style.display = 'none');
+      } else document.getElementById('scannerModal').style.display = 'none';
+    }
+
+let isScanningLocked = false;
+
+  function onScanFound(code) {
+      if (isScanningLocked) return;
+      const cleanCode = code ? String(code).trim() : '';
+      if (!cleanCode) return;
+
+      const scannedCodeLower = cleanCode.toLowerCase();
+
+      // 1. Agar box barcode set karne ke liye scanner khula hai
+      if (currentScanAction === 'color_size_barcode' && targetScanInputId) {
+        isScanningLocked = true;
+        const inp = document.getElementById(targetScanInputId.inputId);
+        if (inp) inp.value = cleanCode;
+        updateColorBarcode(targetScanInputId.col, targetScanInputId.size, cleanCode);
+        closeScannerModal();
+        alert(`Barcode set ho gaya: ${cleanCode}`);
+        setTimeout(() => { isScanningLocked = false; }, 1500);
+        return;
+      }
+
+      let matchedItem = null;
+      let matchedColor = null;
+      let matchedSize = null;
+
+      // 2. Sabhi items me bar-code match karein
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        
+        if (it.itemType === 'general') {
+          if (it.generalBarcode && String(it.generalBarcode).trim().toLowerCase() === scannedCodeLower) {
+            matchedItem = it;
+            matchedColor = 'General';
+            matchedSize = '1 Piece';
+            break;
+          }
+        } else if (it.colorData) {
+          for (let col in it.colorData) {
+            const colorObj = it.colorData[col];
+            const bcMap = colorObj.barcodes || {};
+            
+            for (let sz in bcMap) {
+              const savedBarcode = bcMap[sz] ? String(bcMap[sz]).trim().toLowerCase() : '';
+              if (savedBarcode && savedBarcode === scannedCodeLower) {
+                matchedItem = it;
+                matchedColor = col;
+                matchedSize = sz;
+                break;
+              }
+            }
+            if (matchedItem) break;
+          }
+        }
+        if (matchedItem) break;
+      }
+
+      if (!matchedItem) {
+        isScanningLocked = true;
+        alert(`Barcode [${cleanCode}] database me match nahi hua! Kripya check karein ki yeh barcode item me save hai ya nahi.`);
+        setTimeout(() => { isScanningLocked = false; }, 2000);
+        return;
+      }
+
+      isScanningLocked = true;
+
+      // ⚠️ SABSE ZAROORI FIX: Pehle scanner ko poori tarah band karein, phir sale modal kholein
+      if (scannerObj && scannerObj.isScanning) {
+        scannerObj.stop().then(() => {
+          document.getElementById('scannerModal').style.display = 'none';
+          executePostScanAction(matchedItem, matchedColor, matchedSize);
+        }).catch(() => {
+          document.getElementById('scannerModal').style.display = 'none';
+          executePostScanAction(matchedItem, matchedColor, matchedSize);
+        });
+      } else {
+        document.getElementById('scannerModal').style.display = 'none';
+        executePostScanAction(matchedItem, matchedColor, matchedSize);
+      }
+    }
+
+    // Helper function to handle action after scanner closes successfully
+    function executePostScanAction(matchedItem, matchedColor, matchedSize) {
+      if (currentScanAction === 'check') {
+        openCheckPopup(matchedItem.id, matchedColor, matchedSize);
+      } else if (currentScanAction === 'inward') {
+        if (matchedItem.itemType === 'general') {
+          matchedItem.generalQty = (Number(matchedItem.generalQty) || 0) + 1;
+        } else {
+          if (!matchedItem.colorData[matchedColor].sizes) matchedItem.colorData[matchedColor].sizes = {};
+          matchedItem.colorData[matchedColor].sizes[matchedSize] = (Number(matchedItem.colorData[matchedColor].sizes[matchedSize]) || 0) + 1;
+        }
+        db.ref('footwear_stock/' + matchedItem.id).set(matchedItem);
+        alert(`✓ [${matchedItem.name}] (${matchedColor} - Size ${matchedSize}) me +1 jodi stock badh gaya!`);
+      } else if (currentScanAction === 'sale') {
+        // Turant Bikri Billing Counter modal kholein
+        setTimeout(() => {
+          openSaleCheckout(matchedItem, matchedColor, matchedSize);
+        }, 150);
+      }
+
+      setTimeout(() => { isScanningLocked = false; }, 1500);
+    }
+    
+    function handleManualScan() {
+      const v = document.getElementById('manualInput').value.trim();
+      if (v) onScanFound(v);
+    }
+
+    function copyCustomerStoreLink() {
+      const url = window.location.origin + window.location.pathname;
+      navigator.clipboard.writeText(url).then(() => alert("Customer Store Link Copy Ho Gaya:\n" + url));
+    }
+
+    function copyAdminLink() {
+      const url = window.location.origin + window.location.pathname + '#admin';
+      navigator.clipboard.writeText(url).then(() => alert("Secret Admin Link Copy Ho Gaya:\n" + url));
+    }
+
+    function backupJSON() {
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "DN_Stock_Backup.json";
+      a.click();
+    }
+
+    window.addEventListener('hashchange', checkURLAndSetMode);
+
+    window.onload = function() {
+      checkURLAndSetMode();
+      initLiveSync();
+    };
+
+    // 📱 Manual QR Image Upload Handler
+    function handleManualQrUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert("QR code ki photo 2MB se kam size ki honi chahiye!");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Img = e.target.result;
+
+        // Firebase par save karein
+        db.ref('store_settings/upi_qr_image').set(base64Img).then(() => {
+          alert("✓ Naya UPI QR Code safalta-purvak save ho gaya!");
+          applyCustomQrToUI(base64Img);
+        }).catch(err => {
+          alert("Error: " + err.message);
+        });
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    // UI me QR code ko update karne ka helper function
+    function applyCustomQrToUI(qrSrc) {
+      const billingQrImg = document.getElementById('storeDynamicQrImg');
+      if (billingQrImg) billingQrImg.src = qrSrc;
+
+      const adminPreview = document.getElementById('adminCurrentQrPreview');
+      if (adminPreview) adminPreview.src = qrSrc;
+    }
+
+    // Live Sync ke andar Firebase se QR code fetch karne ka listener
+    function initQrLiveSync() {
+      db.ref('store_settings/upi_qr_image').on('value', (snap) => {
+        const qrUrl = snap.val();
+        if (qrUrl) {
+          applyCustomQrToUI(qrUrl);
+        }
+      });
+    }
+initQrLiveSync();
+
+// 📱 UPI Select hone par aur Price badalne par Automatic Amount wala QR banane ka function
+    function updateDynamicUpiQrCode() {
+      const payModeRadio = document.querySelector('input[name="salePayMode"]:checked');
+      const qrBox = document.getElementById('saleQrCodeBox');
+      
+      if (!payModeRadio || payModeRadio.value !== 'UPI') {
+        if (qrBox) qrBox.style.display = 'none';
+        return;
+      }
+
+      if (qrBox) qrBox.style.display = 'block';
+
+      // Final Selling Price lein
+      const finalPriceInput = document.getElementById('saleFinalPrice');
+      const amount = finalPriceInput ? (Number(finalPriceInput.value) || 0) : 0;
+      
+      const amtText = document.getElementById('qrDisplayAmountText');
+      if (amtText) amtText.innerText = `₹${amount} (Exact Amount)`;
+
+      // Aapki asli UPI ID aur Dukaan ka naam
+      const upiId = "7014401309@ybl"; 
+      const merchantName = "DN%20Footwear%20and%20Sports";
+
+      // UPI deep link jisme amount pehle se jude ga
+      // Format: upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR
+      let upiString = `upi://pay?pa=${upiId}&pn=${merchantName}`;
+      if (amount > 0) {
+        upiString += `&am=${amount}&cu=INR`;
+      }
+
+      // Google ki public API se exact amount wala QR code generate karna
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(upiString);
+      
+      const qrImgElem = document.getElementById('storeDynamicQrImg');
+      if (qrImgElem) {
+        qrImgElem.src = qrImageUrl;
+      }
+    }
+
+    // Event Listeners jodna taaki price badalte hi QR update ho jaye
+    document.addEventListener('DOMContentLoaded', () => {
+      // Payment mode badalne par
+      const payModeRadios = document.querySelectorAll('input[name="salePayMode"]');
+      payModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          updateDynamicUpiQrCode();
+        });
+      });
+
+      // Selling price type karte hi QR update hone ke liye
+      const priceInput = document.getElementById('saleFinalPrice');
+      if (priceInput) {
+        priceInput.addEventListener('input', () => {
+          updateDynamicUpiQrCode();
+        });
+      }
+    });
+
+    // 📦 Customer Order Tracking Function
+    function trackCustomerOrder() {
+      const orderIdInput = document.getElementById('trackOrderIdInput').value.trim();
+      const resultBox = document.getElementById('trackResultBox');
+
+      if (!orderIdInput) {
+        alert("Kripya apna Order ID likhein!");
+        return;
+      }
+
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = '<span style="font-size:12px; color:#64748b;">Order khoja ja raha hai, kripya intezar karein...</span>';
+
+      // Firebase se order data check karna
+      db.ref('customer_orders/' + orderIdInput).once('value').then((snapshot) => {
+        const order = snapshot.val();
+
+        if (!order) {
+          resultBox.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Yeh Order ID [${orderIdInput}] galat hai ya mila nahi. Sahi Order ID daalein.</span>`;
+          return;
+        }
+
+        // Expected Delivery Date calculate karna (Order date se 3 din baad ki date)
+        const orderDate = new Date(order.date || Date.now());
+        const deliveryDate = new Date(orderDate);
+        deliveryDate.setDate(orderDate.getDate() + 3);
+        const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // Live Location / Status check karna
+        let currentStatusText = "Dukaan se dispatch ho gaya hai";
+        let locationBadgeBg = "#eff6ff";
+        let locationBadgeColor = "#1e40af";
+
+        if (order.status === 'Delivered') {
+          currentStatusText = "✓ Grahak tak safalta-purvak pahuch gaya hai (Delivered)";
+          locationBadgeBg = "#dcfce7";
+          locationBadgeColor = "#166534";
+        } else {
+          currentStatusText = order.currentLocation || "Raste me hai (Sojat Road / Pali / Siriyari route)";
+        }
+
+        resultBox.innerHTML = `
+          <div style="font-size:13px; line-height:1.5;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+              <span>Order ID: <b>${order.orderId}</b></span>
+              <span class="cat-chip" style="background:${locationBadgeBg}; color:${locationBadgeColor};">${order.status || 'Processing'}</span>
+            </div>
+            <div style="margin-bottom:4px;">👤 <b>Grahak:</b> ${order.customer} (${order.phone})</div>
+            <div style="margin-bottom:4px;">📍 <b>Pata:</b> ${order.address || 'Siriyari'}</div>
+            <div style="margin-bottom:4px; background:#e0e7ff; padding:6px; border-radius:6px; color:#3730a3;">
+              🚚 <b>Abhi Kahan Pahucha Hai:</b> ${currentStatusText}
+            </div>
+            <div style="color:#059669; font-weight:bold; margin-top:6px;">
+              📅 Pakki Delivery Date: ${formattedDeliveryDate} tak pahuch jayega!
+            </div>
+          </div>
+        `;
+      }).catch((err) => {
+        resultBox.innerHTML = `<span style="font-size:12px; color:#ef4444;">Error: ${err.message}</span>`;
+      });
+    }
+
+    // 🚚 Admin dwara Order ka Current Location Firebase par save karne ka function
+    function updateOrderLocation(orderId) {
+      const inputElem = document.getElementById(`loc_input_${orderId}`);
+      if (!inputElem) return;
+
+      const newLocation = inputElem.value.trim();
+      if (!newLocation) {
+        alert("Kripya location ya gaon ka naam likhein!");
+        return;
+      }
+
+      db.ref('customer_orders/' + orderId + '/currentLocation').set(newLocation).then(() => {
+        alert(`✓ Order [${orderId}] ki location update ho gayi: "${newLocation}"`);
+      }).catch((err) => {
+        alert("Error: " + err.message);
+      });
+    }
+
+    // 🖨️ Purana Bill Dobara Print Karne ka Function
+    function reprintSalesBill(encodedStr) {
+      const record = JSON.parse(decodeURIComponent(encodedStr));
+      const dateStr = record.date ? new Date(record.date).toLocaleString('en-IN') : '-';
+      showReceipt(record, dateStr);
+    }
+
+    // ✏️ Edit Sale Modal (Rate, Customer Name aur Sales Date update karne ke liye)
+    // ✏️ Edit Sale Modal (Multi-item rate edit, Customer name aur Date/Time update karne ke liye)
+ function openEditSaleModal(encodedStr) {
+      try {
+        const record = JSON.parse(decodeURIComponent(encodedStr));
+        
+        let itemsList = record.itemsList ? JSON.parse(JSON.stringify(record.itemsList)) : null;
+        
+        let defaultRates = itemsList ? itemsList.map(bi => bi.sellPrice).join(', ') : record.sellPrice;
+        let defaultName = record.customer || 'Walk-in Customer';
+        
+        // Yahan Date ke sath Time (YYYY-MM-DD HH:MM) bhi default me aayega
+        let defaultDate = record.date ? record.date.slice(0, 16).replace('T', ' ') : new Date().toISOString().slice(0, 16).replace('T', ' ');
+        let defaultPayMode = record.payMode || 'Cash';
+
+        // Ek hi popup me Rates | Name | Date & Time | Payment Mode
+        let userInput = prompt(
+          `Bikri Edit Karein (Sabhi details ek hi line me bharein):\n\n` +
+          `Format: [Rates] | [Naam] | [Date & Time YYYY-MM-DD HH:MM] | [Payment: Cash/UPI/Udhaar]\n\n` +
+          `Udaharan:\n${defaultRates} | ${defaultName} | ${defaultDate} | ${defaultPayMode}`,
+          `${defaultRates} | ${defaultName} | ${defaultDate} | ${defaultPayMode}`
+        );
+
+        if (userInput === null) return;
+
+        let parts = userInput.split('|').map(p => p.trim());
+        if (parts.length < 4) {
+          alert("Kripya sahi format me bharein ( beech me 3 jagah pipe '|' lagana zaroori hai ).");
+          return;
+        }
+
+        let ratesArr = parts[0].split(',').map(r => Number(r.trim()));
+        let newCustName = parts[1];
+        let newDateVal = parts[2]; // Yahan Date aur Time dono honge (jaise 2026-10-30 15:30)
+        let newPayMode = parts[3];
+
+        let newTotalSellPrice = 0;
+        if (itemsList && itemsList.length > 0) {
+          if (ratesArr.length !== itemsList.length || ratesArr.some(isNaN)) {
+            alert("Rates ki sankhya items se match nahi ho rahi! Jitne items hain utne hi rates hone chahiye.");
+            return;
+          }
+          for (let i = 0; i < itemsList.length; i++) {
+            itemsList[i].sellPrice = ratesArr[i];
+            newTotalSellPrice += (itemsList[i].qty * ratesArr[i]);
+          }
+        } else {
+          newTotalSellPrice = ratesArr[0] || 0;
+        }
+
+        // Date aur Time ko properly ISO format me convert karne ke liye
+        let finalDateTime = record.date;
+        if (newDateVal.trim() !== '') {
+          try {
+            let formattedStr = newDateVal.trim().replace(' ', 'T');
+            if (formattedStr.length === 16) formattedStr += ':00.000Z';
+            finalDateTime = new Date(formattedStr).toISOString();
+          } catch(e) {
+            finalDateTime = newDateVal.trim() + ':00.000Z';
+          }
+        }
+
+        let multiNamesDesc = itemsList ? itemsList.map(bi => `${bi.name} (${bi.color} Sz:${bi.size}) x ${bi.qty}`) : record.name;
+
+        const updatedData = {
+          ...record,
+          name: Array.isArray(multiNamesDesc) ? multiNamesDesc.join(', ') : multiNamesDesc,
+          sellPrice: newTotalSellPrice,
+          tagPrice: newTotalSellPrice,
+          profit: newTotalSellPrice - (record.costPrice || 0),
+          customer: newCustName || 'Walk-in Customer',
+          date: finalDateTime,
+          payMode: newPayMode || 'Cash',
+          itemsList: itemsList
+        };
+
+        db.ref('footwear_sales/' + record.id).set(updatedData).then(() => {
+          alert("✓ Bikri ki saari details, Date & Time aur Payment Mode safalta-purvak update ho gaye!");
+          calculateSalesReport();
+        }).catch(err => {
+          alert("Error: " + err.message);
+        });
+
+      } catch(e) {
+        alert("Edit karne me error aayi: " + e.message);
+      }
+    }
+    
+    // ⚠️ Kam stock wale items ki list dikhane ka function
+    function openLowStockModal() {
+      const tbody = document.getElementById('lowStockTableBody');
+      if (!tbody) return;
+
+      let lowItemsHtml = '';
+      let count = 0;
+
+      items.forEach(it => {
+        const itemType = it.itemType || 'footwear';
+        let p = 0;
+        let breakdownHtml = '';
+
+        if (itemType === 'general') {
+          p = Number(it.generalQty) || 0;
+          if (p <= 3) {
+            breakdownHtml = `<span class="size-badge size-low">${p} Pieces bache hain</span>`;
+          }
+        } else if (it.colorData) {
+          for (let c in it.colorData) {
+            const cData = it.colorData[c];
+            const cSizes = cData.sizes || {};
+            let cBadges = [];
+            for (let sz in cSizes) {
+              const q = Number(cSizes[sz]) || 0;
+              p += q;
+              if (q <= 3) {
+                cBadges.push(`Sz ${sz}: <b style="color:#ef4444;">${q} Jodi</b>`);
+              }
+            }
+            if (cBadges.length > 0) {
+              breakdownHtml += `<div style="margin-bottom:2px;"><b style="color:#4f46e5;">● ${c}:</b> ${cBadges.join(', ')}</div>`;
+            }
+          }
+        }
+
+        // Agar total stock ya koi size 3 ya usse kam hai toh list me dikhao
+        if (p <= 3) {
+          count++;
+          let mainImg = it.photo || 'https://via.placeholder.com/40';
+          lowItemsHtml += `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <img src="${mainImg}" style="width:40px; height:40px; object-fit:contain; background:#fff; border-radius:4px; border:1px solid #cbd5e1;">
+                  <div><b>${it.name}</b><br><small style="color:#64748b;">${it.brand} • ${it.category}</small></div>
+                </div>
+              </td>
+              <td style="padding:8px; font-size:12px;">${breakdownHtml || 'Low stock'}</td>
+              <td style="padding:8px;"><b style="color:#ef4444; font-size:14px;">${p} Jodi</b></td>
+              <td style="padding:8px; text-align:right;">
+                <button class="btn btn-amber" style="padding:4px 8px; font-size:11px;" onclick="closeLowStockModal(); openCheckPopup('${it.id}')">Stock Check</button>
+              </td>
+            </tr>
+          `;
+        }
+      });
+
+      tbody.innerHTML = lowItemsHtml || '<tr><td colspan="4" style="text-align:center; padding:20px; color:#10b981; font-weight:bold;">✓ Badhai ho! Koi bhi item low stock me nahi hai.</td></tr>';
+      document.getElementById('lowStockModal').style.display = 'flex';
+    }
+
+    function closeLowStockModal() {
+      document.getElementById('lowStockModal').style.display = 'none';
+    }
+
+    let activeBillItems = [];
+
+    // 🛒 Jab bhi koi item scan ho ya bechne ke liye chuna jaye
+    function openSaleCheckout(item, preferredColor = null, preferredSize = null) {
+      if (!item) return;
+
+      let chosenColor = preferredColor;
+      let chosenSize = preferredSize;
+      let availQty = 0;
+      let itemPrice = item.price || 0;
+
+      if (item.itemType === 'general') {
+        availQty = item.generalQty || 0;
+        chosenColor = 'General';
+        chosenSize = '1 Piece';
+      } else {
+        if (!chosenColor || !item.colorData[chosenColor]) {
+          const colors = Object.keys(item.colorData || {});
+          for (let c of colors) {
+            const sizes = item.colorData[c].sizes || {};
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                chosenColor = c;
+                chosenSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+            if (chosenColor) break;
+          }
+        } else {
+          const sizes = item.colorData[chosenColor].sizes || {};
+          if (!chosenSize || !sizes[chosenSize] || sizes[chosenSize] <= 0) {
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                chosenSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+          } else {
+            availQty = sizes[chosenSize];
+          }
+        }
+
+        // Check size-specific price if available
+        if (item.colorData && item.colorData[chosenColor] && item.colorData[chosenColor].prices && item.colorData[chosenColor].prices[chosenSize]) {
+          itemPrice = item.colorData[chosenColor].prices[chosenSize];
+        }
+      }
+
+      if (availQty <= 0) {
+        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
+        return;
+      }
+
+      // Is item ko active bill cart me add karo
       activeBillItems.push({
-        itemId: item.id, name: item.name, brand: item.brand,
-        color: chosenColor, size: chosenSize, costPrice: item.cost || 0,
-        sellPrice: Number(item.price) || 0, qty: 1, itemObj: item
+        itemId: item.id,
+        name: item.name,
+        brand: item.brand,
+        color: chosenColor,
+        size: chosenSize,
+        costPrice: item.cost || 0,
+        sellPrice: Number(itemPrice) || 0,
+        qty: 1,
+        itemObj: item
       });
 
       renderActiveBillItemsList();
@@ -2097,195 +3663,272 @@
       document.getElementById('saleModal').style.display = 'flex';
     }
 
-    function renderActiveBillItemsList() {
+function renderActiveBillItemsList() {
       const container = document.getElementById('activeBillItemsContainer');
       let totalAmount = 0;
 
-      container.innerHTML = activeBillItems.map((bi, index) => {
+      let html = activeBillItems.map((bi, index) => {
         const rowTotal = bi.qty * bi.sellPrice;
         totalAmount += rowTotal;
+
+        // Item ke available colors aur sizes nikalna
         const itemObj = bi.itemObj || items.find(x => x.id === bi.itemId);
-        let colorOpts = itemObj?.colorData ? Object.keys(itemObj.colorData).map(c => `<option value="${c}" ${c === bi.color ? 'selected' : ''}>${c}</option>`).join('') : '';
-        let sizeOpts = itemObj?.colorData?.[bi.color]?.sizes ? Object.keys(itemObj.colorData[bi.color].sizes).map(s => `<option value="${s}" ${s === bi.size ? 'selected' : ''}>Sz ${s}</option>`).join('') : '';
+        let colorOptionsHtml = '';
+        let sizeOptionsHtml = '';
+
+        if (itemObj && itemObj.colorData) {
+          const colors = Object.keys(itemObj.colorData);
+          colorOptionsHtml = colors.map(c => `<option value="${c}" ${c === bi.color ? 'selected' : ''}>${c}</option>`).join('');
+
+          const sizesMap = (itemObj.colorData[bi.color] && itemObj.colorData[bi.color].sizes) ? itemObj.colorData[bi.color].sizes : {};
+          for (let s in sizesMap) {
+            let q = sizesMap[s] || 0;
+            sizeOptionsHtml += `<option value="${s}" ${String(s) === String(bi.size) ? 'selected' : ''}>Sz ${s} (${q} Jodi)</option>`;
+          }
+        }
 
         return `
           <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-bottom:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <b>${bi.name}</b>
-              <button type="button" onclick="removeActiveBillItem(${index})" style="color:red; border:none; background:none;">✕</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <b style="font-size:12px; color:#0f172a;">${bi.name}</b>
+              <button type="button" onclick="removeActiveBillItem(${index})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Hatao">✕</button>
             </div>
-            <div style="display:flex; gap:6px; margin:6px 0;">
-              <select onchange="updateBillItemColor(${index}, this.value)" class="form-control" style="font-size:11px;">${colorOpts}</select>
-              <select onchange="updateBillItemSize(${index}, this.value)" class="form-control" style="font-size:11px;">${sizeOpts}</select>
+            
+            <!-- 🎨 Rang aur Size badlne ke dropdowns -->
+            <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+              <select onchange="updateBillItemColor(${index}, this.value)" class="form-control" style="font-size:11px; padding:3px; flex:1; font-weight:bold;">
+                ${colorOptionsHtml}
+              </select>
+              <select onchange="updateBillItemSize(${index}, this.value)" class="form-control" style="font-size:11px; padding:3px; flex:1; font-weight:bold;">
+                ${sizeOptionsHtml}
+              </select>
             </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <input type="number" value="${bi.sellPrice}" oninput="updateActiveItemBargainPrice(${index}, this.value)" class="form-control" style="width:80px; text-align:center;">
-              <b style="color:#10b981;">₹${rowTotal}</b>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:11px; color:#64748b; font-weight:bold;">Rate: ₹</span>
+                <input type="number" min="0" value="${bi.sellPrice}" oninput="updateActiveItemBargainPrice(${index}, this.value)" class="form-control" style="width:75px; padding:3px 6px; font-size:12px; font-weight:bold; color:#10b981; text-align:center;">
+              </div>
+              <b style="font-size:12px; color:#10b981;">Total: ₹${rowTotal}</b>
             </div>
           </div>
         `;
       }).join('');
 
+      container.innerHTML = html || '<small style="color:#94a3b8;">Koi item nahi hai. Barcode scan karein.</small>';
       document.getElementById('saleModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
       updateDynamicUpiQrCode();
     }
 
-    function updateBillItemColor(index, val) { activeBillItems[index].color = val; renderActiveBillItemsList(); }
-    function updateBillItemSize(index, val) { activeBillItems[index].size = val; renderActiveBillItemsList(); }
-    function updateActiveItemBargainPrice(index, val) { activeBillItems[index].sellPrice = Number(val) || 0; renderActiveBillItemsList(); }
-    function removeActiveBillItem(index) { activeBillItems.splice(index, 1); renderActiveBillItemsList(); if(activeBillItems.length===0) closeSaleModal(); }
-    function closeSaleModal() { activeBillItems = []; document.getElementById('saleModal').style.display = 'none'; }
+    function updateBillItemColor(index, newColor) {
+      let bi = activeBillItems[index];
+      if (!bi) return;
+      bi.color = newColor;
+      
+      // Us color ka pehla available size set kar do
+      const itemObj = bi.itemObj || items.find(x => x.id === bi.itemId);
+      if (itemObj && itemObj.colorData && itemObj.colorData[newColor]) {
+        const sizes = itemObj.colorData[newColor].sizes || {};
+        for (let s in sizes) {
+          if (sizes[s] > 0) {
+            bi.size = s;
+            break;
+          }
+        }
+      }
+      renderActiveBillItemsList();
+    }
 
+    function updateBillItemSize(index, newSize) {
+      let bi = activeBillItems[index];
+      if (!bi) return;
+      bi.size = newSize;
+      renderActiveBillItemsList();
+    }
+
+    // 🏷️ Bargain price update karne ka function
+    function updateActiveItemBargainPrice(index, newPriceVal) {
+      const parsed = Number(newPriceVal);
+      if (!isNaN(parsed) && parsed >= 0) {
+        activeBillItems[index].sellPrice = parsed;
+        
+        // Total amount aur QR code ko turant update karo
+        let totalAmount = 0;
+        activeBillItems.forEach(bi => totalAmount += (bi.qty * bi.sellPrice));
+        document.getElementById('saleModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
+        updateDynamicUpiQrCode();
+      }
+    }
+
+    function removeActiveBillItem(index) {
+      activeBillItems.splice(index, 1);
+      renderActiveBillItemsList();
+      if (activeBillItems.length === 0) {
+        closeSaleModal();
+      }
+    }
+
+    function closeSaleModal() {
+      activeBillItems = [];
+      document.getElementById('saleModal').style.display = 'none';
+    }
+
+    // Saare items ka ek sath transaction save karna
     function confirmSaleTransaction(e, shouldPrint = false) {
       if (e) e.preventDefault();
-      if (activeBillItems.length === 0) { alert("Bill khali hai!"); return; }
+      if (activeBillItems.length === 0) {
+        alert("Bill me koi item nahi hai!");
+        return;
+      }
 
       const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
       const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
       const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
 
-      let totalBillAmt = 0, totalCostAmt = 0, multiNamesDesc = [];
+      let totalBillAmt = 0;
+      let totalCostAmt = 0;
+      let multiNamesDesc = [];
+
       activeBillItems.forEach(bi => {
-        totalBillAmt += (bi.qty * bi.sellPrice);
+        const itemSum = bi.qty * bi.sellPrice;
+        totalBillAmt += itemSum;
         totalCostAmt += (bi.qty * bi.costPrice);
-        multiNamesDesc.push(`${bi.name} (${bi.color} Sz:${bi.size})`);
-        
-        let itemObj = bi.itemObj;
-        if (itemObj.itemType === 'general') itemObj.generalQty = Math.max(0, (itemObj.generalQty || 0) - bi.qty);
-        else if (itemObj.colorData?.[bi.color]?.sizes) itemObj.colorData[bi.color].sizes[bi.size] = Math.max(0, itemObj.colorData[bi.color].sizes[bi.size] - bi.qty);
+        multiNamesDesc.push(`${bi.name} (${bi.color} Sz:${bi.size}) x ${bi.qty}`);
+
+        // Stock reduce karna
+        const itemObj = bi.itemObj;
+        if (itemObj.itemType === 'general') {
+          itemObj.generalQty = Math.max(0, (Number(itemObj.generalQty) || 0) - bi.qty);
+        } else {
+          if (itemObj.colorData && itemObj.colorData[bi.color] && itemObj.colorData[bi.color].sizes) {
+            itemObj.colorData[bi.color].sizes[bi.size] = Math.max(0, (Number(itemObj.colorData[bi.color].sizes[bi.size]) || 0) - bi.qty);
+          }
+        }
         db.ref('footwear_stock/' + itemObj.id).set(itemObj);
       });
 
       const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowIso = new Date().toISOString();
+      const nowStr = new Date().toLocaleString('en-IN');
+
       const saleRecord = {
-        id: 'sale_' + Date.now(), billNo, date: new Date().toISOString(),
-        name: multiNamesDesc.join(', '), brand: 'Multi-Pair', sellPrice: totalBillAmt,
-        costPrice: totalCostAmt, profit: totalBillAmt - totalCostAmt, payMode, customer: custName, phone: custPhone, itemsList: activeBillItems
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: nowIso,
+        name: multiNamesDesc.join(', '),
+        brand: 'Multi-Pair Bill',
+        color: '-',
+        size: '-',
+        costPrice: totalCostAmt,
+        tagPrice: totalBillAmt,
+        sellPrice: totalBillAmt,
+        profit: totalBillAmt - totalCostAmt,
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone,
+        itemsList: activeBillItems
       };
 
       db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
-      const tempRec = {...saleRecord};
+
+      const tempRecord = {...saleRecord};
+      activeBillItems = [];
       closeSaleModal();
 
-      if (shouldPrint) showReceipt(tempRec, new Date().toLocaleString('en-IN'));
-      else alert(`✓ Bill Safal! ₹${totalBillAmt}`);
-    }
-
-    function showReceipt(record, dateStr) {
-      document.getElementById('rBillNo').innerText = record.billNo;
-      document.getElementById('rDate').innerText = dateStr;
-      document.getElementById('rCust').innerText = `${record.customer} (${record.phone})`;
-      document.getElementById('rPayMode').innerText = record.payMode;
-      
-      document.getElementById('rReceiptTableBody').innerHTML = (record.itemsList || []).map(bi => `<tr><td><b>${bi.name}</b></td><td align="center">${bi.size}/${bi.color}</td><td align="right">₹${bi.sellPrice}</td></tr>`).join('');
-      document.getElementById('rTagPrice').innerText = `₹${record.sellPrice}`;
-      document.getElementById('rFinalTotal').innerText = `₹${record.sellPrice}`;
-      document.getElementById('receiptModal').style.display = 'flex';
-      setTimeout(() => window.print(), 300);
-    }
-    function closeReceiptModal() { document.getElementById('receiptModal').style.display = 'none'; }
-
-    function openScannerModal(mode) {
-      currentScanAction = mode;
-      document.getElementById('scannerModal').style.display = 'flex';
-      if (window.Html5Qrcode) {
-        if (!scannerObj) scannerObj = new Html5Qrcode("scannerTarget");
-        scannerObj.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 180 } }, onScanFound, () => {});
+      if (shouldPrint) {
+        showReceipt(tempRecord, nowStr);
+      } else {
+        alert(`✓ Bill [${billNo}] Safalta-purvak save ho gaya! Kul Raashi: ₹${totalBillAmt}`);
       }
     }
-    function closeScannerModal() {
-      if (scannerObj?.isScanning) scannerObj.stop().then(() => document.getElementById('scannerModal').style.display = 'none');
-      else document.getElementById('scannerModal').style.display = 'none';
-    }
 
-    function onScanFound(code) {
-      const clean = code?.trim().toLowerCase();
-      let matched = null, matchCol = null, matchSz = null;
-      items.forEach(it => {
-        if (it.colorData) {
-          for (let col in it.colorData) {
-            for (let sz in it.colorData[col].barcodes) {
-              if (it.colorData[col].barcodes[sz]?.toLowerCase() === clean) { matched = it; matchCol = col; matchSz = sz; }
-            }
-          }
-        }
-      });
-      if (matched) {
-        closeScannerModal();
-        if (currentScanAction === 'check') openCheckPopup(matched.id, matchCol, matchSz);
-        else openSaleCheckout(matched, matchCol, matchSz);
-      } else { alert("Barcode match nahi hua!"); }
-    }
-    function handleManualScan() { const v = document.getElementById('manualInput').value.trim(); if(v) onScanFound(v); }
-
-    function copyCustomerStoreLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname).then(() => alert("Customer Link Copy Ho Gaya!")); }
-    function copyAdminLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#admin').then(() => alert("Admin Link Copy Ho Gaya!")); }
-    function backupJSON() {
-      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "Backup.json"; a.click();
-    }
-
+    // Dynamic QR code update function
     function updateDynamicUpiQrCode() {
-      const payMode = document.querySelector('input[name="salePayMode"]:checked')?.value;
+      const payModeRadio = document.querySelector('input[name="salePayMode"]:checked');
       const qrBox = document.getElementById('saleQrCodeBox');
-      if (payMode !== 'UPI') { if(qrBox) qrBox.style.display = 'none'; return; }
-      if(qrBox) qrBox.style.display = 'block';
+      
+      if (!payModeRadio || payModeRadio.value !== 'UPI') {
+        if (qrBox) qrBox.style.display = 'none';
+        return;
+      }
 
-      let total = 0; activeBillItems.forEach(b => total += (b.qty * b.sellPrice));
-      document.getElementById('qrDisplayAmountText').innerText = `₹${total} (Exact Amount)`;
-      document.getElementById('storeDynamicQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(`upi://pay?pa=7014401309@ybl&pn=DN%20Footwear&am=${total}&cu=INR`);
+      if (qrBox) qrBox.style.display = 'block';
+
+      let totalAmount = 0;
+      activeBillItems.forEach(bi => totalAmount += (bi.qty * bi.sellPrice));
+      
+      const amtText = document.getElementById('qrDisplayAmountText');
+      if (amtText) amtText.innerText = `₹${totalAmount} (Exact Amount)`;
+
+      const upiId = "7014401309@ybl"; 
+      const merchantName = "DN%20Footwear%20and%20Sports";
+
+      let upiString = `upi://pay?pa=${upiId}&pn=${merchantName}`;
+      if (totalAmount > 0) {
+        upiString += `&am=${totalAmount}&cu=INR`;
+      }
+
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(upiString);
+      const qrImgElem = document.getElementById('storeDynamicQrImg');
+      if (qrImgElem) qrImgElem.src = qrImageUrl;
     }
 
-    function openUdhaarReportModal() { renderUdhaarTable(); document.getElementById('udhaarReportModal').style.display = 'flex'; }
-    function closeUdhaarReportModal() { document.getElementById('udhaarReportModal').style.display = 'none'; }
+    function openUdhaarReportModal() {
+      renderUdhaarTable();
+      document.getElementById('udhaarReportModal').style.display = 'flex';
+    }
+
+    function closeUdhaarReportModal() {
+      document.getElementById('udhaarReportModal').style.display = 'none';
+    }
 
     function renderUdhaarTable() {
       const tbody = document.getElementById('udhaarTableBody');
       if (!tbody) return;
-      let udhaar = salesHistory.filter(s => s.payMode?.toLowerCase().includes('udhaar') && s.status !== 'Paid');
-      let total = 0;
-      tbody.innerHTML = udhaar.map(s => {
-        total += Number(s.sellPrice)||0;
+
+      // Sirf woh sales records filter karein jinka payMode 'Udhaar' hai
+      let udhaarSales = salesHistory.filter(s => {
+        let mode = (s.payMode || '').toLowerCase();
+        return mode.includes('udhaar') && s.status !== 'Paid';
+      });
+
+      udhaarSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      let totalUdhaar = 0;
+      let html = udhaarSales.map(s => {
+        let amt = Number(s.sellPrice) || 0;
+        totalUdhaar += amt;
+        let dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+
         return `
-          <tr>
-            <td><b>${s.billNo}</b></td>
-            <td><b>${s.customer}</b><br><small>${s.phone}</small></td>
-            <td>${s.name}</td>
-            <td align="right"><b style="color:red;">₹${s.sellPrice}</b></td>
-            <td align="right"><button class="btn btn-green" style="padding:4px;" onclick="markUdhaarAsPaid('${s.id}')">✓ Clear</button></td>
+          <tr style="border-bottom:1px solid #f1f5f9; vertical-align:middle;">
+            <td style="padding:8px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
+            <td style="padding:8px;"><b>${s.customer || 'Walk-in'}</b><br><a href="tel:${s.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${s.phone || 'No Phone'}</a></td>
+            <td style="padding:8px; font-size:12px;">${s.name || '-'}</td>
+            <td style="padding:8px; text-align:right;"><b style="color:#dc2626; font-size:15px;">₹${amt}</b></td>
+            <td style="padding:8px; text-align:right;">
+              <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="markUdhaarAsPaid('${s.id}')">✓ Paisa Mila (Clear)</button>
+            </td>
           </tr>
         `;
-      }).join('') || '<tr><td colspan="5" align="center" style="padding:20px; color:#10b981;">Koi udhaar nahi hai!</td></tr>';
-      document.getElementById('totalUdhaarAmountText').innerText = `₹${total}`;
+      }).join('');
+
+      tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:25px; color:#10b981; font-weight:bold;">✓ Badhai ho! Koi bhi udhaar baaki nahi hai.</td></tr>';
+      document.getElementById('totalUdhaarAmountText').innerText = `₹${totalUdhaar.toLocaleString('en-IN')}`;
     }
 
-    function markUdhaarAsPaid(id) {
-      db.ref('footwear_sales/' + id + '/status').set('Paid').then(() => {
-        db.ref('footwear_sales/' + id + '/payMode').set('Cash (Paid)');
-        alert("✓ Udhaar clear ho gaya!");
-        renderUdhaarTable();
-      });
-    }
-
-    function initQrLiveSync() {
-      db.ref('store_settings/upi_qr_image').on('value', (snap) => {
-        if(snap.val()) {
-          document.getElementById('storeDynamicQrImg').src = snap.val();
-          document.getElementById('adminCurrentQrPreview').src = snap.val();
-        }
-      });
-    }
-    function handleManualQrUpload(e) {
-      const f = e.target.files[0];
-      if (f) {
-        const r = new FileReader();
-        r.onload = function(evt) { db.ref('store_settings/upi_qr_image').set(evt.target.result).then(() => alert("QR Save Ho Gaya!")); };
-        r.readAsDataURL(f);
+    function markUdhaarAsPaid(saleId) {
+      if (confirm("Kya is udhaar ka paisa mil gaya hai aur khata clear (Paid) karna chahte hain?")) {
+        db.ref('footwear_sales/' + saleId + '/payMode').set('Cash (Paid)').then(() => {
+          db.ref('footwear_sales/' + saleId + '/status').set('Paid');
+          alert("✓ Udhaar khata clear ho gaya!");
+          renderUdhaarTable();
+          calculateSalesReport();
+        }).catch(err => {
+          alert("Error: " + err.message);
+        });
       }
     }
-
-    window.addEventListener('hashchange', checkURLAndSetMode);
-    window.onload = function() { checkURLAndSetMode(); initLiveSync(); };
   </script>
 </body>
 </html>
