@@ -1002,22 +1002,6 @@
           </div>
         </div>
 
-        <!-- 🎨 SALE MODAL ME COLOR & SIZE SELECTOR -->
-  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
-    <div class="row" style="margin-bottom:6px;">
-      <div class="form-group" style="margin:0;">
-        <label style="font-size:10px; color:#475569;">Rang (Color) Badlein:</label>
-        <select id="saleColorSelect" class="form-control" style="font-size:12px; font-weight:bold;" onchange="onSaleColorChanged()">
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label style="font-size:10px; color:#475569;">Size Badlein:</label>
-        <select id="saleSizeSelect" class="form-control" style="font-size:12px; font-weight:bold;" onchange="onSaleSizeChanged()">
-        </select>
-      </div>
-    </div>
-  </div>
-        
         <div class="form-group">
           <label>Payment Mode (Kaise Paise Aaye):</label>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
@@ -2941,91 +2925,122 @@
       currentSellingColor = preferredColor;
       currentSellingSize = preferredSize;
 
-      if (!currentSellingColor || !item.colorData[currentSellingColor]) {
-        const colors = Object.keys(item.colorData || {});
-        currentSellingColor = colors[0] || 'Standard';
-      }
+      let availQty = 0;
 
-      if (!currentSellingSize || !item.colorData[currentSellingColor].sizes[currentSellingSize]) {
-        const sizes = item.colorData[currentSellingColor].sizes || {};
-        for (let s in sizes) {
-          if (sizes[s] > 0) {
-            currentSellingSize = s;
-            break;
+      if (item.itemType === 'general') {
+        availQty = item.generalQty || 0;
+        currentSellingColor = 'General';
+        currentSellingSize = '1 Piece';
+      } else {
+        if (!currentSellingColor || !item.colorData[currentSellingColor]) {
+          const colors = Object.keys(item.colorData || {});
+          for (let c of colors) {
+            const sizes = item.colorData[c].sizes || {};
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingColor = c;
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+            if (currentSellingColor) break;
+          }
+        } else {
+          const sizes = item.colorData[currentSellingColor].sizes || {};
+          if (!currentSellingSize || !sizes[currentSellingSize] || sizes[currentSellingSize] <= 0) {
+            for (let s in sizes) {
+              if (sizes[s] > 0) {
+                currentSellingSize = s;
+                availQty = sizes[s];
+                break;
+              }
+            }
+          } else {
+            availQty = sizes[currentSellingSize];
           }
         }
-        if (!currentSellingSize) {
-          currentSellingSize = Object.keys(sizes)[0] || '1';
-        }
       }
 
-      const colorSelect = document.getElementById('saleColorSelect');
-      if (colorSelect) {
-        const colors = Object.keys(item.colorData || {});
-        colorSelect.innerHTML = colors.map(c => `<option value="${c}" ${c === currentSellingColor ? 'selected' : ''}>${c}</option>`).join('');
+      if (availQty <= 0) {
+        alert("Maaf kijiye, yeh item stock me uplabdh nahi hai!");
+        return;
       }
-
-      populateSaleSizesDropdown(currentSellingColor);
 
       document.getElementById('saleImg').src = item.photo || 'https://via.placeholder.com/60';
       document.getElementById('saleName').innerText = `${item.name} (${item.brand})`;
+      document.getElementById('saleSizeBadge').innerText = `Size: ${currentSellingSize}`;
+      document.getElementById('saleColorBadge').innerText = `${currentSellingColor}`;
+      document.getElementById('saleStockRem').innerText = `Stock: ${availQty}`;
+
       document.getElementById('saleTagPrice').innerText = `₹${item.price}`;
       document.getElementById('saleFinalPrice').value = item.price;
       document.getElementById('saleCustName').value = '';
       document.getElementById('saleCustPhone').value = '';
 
-      updateSaleStockDisplay();
-
       closeScannerModal();
       document.getElementById('saleModal').style.display = 'flex';
     }
 
-    function populateSaleSizesDropdown(colorName) {
-      const sizeSelect = document.getElementById('saleSizeSelect');
-      if (!sizeSelect || !currentSellingItem || !currentSellingItem.colorData[colorName]) return;
-
-      const sizesMap = currentSellingItem.colorData[colorName].sizes || {};
-      let html = '';
-      for (let s in sizesMap) {
-        let q = sizesMap[s] || 0;
-        let selectedAttr = (String(s) === String(currentSellingSize)) ? 'selected' : '';
-        html += `<option value="${s}" ${selectedAttr}>Sz ${s} (${q} Jodi)</option>`;
-      }
-      sizeSelect.innerHTML = html;
+    function closeSaleModal() {
+      document.getElementById('saleModal').style.display = 'none';
     }
 
-    function onSaleColorChanged() {
-      const colorSelect = document.getElementById('saleColorSelect');
-      if (!colorSelect) return;
-      currentSellingColor = colorSelect.value;
-      
-      populateSaleSizesDropdown(currentSellingColor);
-      
-      const sizeSelect = document.getElementById('saleSizeSelect');
-      if (sizeSelect) currentSellingSize = sizeSelect.value;
-
-      updateSaleStockDisplay();
-    }
-
-    function onSaleSizeChanged() {
-      const sizeSelect = document.getElementById('saleSizeSelect');
-      if (!sizeSelect) return;
-      currentSellingSize = sizeSelect.value;
-      updateSaleStockDisplay();
-    }
-
-    function updateSaleStockDisplay() {
+    function confirmSaleTransaction(e, shouldPrint = false) {
+      if (e) e.preventDefault();
       if (!currentSellingItem) return;
-      let avail = 0;
+
+      const finalPrice = Number(document.getElementById('saleFinalPrice').value);
+      const payMode = document.querySelector('input[name="salePayMode"]:checked').value;
+      const custName = document.getElementById('saleCustName').value.trim() || 'Walk-in Customer';
+      const custPhone = document.getElementById('saleCustPhone').value.trim() || '';
+
       if (currentSellingItem.itemType === 'general') {
-        avail = currentSellingItem.generalQty || 0;
-      } else if (currentSellingItem.colorData && currentSellingItem.colorData[currentSellingColor]) {
-        avail = currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] || 0;
+        if ((currentSellingItem.generalQty || 0) <= 0) { alert("Stock khatam hai!"); return; }
+        currentSellingItem.generalQty -= 1;
+      } else {
+        if (!currentSellingItem.colorData[currentSellingColor] || 
+            !currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] || 
+            currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] <= 0) {
+          alert("Stock khatam hai!");
+          return;
+        }
+        currentSellingItem.colorData[currentSellingColor].sizes[currentSellingSize] -= 1;
       }
-      const stockRem = document.getElementById('saleStockRem');
-      if (stockRem) stockRem.innerText = `Stock: ${avail} Jodi Uplabdh`;
+
+      db.ref('footwear_stock/' + currentSellingItem.id).set(currentSellingItem);
+
+      const billNo = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+      const nowStr = new Date().toLocaleString('en-IN');
+
+      const saleRecord = {
+        id: 'sale_' + Date.now(),
+        billNo: billNo,
+        date: new Date().toISOString(),
+        itemId: currentSellingItem.id,
+        name: currentSellingItem.name,
+        brand: currentSellingItem.brand,
+        color: currentSellingColor,
+        size: currentSellingSize,
+        costPrice: currentSellingItem.cost || 0,
+        tagPrice: currentSellingItem.price || 0,
+        sellPrice: finalPrice,
+        profit: finalPrice - (currentSellingItem.cost || 0),
+        payMode: payMode,
+        customer: custName,
+        phone: custPhone
+      };
+
+      db.ref('footwear_sales/' + saleRecord.id).set(saleRecord);
+      closeSaleModal();
+
+      if (shouldPrint) {
+        showReceipt(saleRecord, nowStr);
+      } else {
+        alert(`✓ Bikri Safal! ₹${finalPrice} me becha gaya.`);
+      }
     }
-    
+
    function showReceipt(record, dateStr) {
       document.getElementById('rBillNo').innerText = record.billNo || 'DN-Bill';
       document.getElementById('rDate').innerText = dateStr;
