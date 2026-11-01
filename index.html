@@ -2704,130 +2704,134 @@ function renderAdminTable() {
 }
     
     function renderCustomerCatalog() {
-      const grid = document.getElementById('customerCatalogGrid');
-      let cardsHtml = '';
+  const grid = document.getElementById('customerCatalogGrid');
+  const catFlt = document.getElementById('custCategoryFilter').value; // 👈 1. Yeh line yahan jodein (category value lene ke liye)
+  let cardsHtml = '';
 
-      items.forEach(it => {
-        const isFootwear = (it.itemType !== 'general');
-        let colors = Object.keys(it.colorData || {});
+  items.forEach(it => {
+    const itemCat = it.category || 'Footwear'; // 👈 Item ki category
 
-        if (!selectedItemOptions[it.id]) {
-          selectedItemOptions[it.id] = {
-            color: colors[0] || 'Standard',
-            size: null
-          };
-        }
-
-        let activeColor = selectedItemOptions[it.id].color || colors[0];
-        let cData = (it.colorData && it.colorData[activeColor]) ? it.colorData[activeColor] : {};
-
-        // Backward compatibility fix for rendering customer catalog
-        let mediaList = cData.media || [];
-        if (mediaList.length === 0) {
-          if (cData.video) mediaList.push({ type: 'video', url: cData.video });
-          if (cData.photos) cData.photos.forEach(p => mediaList.push({ type: 'image', url: p }));
-        }
-
-        let colorsChipsHtml = colors.map(c => `
-          <button type="button" class="color-chip-btn ${c === activeColor ? 'active' : ''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
-            ● ${c}
-          </button>
-        `).join('');
-
-        let sizeButtonsHtml = '';
-        if (isFootwear && cData.sizes) {
-          const szKeys = Object.keys(cData.sizes);
-          sizeButtonsHtml = szKeys.map(sz => {
-            const qty = cData.sizes[sz] || 0;
-            const isSelected = (selectedItemOptions[it.id].size === String(sz));
-            if (qty > 0) {
-              return `<span class="size-select-chip ${isSelected ? 'selected' : ''}" data-size="${sz}" onclick="selectCardSize('${it.id}', '${sz}')">Sz ${sz}</span>`;
-            } else {
-              return `<span class="size-select-chip disabled" data-size="${sz}">Sz ${sz} (0)</span>`;
-            }
-          }).join(' ');
-        }
-
-        const mediaBoxId = `card_media_box_${it.id}`;
-        const trayId = `card_thumb_tray_${it.id}`;
-
-        let initialMediaHtml = '';
-        if (mediaList.length > 0) {
-          const firstM = mediaList[0];
-          if (firstM.type === 'video') {
-            initialMediaHtml = `<video class="main-card-video" src="${firstM.url}" autoplay muted loop playsinline></video>`;
-          } else {
-            initialMediaHtml = `<img class="main-card-img" src="${firstM.url}">`;
-          }
-        } else {
-          initialMediaHtml = `<img class="main-card-img" src="${it.photo || 'https://via.placeholder.com/300'}">`;
-        }
-
-        let thumbsHtml = generateThumbnailsHtml(it.id, mediaList);
-
-        const realPrice = Number(it.price) || 0;
-        const fakeMrp = it.mrp ? Number(it.mrp) : Math.round(realPrice * 1.45);
-        const discountPct = fakeMrp > realPrice ? Math.round(((fakeMrp - realPrice) / fakeMrp) * 100) : 0;
-
-        cardsHtml += `
-          <div class="shoe-card">
-            ${discountPct > 0 ? `<div class="discount-badge">${discountPct}% OFF</div>` : ''}
-
-            <div>
-              <div class="item-media-box" id="${mediaBoxId}">
-                ${initialMediaHtml}
-              </div>
-              <div class="thumb-tray" id="${trayId}">
-                ${thumbsHtml}
-              </div>
-            </div>
-
-            <div class="shoe-card-body">
-              <div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <span style="font-size:11px; font-weight:bold; color:#64748b; text-transform:uppercase;">${it.brand}</span>
-                  <span style="background:#15803d; color:white; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">★ 4.6</span>
-                </div>
-
-                <h4 style="font-size:15px; font-weight:bold; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
-                <p style="font-size:12px; color:#64748b;">${it.category}</p>
-
-                <div class="price-row">
-                  <span class="current-price">₹${realPrice}</span>
-                  ${fakeMrp > realPrice ? `<span class="mrp-cut">₹${fakeMrp}</span><span class="offer-percent">${discountPct}% off</span>` : ''}
-                </div>
-
-                ${isFootwear ? `
-                  <div style="margin:6px 0 4px;">
-                    <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">1. RANG CHUNEIN:</small>
-                    ${colorsChipsHtml}
-                  </div>
-
-                  <div style="margin-bottom:8px;">
-                    <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">2. APNA SIZE CHUNEIN (TAP KAREIN):</small>
-                    <div id="sizes_box_${it.id}">${sizeButtonsHtml || '<small style="color:#ef4444;">Out of stock</small>'}</div>
-                  </div>
-                ` : `
-                  <div style="margin:8px 0;"><small style="color:#059669; font-weight:bold;">Stock: ${it.generalQty || 0} Pieces Uplabdh</small></div>
-                `}
-              </div>
-
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
-                <button class="btn btn-amber" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', false)">
-                  🛒 Cart Me Jodein
-                </button>
-                <button class="btn btn-wa" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', true)">
-                  ⚡ Abhi Kharidein
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Koi item stock me nahi hai.</div>';
-      updateCartBar();
+    // 2. 👈 Yeh condition check karegi: agar ALL nahi hai aur category match nahi hoti, toh skip kar do
+    if (catFlt !== 'ALL' && !itemCat.toLowerCase().includes(catFlt.toLowerCase())) {
+      return; 
     }
+
+    const isFootwear = (it.itemType !== 'general');
+    let colors = Object.keys(it.colorData || {});
+
+    if (!selectedItemOptions[it.id]) {
+      selectedItemOptions[it.id] = {
+        color: colors[0] || 'Standard',
+        size: null
+      };
+    }
+
+    let activeColor = selectedItemOptions[it.id].color || colors[0];
+    let cData = (it.colorData && it.colorData[activeColor]) ? it.colorData[activeColor] : {};
+
+    let mediaList = cData.media || [];
+    if (mediaList.length === 0) {
+      if (cData.video) mediaList.push({ type: 'video', url: cData.video });
+      if (cData.photos) cData.photos.forEach(p => mediaList.push({ type: 'image', url: p }));
+    }
+
+    let colorsChipsHtml = colors.map(c => `
+      <button type="button" class="color-chip-btn ${c === activeColor ? 'active' : ''}" onclick="customerPickColor(this, '${it.id}', '${c}')">
+        ● ${c}
+      </button>
+    `).join('');
+
+    let sizeButtonsHtml = '';
+    if (isFootwear && cData.sizes) {
+      const szKeys = Object.keys(cData.sizes);
+      sizeButtonsHtml = szKeys.map(sz => {
+        const qty = cData.sizes[sz] || 0;
+        const isSelected = (selectedItemOptions[it.id].size === String(sz));
+        if (qty > 0) {
+          return `<span class="size-select-chip ${isSelected ? 'selected' : ''}" data-size="${sz}" onclick="selectCardSize('${it.id}', '${sz}')">Sz ${sz}</span>`;
+        } else {
+          return `<span class="size-select-chip disabled" data-size="${sz}">Sz ${sz} (0)</span>`;
+        }
+      }).join(' ');
+    }
+
+    const realPrice = Number(it.price) || 0;
+    const fakeMrp = it.mrp ? Number(it.mrp) : Math.round(realPrice * 1.45);
+    const discountPct = fakeMrp > realPrice ? Math.round(((fakeMrp - realPrice) / fakeMrp) * 100) : 0;
+
+    let initialMediaHtml = '';
+    if (mediaList.length > 0) {
+      const firstM = mediaList[0];
+      if (firstM.type === 'video') {
+        initialMediaHtml = `<video class="main-card-video" src="${firstM.url}" autoplay muted loop playsinline></video>`;
+      } else {
+        initialMediaHtml = `<img class="main-card-img" src="${firstM.url}">`;
+      }
+    } else {
+      initialMediaHtml = `<img class="main-card-img" src="${it.photo || 'https://via.placeholder.com/300'}">`;
+    }
+
+    let thumbsHtml = generateThumbnailsHtml(it.id, mediaList);
+
+    cardsHtml += `
+      <div class="shoe-card">
+        ${discountPct > 0 ? `<div class="discount-badge">${discountPct}% OFF</div>` : ''}
+
+        <div>
+          <div class="item-media-box">
+            ${initialMediaHtml}
+          </div>
+          <div class="thumb-tray">
+            ${thumbsHtml}
+          </div>
+        </div>
+
+        <div class="shoe-card-body">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span style="font-size:11px; font-weight:bold; color:#64748b; text-transform:uppercase;">${it.brand}</span>
+              <span style="background:#15803d; color:white; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">★ 4.6</span>
+            </div>
+
+            <h4 style="font-size:15px; font-weight:bold; color:#0f172a; margin-bottom:2px;">${it.name}</h4>
+            <p style="font-size:12px; color:#64748b;">${itemCat}</p>
+
+            <div class="price-row">
+              <span class="current-price">₹${realPrice}</span>
+              ${fakeMrp > realPrice ? `<span class="mrp-cut">₹${fakeMrp}</span><span class="offer-percent">${discountPct}% off</span>` : ''}
+            </div>
+
+            ${isFootwear ? `
+              <div style="margin:6px 0 4px;">
+                <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">1. RANG CHUNEIN:</small>
+                ${colorsChipsHtml}
+              </div>
+
+              <div style="margin-bottom:8px;">
+                <small style="font-size:10px; font-weight:bold; color:#475569; display:block; margin-bottom:2px;">2. APNA SIZE CHUNEIN:</small>
+                <div id="sizes_box_${it.id}">${sizeButtonsHtml || '<small style="color:#ef4444;">Out of stock</small>'}</div>
+              </div>
+            ` : `
+              <div style="margin:8px 0;"><small style="color:#059669; font-weight:bold;">Stock: ${it.generalQty || 0} Pieces Uplabdh</small></div>
+            `}
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
+            <button class="btn btn-amber" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', false)">
+              🛒 Cart Me Jodein
+            </button>
+            <button class="btn btn-wa" style="justify-content:center; padding:10px; font-size:12px;" onclick="addItemToCustomerCart('${it.id}', true)">
+              ⚡ Abhi Kharidein
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = cardsHtml || '<div style="text-align:center; grid-column:1/-1; padding:40px; color:#94a3b8;">Is category me abhi koi item uplabdh nahi hai.</div>';
+  updateCartBar();
+}
 
     function generateThumbnailsHtml(itemId, mediaList) {
       let html = '';
