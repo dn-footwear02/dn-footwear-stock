@@ -657,10 +657,11 @@
       <button class="btn btn-slate" onclick="closeReturnExchangeModal()">✕</button>
     </div>
 
-    <!-- Bill Search Box -->
-    <div style="display:flex; gap:8px; margin-bottom:14px; align-items:center;">
-      <input type="text" id="retBillNoInput" placeholder="Bill No. daalein (jaise: DN-4512)..." class="form-control" style="font-size:13px; flex:1;">
-      <button class="btn btn-indigo" onclick="searchBillForReturn()" style="padding:9px 16px;">Bill Khojein</button>
+    <!-- Bill No. & Barcode Search Box -->
+    <div style="display:flex; gap:8px; margin-bottom:14px; align-items:center; flex-wrap:wrap;">
+      <input type="text" id="retBillNoInput" placeholder="Bill No. ya Box Barcode daalein..." class="form-control" style="font-size:13px; flex:1; min-width:200px;">
+      <button class="btn btn-amber" onclick="openScannerForReturn()" title="Barcode Scan Karein" style="padding:9px 12px;">📷 Scan</button>
+      <button class="btn btn-indigo" onclick="searchBillOrBarcodeForReturn()" style="padding:9px 16px;">Khojein</button>
     </div>
 
     <!-- Bill Details & Return Area -->
@@ -4047,18 +4048,133 @@ function closeReturnExchangeModal() {
 }
 
 // Purana bill search karna
-function searchBillForReturn() {
-  const billNoVal = document.getElementById('retBillNoInput').value.trim().toUpperCase();
+// Bill No. ya Barcode dono se search karne ka function
+function searchBillOrBarcodeForReturn() {
+  const query = document.getElementById('retBillNoInput').value.trim();
   const area = document.getElementById('retBillDetailsArea');
 
-  if (!billNoVal) {
-    alert("Kripya Bill No. likhein!");
+  if (!query) {
+    alert("Kripya Bill No. ya Barcode likhein!");
     return;
   }
 
-  area.style.display = 'block';
-  area.innerHTML = '<span style="font-size:12px; color:#64748b;">Bill khoja ja raha hai...</span>';
+  const queryUpper = query.toUpperCase();
+  const queryLower = query.toLowerCase();
 
+  area.style.display = 'block';
+  area.innerHTML = '<span style="font-size:12px; color:#64748b;">Khoja ja raha hai...</span>';
+
+  // 1. Pehle check karein kya yeh koi Bill No hai?
+  const matchedSale = salesHistory.find(s => (s.billNo || '').toUpperCase() === queryUpper);
+
+  if (matchedSale) {
+    renderReturnSaleDetails(matchedSale, area);
+    return;
+  }
+
+  // 2. Agar Bill No nahi hai, toh check karein kya yeh kisi Item ka Barcode hai?
+  let matchedItem = null;
+  let foundColor = null;
+  let foundSize = null;
+
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    if (it.colorData) {
+      for (let col in it.colorData) {
+        const bcMap = it.colorData[col].barcodes || {};
+        for (let sz in bcMap) {
+          if (bcMap[sz] && String(bcMap[sz]).trim().toLowerCase() === queryLower) {
+            matchedItem = it;
+            foundColor = col;
+            foundSize = sz;
+            break;
+          }
+        }
+        if (matchedItem) break;
+      }
+    }
+    if (matchedItem) break;
+  }
+
+  if (matchedItem) {
+    // Agar barcode match ho gaya, toh is item ki recent sale dhundo ya direct return option do
+    area.innerHTML = `
+      <div style="background:#e0e7ff; border:1px solid #c7d2fe; padding:10px; border-radius:6px; margin-bottom:8px;">
+        <b style="color:#3730a3; font-size:13px;">📦 Barcode Matched Item:</b><br>
+        <b>${matchedItem.name}</b> (${matchedItem.brand})<br>
+        <small style="color:#475569;">Rang: <b>${foundColor}</b> | Size: <b>${foundSize}</b> | Rate: ₹${matchedItem.price}</small>
+      </div>
+      <p style="font-size:11px; color:#64748b; margin-bottom:8px;">Yeh barcode is item ka hai. Agar aapko yeh wapas lena hai toh iska bill no. upar daalein ya neeche direct return karein:</p>
+      <button class="btn btn-red" style="padding:6px 12px; font-size:11px;" onclick="directReturnItem('${matchedItem.id}', '${foundColor}', '${foundSize}')">🔄 Is Item Ka Stock Wapas Jodein (Return)</button>
+    `;
+    return;
+  }
+
+  // Agar kuch bhi match na ho
+  area.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Na toh yeh Bill No [${query}] mila aur na hi Barcode match hua!</span>`;
+}
+
+// Helper function to render bill details
+function renderReturnSaleDetails(matchedSale, area) {
+  let itemsListHtml = "";
+  if (matchedSale.itemsList && matchedSale.itemsList.length > 0) {
+    matchedSale.itemsList.forEach((bi, idx) => {
+      itemsListHtml += `
+        <div style="background:#fff; border:1px solid #e2e8f0; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <b>${bi.name}</b><br>
+            <small style="color:#64748b;">Rang: ${bi.color} | Size: ${bi.size} | Qty: ${bi.qty} | Rate: ₹${bi.sellPrice}</small>
+          </div>
+          <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="processItemReturn('${matchedSale.id}', ${idx})">🔄 Wapas/Exchange Karein</button>
+        </div>
+      `;
+    });
+  } else {
+    itemsListHtml = `
+      <div style="background:#fff; border:1px solid #e2e8f0; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <b>${matchedSale.name || 'Shoe'}</b><br>
+          <small style="color:#64748b;">Rang: ${matchedSale.color} | Size: ${matchedSale.size} | Rate: ₹${matchedSale.sellPrice}</small>
+        </div>
+        <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="processItemReturn('${matchedSale.id}', -1)">🔄 Wapas/Exchange Karein</button>
+      </div>
+    `;
+  }
+
+  area.innerHTML = `
+    <div style="font-size:12px; margin-bottom:8px;">
+      <b>Bill No:</b> ${matchedSale.billNo} | <b>Grahak:</b> ${matchedSale.customer || 'Walk-in'} (${matchedSale.phone || 'No phone'})<br>
+      <b>Kul Raashi:</b> ₹${matchedSale.sellPrice} | <b>Date:</b> ${new Date(matchedSale.date).toLocaleString('en-IN')}
+    </div>
+    <hr style="border:0; border-top:1px solid #cbd5e1; margin:8px 0;">
+    <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:6px;">Is Bill Me Jude Samaan:</b>
+    ${itemsListHtml}
+  `;
+}
+
+// Direct Barcode scan se item return karne ke liye
+function directReturnItem(itemId, color, size) {
+  if (confirm(`Kya aap [${color} - Sz ${size}] stock ko wapas dukan me jodna chahte hain?`)) {
+    db.ref('footwear_stock/' + itemId).once('value').then((snap) => {
+      const stockItm = snap.val();
+      if (stockItm && stockItm.colorData && stockItm.colorData[color] && stockItm.colorData[color].sizes) {
+        let curSzQ = Number(stockItm.colorData[color].sizes[size]) || 0;
+        stockItm.colorData[color].sizes[size] = curSzQ + 1;
+        db.ref('footwear_stock/' + itemId).set(stockItm);
+        alert("✓ Stock safalta-purvak wapas jodh diya gaya hai!");
+        closeReturnExchangeModal();
+      } else {
+        alert("Stock update karne me error aayi.");
+      }
+    });
+  }
+}
+
+// Barcode scanner open karne ke liye Return modal me
+function openScannerForReturn() {
+  // Aap apna existing scanner modal ya function use kar sakte hain
+  openScannerModal('return_barcode');
+}
   // salesHistory me se bill number match karna
   const matchedSale = salesHistory.find(s => (s.billNo || '').toUpperCase() === billNoVal);
 
