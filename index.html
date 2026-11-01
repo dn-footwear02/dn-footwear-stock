@@ -231,6 +231,7 @@
         <button class="btn btn-blue" onclick="openScannerModal('inward')">📦 Stock +1</button>
         <button class="btn btn-indigo" onclick="openNewShoeModal()">+ Naya Item</button>
         <button class="btn btn-red" onclick="openUdhaarReportModal()" title="Udhaar Khata & Pending Payments">📋 Udhaar Khata</button>
+        <button class="btn btn-purple" onclick="openReturnExchangeModal()" title="Item Badalna ya Wapas Karna">🔄 Return/Exchange</button>
       </span>
     </div>
   </header>
@@ -644,6 +645,32 @@
       </div>
     </div>
   </div>
+
+  <!-- 🔄 RETURN & EXCHANGE MODAL -->
+<div id="returnExchangeModal" class="modal">
+  <div class="modal-box" style="max-width:650px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+      <div>
+        <h3 style="font-size:17px; font-weight:900; color:#9333ea;">🔄 Return & Exchange Management</h3>
+        <p style="font-size:11px; color:#64748b;">Grahak ka purana bill no. daal kar item wapas lein ya badlein</p>
+      </div>
+      <button class="btn btn-slate" onclick="closeReturnExchangeModal()">✕</button>
+    </div>
+
+    <!-- Bill Search Box -->
+    <div style="display:flex; gap:8px; margin-bottom:14px; align-items:center;">
+      <input type="text" id="retBillNoInput" placeholder="Bill No. daalein (jaise: DN-4512)..." class="form-control" style="font-size:13px; flex:1;">
+      <button class="btn btn-indigo" onclick="searchBillForReturn()" style="padding:9px 16px;">Bill Khojein</button>
+    </div>
+
+    <!-- Bill Details & Return Area -->
+    <div id="retBillDetailsArea" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;"></div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-slate" onclick="closeReturnExchangeModal()">Band Karein</button>
+    </div>
+  </div>
+</div>
 
   <!-- 📋 UDHAAR KHATA REPORT MODAL -->
   <div id="udhaarReportModal" class="modal">
@@ -4007,6 +4034,116 @@ function renderActiveBillItemsList() {
         });
       }
     }
+
+    // 🔄 Return & Exchange Modals control
+function openReturnExchangeModal() {
+  document.getElementById('retBillNoInput').value = '';
+  document.getElementById('retBillDetailsArea').style.display = 'none';
+  document.getElementById('returnExchangeModal').style.display = 'flex';
+}
+
+function closeReturnExchangeModal() {
+  document.getElementById('returnExchangeModal').style.display = 'none';
+}
+
+// Purana bill search karna
+function searchBillForReturn() {
+  const billNoVal = document.getElementById('retBillNoInput').value.trim().toUpperCase();
+  const area = document.getElementById('retBillDetailsArea');
+
+  if (!billNoVal) {
+    alert("Kripya Bill No. likhein!");
+    return;
+  }
+
+  area.style.display = 'block';
+  area.innerHTML = '<span style="font-size:12px; color:#64748b;">Bill khoja ja raha hai...</span>';
+
+  // salesHistory me se bill number match karna
+  const matchedSale = salesHistory.find(s => (s.billNo || '').toUpperCase() === billNoVal);
+
+  if (!matchedSale) {
+    area.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Yeh Bill No [${billNoVal}] nahi mila. Sahi Bill No. daalein.</span>`;
+    return;
+  }
+
+  let itemsListHtml = "";
+  if (matchedSale.itemsList && matchedSale.itemsList.length > 0) {
+    matchedSale.itemsList.forEach((bi, idx) => {
+      itemsListHtml += `
+        <div style="background:#fff; border:1px solid #e2e8f0; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <b>${bi.name}</b><br>
+            <small style="color:#64748b;">Rang: ${bi.color} | Size: ${bi.size} | Qty: ${bi.qty} | Rate: ₹${bi.sellPrice}</small>
+          </div>
+          <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="processItemReturn('${matchedSale.id}', ${idx})">🔄 Yeh Item Wapas/Exchange Karein</button>
+        </div>
+      `;
+    });
+  } else {
+    itemsListHtml = `
+      <div style="background:#fff; border:1px solid #e2e8f0; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <b>${matchedSale.name || 'Shoe'}</b><br>
+          <small style="color:#64748b;">Rang: ${matchedSale.color} | Size: ${matchedSale.size} | Rate: ₹${matchedSale.sellPrice}</small>
+        </div>
+        <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="processItemReturn('${matchedSale.id}', -1)">🔄 Yeh Item Wapas/Exchange Karein</button>
+      </div>
+    `;
+  }
+
+  area.innerHTML = `
+    <div style="font-size:12px; margin-bottom:8px;">
+      <b>Bill No:</b> ${matchedSale.billNo} | <b>Grahak:</b> ${matchedSale.customer || 'Walk-in'} (${matchedSale.phone || 'No phone'})<br>
+      <b>Kul Raashi:</b> ₹${matchedSale.sellPrice} | <b>Date:</b> ${new Date(matchedSale.date).toLocaleString('en-IN')}
+    </div>
+    <hr style="border:0; border-top:1px solid #cbd5e1; margin:8px 0;">
+    <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:6px;">Is Bill Me Jude Samaan:</b>
+    ${itemsListHtml}
+  `;
+}
+
+// Item ko wapas lene aur stock me add karne ka function
+function processItemReturn(saleId, itemIndex) {
+  if (confirm("Kya aap is item ko wapas lena chahte hain? Isse stock wapas dukan me jud jayega.")) {
+    const saleRec = salesHistory.find(s => s.id === saleId);
+    if (!saleRec) return;
+
+    let targetItem = null;
+    if (itemIndex >= 0 && saleRec.itemsList) {
+      targetItem = saleRec.itemsList[itemIndex];
+    } else {
+      targetItem = {
+        itemId: saleRec.itemId,
+        color: saleRec.color,
+        size: saleRec.size,
+        qty: 1
+      };
+    }
+
+    // Stock wapas update karna
+    if (targetItem && targetItem.itemId) {
+      db.ref('footwear_stock/' + targetItem.itemId).once('value').then((snap) => {
+        const stockItm = snap.val();
+        if (stockItm) {
+          const rQty = Number(targetItem.qty) || 1;
+          if (stockItm.itemType === 'general') {
+            stockItm.generalQty = (Number(stockItm.generalQty) || 0) + rQty;
+          } else if (stockItm.colorData && stockItm.colorData[targetItem.color] && stockItm.colorData[targetItem.color].sizes) {
+            let curSzQ = Number(stockItm.colorData[targetItem.color].sizes[targetItem.size]) || 0;
+            stockItm.colorData[targetItem.color].sizes[targetItem.size] = curSzQ + rQty;
+          }
+          db.ref('footwear_stock/' + targetItem.itemId).set(stockItm);
+        }
+      });
+    }
+
+    // Sales record se isko hata dena ya status 'Returned' karna
+    db.ref('footwear_sales/' + saleId + '/status').set('Returned');
+    alert("✓ Item safalta-purvak wapas le liya gaya hai aur stock me jodh diya gaya hai!");
+    closeReturnExchangeModal();
+  }
+}
   </script>
 </body>
 </html>
