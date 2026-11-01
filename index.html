@@ -4625,50 +4625,51 @@ function closeSupplierModal() {
   document.getElementById('supplierModal').style.display = 'none';
 }
 
-// 1. Naya Supplier Jodne ka Form
-function showAddSupplierForm() {
-  const area = document.getElementById('supplierActionArea');
-  area.style.display = 'block';
-  area.innerHTML = `
-    <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:8px;">Naya Supplier / Holesale Company Jodein:</b>
-    <div style="display:flex; gap:8px; flex-direction:column; margin-bottom:8px;">
-      <input type="text" id="supName" placeholder="Supplier / Company ka Naam..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-      <input type="text" id="supPerson" placeholder="Salesman / Malik ka Naam..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-      <input type="text" id="supPhone" placeholder="Mobile Number..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-      <input type="text" id="supAddress" placeholder="Pata (Address/City)..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-    </div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-green" style="font-size:11px; padding:6px 12px;" onclick="saveNewSupplier()">✓ Save Karein</button>
-      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('supplierActionArea').style.display='none'">Radd Karein</button>
-    </div>
-  `;
-}
-
+// 1. Naya Supplier Jodne ka Form aur Save Function (Updated with Error Debugging)
 function saveNewSupplier() {
-  const name = document.getElementById('supName').value.trim();
-  const person = document.getElementById('supPerson').value.trim();
-  const phone = document.getElementById('supPhone').value.trim();
-  const address = document.getElementById('supAddress').value.trim();
+  const nameInput = document.getElementById('supName');
+  const personInput = document.getElementById('supPerson');
+  const phoneInput = document.getElementById('supPhone');
+  const addressInput = document.getElementById('supAddress');
+
+  const name = nameInput ? nameInput.value.trim() : '';
+  const person = personInput ? personInput.value.trim() : '';
+  const phone = phoneInput ? phoneInput.value.trim() : '';
+  const address = addressInput ? addressInput.value.trim() : '';
 
   if (!name) {
     alert("Kripya Supplier ka naam likhein!");
     return;
   }
 
+  // Check karein ki 'db' object available hai ya nahi
+  if (typeof db === 'undefined' || !db) {
+    alert("Database connection (db) nahi mil raha hai! Kripya page refresh karein.");
+    return;
+  }
+
+  console.log("Saving supplier:", { name, person, phone, address });
+
   const newRef = db.ref('suppliers').push();
   newRef.set({
-    name,
-    person,
-    phone,
-    address,
+    name: name,
+    person: person,
+    phone: phone,
+    address: address,
     balanceDue: 0,
     createdAt: Date.now()
   }, (err) => {
     if (!err) {
       alert("✓ Supplier safalta-purvak jud gaya hai!");
       document.getElementById('supplierActionArea').style.display = 'none';
+      // Form fields clear kar dein
+      if(nameInput) nameInput.value = '';
+      if(personInput) personInput.value = '';
+      if(phoneInput) phoneInput.value = '';
+      if(addressInput) addressInput.value = '';
     } else {
-      alert("Error: " + err.message);
+      console.error("Firebase Error:", err);
+      alert("Supplier save karne me error aayi: " + err.message);
     }
   });
 }
