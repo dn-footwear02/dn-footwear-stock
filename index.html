@@ -3953,14 +3953,31 @@ function renderActiveBillItemsList() {
         totalUdhaar += amt;
         let dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
 
+        // WhatsApp Number Clean Karna aur Message banana
+        let customerPhoneClean = s.phone ? s.phone.replace(/\D/g, '') : '';
+        if (customerPhoneClean.length === 10) {
+          customerPhoneClean = '91' + customerPhoneClean; // India Country Code
+        }
+
+        let waUdhaarMsg = `*NAMASTE ${s.customer || 'Grahak'} Ji!*\n\n`;
+        waUdhaarMsg += `Aapka *DN Footwear & Sports* (Siriyari) par udhaar baaki hai:\n`;
+        waUdhaarMsg += `📋 *Bill No:* ${s.billNo || 'DN-Bill'}\n`;
+        waUdhaarMsg += `🛍️ *Samaan:* ${s.name || 'Footwear'}\n`;
+        waUdhaarMsg += `💰 *Kul Baaki Raashi:* ₹${amt}\n\n`;
+        waUdhaarMsg += `Kripya apna bhugtan jald se jald karein ya PhonePe/UPI dwara bhejein. Dhanyawad!\n`;
+        waUdhaarMsg += `📞 Mo: 8209452284`;
+
+        let waUdhaarUrl = customerPhoneClean ? `https://wa.me/${customerPhoneClean}?text=` + encodeURIComponent(waUdhaarMsg) : '';
+
         return `
           <tr style="border-bottom:1px solid #f1f5f9; vertical-align:middle;">
             <td style="padding:8px;"><b style="font-family:monospace;">${s.billNo || 'DN-Bill'}</b><br><small style="color:#64748b;">${dateStr}</small></td>
             <td style="padding:8px;"><b>${s.customer || 'Walk-in'}</b><br><a href="tel:${s.phone}" style="color:#2563eb; font-weight:bold; font-size:11px;">📞 ${s.phone || 'No Phone'}</a></td>
             <td style="padding:8px; font-size:12px;">${s.name || '-'}</td>
             <td style="padding:8px; text-align:right;"><b style="color:#dc2626; font-size:15px;">₹${amt}</b></td>
-            <td style="padding:8px; text-align:right;">
-              <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="markUdhaarAsPaid('${s.id}')">✓ Paisa Mila (Clear)</button>
+            <td style="padding:8px; text-align:right; white-space:nowrap;">
+              ${customerPhoneClean ? `<a href="${waUdhaarUrl}" target="_blank" class="btn btn-wa" style="padding:4px 8px; font-size:11px; margin-bottom:3px; display:inline-block; text-decoration:none;">💬 WhatsApp</a><br>` : ''}
+              <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="markUdhaarAsPaid('${s.id}')">✓ Clear</button>
             </td>
           </tr>
         `;
