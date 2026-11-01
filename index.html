@@ -4061,7 +4061,39 @@ function restoreStock(itemId, color, size, qtyToAdd) {
   });
 }
 
-// 🔄 Return & Exchange Modals control
+// ==========================================
+// 🔄 RETURN & EXCHANGE MANAGEMENT MODULE
+// ==========================================
+
+// Global variable for barcode scanner in exchange
+let activeExchangeInputId = null;
+
+// Robust Stock Restore Helper Function (Purana stock wapas jodne ke liye)
+function restoreStock(itemId, color, size, qtyToAdd) {
+  if (!itemId) return;
+  db.ref('footwear_stock/' + itemId).once('value').then((snap) => {
+    const stockItm = snap.val();
+    if (stockItm) {
+      const addQ = Number(qtyToAdd) || 1;
+      if (stockItm.itemType === 'general') {
+        stockItm.generalQty = (Number(stockItm.generalQty) || 0) + addQ;
+      } else {
+        if (!stockItm.colorData) stockItm.colorData = {};
+        if (!stockItm.colorData[color]) {
+          stockItm.colorData[color] = { media: [], sizes: {}, barcodes: {} };
+        }
+        if (!stockItm.colorData[color].sizes) {
+          stockItm.colorData[color].sizes = {};
+        }
+        let curQ = Number(stockItm.colorData[color].sizes[size]) || 0;
+        stockItm.colorData[color].sizes[size] = curQ + addQ;
+      }
+      db.ref('footwear_stock/' + itemId).set(stockItm);
+    }
+  });
+}
+
+// Modal Open/Close Controls
 function openReturnExchangeModal() {
   document.getElementById('retBillNoInput').value = '';
   document.getElementById('retBillDetailsArea').style.display = 'none';
@@ -4123,7 +4155,7 @@ function searchBillOrBarcodeForReturn() {
     return;
   }
 
-  area.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Na toh yeh Bill No [${query}] mila aur na hi Barcode match हुआ!</span>`;
+  area.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Na toh yeh Bill No [${query}] mila aur na hi Barcode match hua!</span>`;
 }
 
 // 1. Bill Details Render with Return & Exchange Options
@@ -4179,7 +4211,7 @@ function renderReturnSaleDetails(matchedSale, area) {
   `;
 }
 
-// 2. Exchange Selector (Ab 'this' ka use karne se size aur color turant select honge)
+// 2. Exchange Selector Panel
 function showExchangeSelector(saleId, itemIdx, oldItemId, oldColor, oldSize, qty) {
   const boxId = `exchange_box_${saleId}_${itemIdx}`;
   const box = document.getElementById(boxId);
@@ -4323,7 +4355,7 @@ function handleExchangeBarcodeSearch(inputElem, saleId, itemIdx) {
   }
 }
 
-// Finalize Exchange Transaction
+// 3. Finalize Exchange Transaction
 function confirmExchangeTransaction(saleId, itemIdx, oldItemId, oldColor, oldSize, qty) {
   const newItemId = document.getElementById(`ex_it_${saleId}_${itemIdx}`).value;
   const newColor = document.getElementById(`ex_col_${saleId}_${itemIdx}`).value;
@@ -4334,8 +4366,10 @@ function confirmExchangeTransaction(saleId, itemIdx, oldItemId, oldColor, oldSiz
     return;
   }
 
+  // Purana item wapas stock me jodo
   restoreStock(oldItemId, oldColor, oldSize, qty);
 
+  // Naya item stock se minus karo
   db.ref('footwear_stock/' + newItemId).once('value').then((snap) => {
     const newStockItm = snap.val();
     if (newStockItm && newStockItm.colorData && newStockItm.colorData[newColor] && newStockItm.colorData[newColor].sizes) {
@@ -4351,6 +4385,135 @@ function confirmExchangeTransaction(saleId, itemIdx, oldItemId, oldColor, oldSiz
 
   db.ref('footwear_sales/' + saleId + '/status').set('Exchanged');
   alert("✓ Exchange Safal! Purana item wapas stock me jud gaya aur naya item minus ho gaya.");
+  closeReturnExchangeModal();
+}
+
+// 4. Barcode se direct return/exchange options
+function renderBarcodeReturnOptions(matchedItem, foundColor, foundSize, area) {
+  let itemOptions = items.map(it => `<option value="${it.id}" ${it.id === matchedItem.id ? 'selected' : ''}>${it.name} (${it.brand})</option>`).join('');
+
+  let defaultPhoto = matchedItem.photo || 'https://via.placeholder.com/45';
+  if (matchedItem.colorData && matchedItem.colorData[foundColor]) {
+    const cd = matchedItem.colorData[foundColor];
+    if (cd.media && cd.media[0]) defaultPhoto = cd.media[0].url;
+  }
+
+  area.innerHTML = `
+    <div style="background:#e0e7ff; border:1px solid #c7d2fe; padding:10px; border-radius:6px; margin-bottom:8px; display:flex; gap:10px; align-items:center;">
+      <img src="${defaultPhoto}" style="width:50px; height:50px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
+      <div>
+        <b style="color:#3730a3; font-size:13px;">📦 Barcode Scanned Item:</b><br>
+        <b>${matchedItem.name}</b> (${matchedItem.brand})<br>
+        <small style="color:#475569;">Rang: <b>${foundColor}</b> | Size: <b>${foundSize}</b></small>
+      </div>
+    </div>
+    
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <button class="btn btn-red" style="padding:6px 12px; font-size:11px; flex:1;" onclick="directReturnItem('${matchedItem.id}', '${foundColor}', '${foundSize}')">🔄 Sirf Return (Stock Jodein)</button>
+    </div>
+
+    <div style="background:#faf5ff; border:1px dashed #9333ea; padding:8px; border-radius:6px;">
+      <b style="font-size:11px; color:#6b21a8; display:block; margin-bottom:4px;">Ya Naya Item/Size Badal kar dein:</b>
+      
+      <div style="display:flex; gap:6px; margin-bottom:6px; align-items:center;">
+        <input type="text" id="bc_ex_barcode_input" placeholder="Naye item ka Barcode scan/type karein..." class="form-control" style="font-size:11px; flex:1;" oninput="handleExchangeBarcodeSearch(this, 'bc', 'ex')">
+        <button class="btn btn-amber" style="padding:4px 8px; font-size:10px;" onclick="activeExchangeInputId='bc_ex_barcode_input'; openScannerModal('exchange_scan')">📷 Scan</button>
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+        <img id="bc_ex_preview_img" src="${defaultPhoto}" style="width:45px; height:45px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1; flex-shrink:0;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; flex:1;">
+          <select id="bc_ex_item" class="form-control" style="font-size:11px; flex:1;" onchange="loadBarcodeExchangeSizes()">
+            ${itemOptions}
+          </select>
+          <select id="bc_ex_color" class="form-control" style="font-size:11px; width:90px;" onchange="loadBarcodeExchangeSizeList()">
+            <option value="${foundColor}">${foundColor}</option>
+          </select>
+          <select id="bc_ex_size" class="form-control" style="font-size:11px; width:80px;">
+            <option value="">Size</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-green" style="padding:5px 12px; font-size:11px;" onclick="confirmBarcodeExchange('${matchedItem.id}', '${foundColor}', '${foundSize}')">✓ Exchange Pakka Karein</button>
+    </div>
+  `;
+
+  setTimeout(() => {
+    const colorSel = document.getElementById('bc_ex_color');
+    const colors = Object.keys(matchedItem.colorData || {});
+    colorSel.innerHTML = colors.map(c => `<option value="${c}" ${c === foundColor ? 'selected' : ''}>${c}</option>`).join('');
+    loadBarcodeExchangeSizeList();
+  }, 100);
+}
+
+function loadBarcodeExchangeSizes() {
+  const itemId = document.getElementById('bc_ex_item').value;
+  const colorSel = document.getElementById('bc_ex_color');
+  const imgPrev = document.getElementById('bc_ex_preview_img');
+
+  const itm = items.find(x => x.id === itemId);
+  if (!itm) return;
+
+  if (imgPrev) imgPrev.src = itm.photo || 'https://via.placeholder.com/45';
+
+  if (!itm.colorData) return;
+  let colors = Object.keys(itm.colorData);
+  colorSel.innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
+  loadBarcodeExchangeSizeList();
+}
+
+function loadBarcodeExchangeSizeList() {
+  const itemId = document.getElementById('bc_ex_item').value;
+  const colorName = document.getElementById('bc_ex_color').value;
+  const sizeSel = document.getElementById('bc_ex_size');
+  const imgPrev = document.getElementById('bc_ex_preview_img');
+
+  sizeSel.innerHTML = '<option value="">Size</option>';
+
+  const itm = items.find(x => x.id === itemId);
+  if (!itm || !itm.colorData || !itm.colorData[colorName]) return;
+
+  const cData = itm.colorData[colorName];
+  let colorPhoto = itm.photo;
+  if (cData.media && cData.media.length > 0) {
+    const firstImg = cData.media.find(m => m.type === 'image');
+    if (firstImg) colorPhoto = firstImg.url;
+  }
+  if (imgPrev && colorPhoto) imgPrev.src = colorPhoto;
+
+  const sizesMap = cData.sizes || {};
+  for (let sz in sizesMap) {
+    let q = sizesMap[sz] || 0;
+    sizeSel.innerHTML += `<option value="${sz}">Sz ${sz} (${q} Jodi)</option>`;
+  }
+}
+
+function confirmBarcodeExchange(oldItemId, oldColor, oldSize) {
+  const newItemId = document.getElementById('bc_ex_item').value;
+  const newColor = document.getElementById('bc_ex_color').value;
+  const newSize = document.getElementById('bc_ex_size').value;
+
+  if (!newItemId || !newColor || !newSize) {
+    alert("Kripya naya Item, Rang aur Size teeno chunein!");
+    return;
+  }
+
+  restoreStock(oldItemId, oldColor, oldSize, 1);
+
+  db.ref('footwear_stock/' + newItemId).once('value').then((snap) => {
+    const newStockItm = snap.val();
+    if (newStockItm && newStockItm.colorData && newStockItm.colorData[newColor] && newStockItm.colorData[newColor].sizes) {
+      let curQ = Number(newStockItm.colorData[newColor].sizes[newSize]) || 0;
+      if (curQ <= 0) {
+        alert("Maaf kijiye, naya chuna gaya size stock me nahi hai!");
+        return;
+      }
+      newStockItm.colorData[newColor].sizes[newSize] = curQ - 1;
+      db.ref('footwear_stock/' + newItemId).set(newStockItm);
+    }
+  });
+
+  alert("✓ Barcode Exchange Safal! Purana stock me jud gaya aur naya minus ho gaya.");
   closeReturnExchangeModal();
 }
 
@@ -4382,9 +4545,7 @@ function openScannerForReturn() {
   openScannerModal('return_barcode');
 }
 
-// Global variable active exchange input track karne ke liye
-let activeExchangeInputId = null;
-
+// Scanner Hook for Exchange Barcode
 const originalOnScanFound = window.onScanFound;
 window.onScanFound = function(code) {
   if (currentScanAction === 'exchange_scan' && activeExchangeInputId) {
