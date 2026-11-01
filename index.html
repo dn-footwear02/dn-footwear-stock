@@ -4103,7 +4103,7 @@ function searchBillOrBarcodeForReturn() {
   area.innerHTML = `<span style="font-size:12px; color:#ef4444; font-weight:bold;">❌ Na toh yeh Bill No [${query}] mila aur na hi Barcode match hua!</span>`;
 }
 
-// 1. Bill Details Render with Return & Exchange Options (Photo Included)
+// 1. Bill Details Render with Return & Exchange Options
 function renderReturnSaleDetails(matchedSale, area) {
   let itemsListHtml = "";
   if (matchedSale.itemsList && matchedSale.itemsList.length > 0) {
@@ -4153,7 +4153,7 @@ function renderReturnSaleDetails(matchedSale, area) {
   `;
 }
 
-// 2. Exchange Selector with Photo Preview
+// 2. Exchange Selector with Barcode Input & Photo Preview
 function showExchangeSelector(saleId, itemIdx, oldItemId, oldColor, oldSize) {
   const boxId = `exchange_box_${saleId}_${itemIdx}`;
   const box = document.getElementById(boxId);
@@ -4168,17 +4168,22 @@ function showExchangeSelector(saleId, itemIdx, oldItemId, oldColor, oldSize) {
 
   box.style.display = 'block';
   box.innerHTML = `
-    <b style="font-size:11px; color:#6b21a8; display:block; margin-bottom:4px;">Naya Item ya Dusra Size Chunein:</b>
+    <b style="font-size:11px; color:#6b21a8; display:block; margin-bottom:4px;">Naya Item Exchange Karein:</b>
+    
+    <!-- 📷 Barcode Input for Exchange Item -->
+    <div style="display:flex; gap:6px; margin-bottom:6px; align-items:center;">
+      <input type="text" id="ex_barcode_${saleId}_${itemIdx}" placeholder="Naye item ka Barcode scan/type karein..." class="form-control" style="font-size:11px; flex:1;" oninput="handleExchangeBarcodeSearch('${saleId}', ${itemIdx}, 'ex')">
+    </div>
+
     <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
-      <!-- 🖼️ Photo Thumbnail Preview -->
       <img id="ex_preview_img_${saleId}_${itemIdx}" src="https://via.placeholder.com/45" style="width:45px; height:45px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1; flex-shrink:0;">
       
       <div style="display:flex; gap:6px; flex-wrap:wrap; flex:1;">
-        <select id="ex_item_${saleId}_${itemIdx}" class="form-control" style="font-size:11px; flex:1;" onchange="loadExchangeSizes('${saleId}', ${itemIdx})">
+        <select id="ex_item_${saleId}_${itemIdx}" class="form-control" style="font-size:11px; flex:1;" onchange="loadExchangeSizes('${saleId}', ${itemIdx}, 'ex')">
           <option value="">-- Item Chunein --</option>
           ${itemOptions}
         </select>
-        <select id="ex_color_${saleId}_${itemIdx}" class="form-control" style="font-size:11px; width:90px;" onchange="loadExchangeSizeList('${saleId}', ${itemIdx})">
+        <select id="ex_color_${saleId}_${itemIdx}" class="form-control" style="font-size:11px; width:90px;" onchange="loadExchangeSizeList('${saleId}', ${itemIdx}, 'ex')">
           <option value="">Rang</option>
         </select>
         <select id="ex_size_${saleId}_${itemIdx}" class="form-control" style="font-size:11px; width:80px;">
@@ -4190,12 +4195,63 @@ function showExchangeSelector(saleId, itemIdx, oldItemId, oldColor, oldSize) {
   `;
 }
 
+// Barcode search inside Exchange selector
+function handleExchangeBarcodeSearch(saleId, itemIdx, prefix) {
+  const barcodeInput = document.getElementById(`${prefix}_barcode_${saleId}_${itemIdx}`);
+  if (!barcodeInput) return;
+  const code = barcodeInput.value.trim().toLowerCase();
+  if (code.length < 3) return; // minimum length to avoid false triggers
+
+  let matchedItem = null;
+  let foundCol = null;
+  let foundSz = null;
+
+  for (let it of items) {
+    if (it.colorData) {
+      for (let col in it.colorData) {
+        let bcMap = it.colorData[col].barcodes || {};
+        for (let sz in bcMap) {
+          if (bcMap[sz] && String(bcMap[sz]).trim().toLowerCase() === code) {
+            matchedItem = it;
+            foundCol = col;
+            foundSz = sz;
+            break;
+          }
+        }
+        if (matchedItem) break;
+      }
+    }
+    if (matchedItem) break;
+  }
+
+  if (matchedItem) {
+    const itemSel = document.getElementById(`${prefix}_item_${saleId}_${itemIdx}`);
+    if (itemSel) {
+      itemSel.value = matchedItem.id;
+      loadExchangeSizes(saleId, itemIdx, prefix);
+    }
+    setTimeout(() => {
+      const colorSel = document.getElementById(`${prefix}_color_${saleId}_${itemIdx}`);
+      if (colorSel) {
+        colorSel.value = foundCol;
+        loadExchangeSizeList(saleId, itemIdx, prefix);
+      }
+      setTimeout(() => {
+        const sizeSel = document.getElementById(`${prefix}_size_${saleId}_${itemIdx}`);
+        if (sizeSel) {
+          sizeSel.value = foundSz;
+        }
+      }, 50);
+    }, 50);
+  }
+}
+
 // Exchange item chunne par colors aur photo load karna
-function loadExchangeSizes(saleId, itemIdx) {
-  const itemId = document.getElementById(`ex_item_${saleId}_${itemIdx}`).value;
-  const colorSel = document.getElementById(`ex_color_${saleId}_${itemIdx}`);
-  const sizeSel = document.getElementById(`ex_size_${saleId}_${itemIdx}`);
-  const imgPrev = document.getElementById(`ex_preview_img_${saleId}_${itemIdx}`);
+function loadExchangeSizes(saleId, itemIdx, prefix) {
+  const itemId = document.getElementById(`${prefix}_item_${saleId}_${itemIdx}`).value;
+  const colorSel = document.getElementById(`${prefix}_color_${saleId}_${itemIdx}`);
+  const sizeSel = document.getElementById(`${prefix}_size_${saleId}_${itemIdx}`);
+  const imgPrev = document.getElementById(`${prefix}_preview_img_${saleId}_${itemIdx}`);
 
   colorSel.innerHTML = '<option value="">Rang</option>';
   sizeSel.innerHTML = '<option value="">Size</option>';
@@ -4203,7 +4259,6 @@ function loadExchangeSizes(saleId, itemIdx) {
   const itm = items.find(x => x.id === itemId);
   if (!itm) return;
 
-  // Item ki main photo update karna
   if (imgPrev) imgPrev.src = itm.photo || 'https://via.placeholder.com/45';
 
   if (!itm.colorData) return;
@@ -4211,16 +4266,16 @@ function loadExchangeSizes(saleId, itemIdx) {
   colorSel.innerHTML += colors.map(c => `<option value="${c}">${c}</option>`).join('');
   if (colors.length > 0) {
     colorSel.value = colors[0];
-    loadExchangeSizeList(saleId, itemIdx);
+    loadExchangeSizeList(saleId, itemIdx, prefix);
   }
 }
 
-// Color chunne par available sizes aur us color ki photo load karna
-function loadExchangeSizeList(saleId, itemIdx) {
-  const itemId = document.getElementById(`ex_item_${saleId}_${itemIdx}`).value;
-  const colorName = document.getElementById(`ex_color_${saleId}_${itemIdx}`).value;
-  const sizeSel = document.getElementById(`ex_size_${saleId}_${itemIdx}`);
-  const imgPrev = document.getElementById(`ex_preview_img_${saleId}_${itemIdx}`);
+// Color chunne par available sizes aur photo load karna
+function loadExchangeSizeList(saleId, itemIdx, prefix) {
+  const itemId = document.getElementById(`${prefix}_item_${saleId}_${itemIdx}`).value;
+  const colorName = document.getElementById(`${prefix}_color_${saleId}_${itemIdx}`).value;
+  const sizeSel = document.getElementById(`${prefix}_size_${saleId}_${itemIdx}`);
+  const imgPrev = document.getElementById(`${prefix}_preview_img_${saleId}_${itemIdx}`);
 
   sizeSel.innerHTML = '<option value="">Size</option>';
 
@@ -4229,7 +4284,6 @@ function loadExchangeSizeList(saleId, itemIdx) {
 
   const cData = itm.colorData[colorName];
   
-  // Agar us color ki apni photo hai toh wahi dikhao
   let colorPhoto = itm.photo;
   if (cData.media && cData.media.length > 0) {
     const firstImg = cData.media.find(m => m.type === 'image');
@@ -4287,7 +4341,7 @@ function confirmExchangeTransaction(saleId, itemIdx, oldItemId, oldColor, oldSiz
   closeReturnExchangeModal();
 }
 
-// 4. Barcode se direct return/exchange options (With Photo Preview)
+// 4. Barcode se direct return/exchange options
 function renderBarcodeReturnOptions(matchedItem, foundColor, foundSize, area) {
   let itemOptions = items.map(it => `<option value="${it.id}" ${it.id === matchedItem.id ? 'selected' : ''}>${it.name} (${it.brand})</option>`).join('');
 
@@ -4313,6 +4367,12 @@ function renderBarcodeReturnOptions(matchedItem, foundColor, foundSize, area) {
 
     <div style="background:#faf5ff; border:1px dashed #9333ea; padding:8px; border-radius:6px;">
       <b style="font-size:11px; color:#6b21a8; display:block; margin-bottom:4px;">Ya Naya Item/Size Badal kar dein:</b>
+      
+      <!-- 📷 Barcode Input for Barcode Scanned Exchange -->
+      <div style="display:flex; gap:6px; margin-bottom:6px; align-items:center;">
+        <input type="text" id="bc_ex_barcode_input" placeholder="Naye item ka Barcode scan/type karein..." class="form-control" style="font-size:11px; flex:1;" oninput="handleExchangeBarcodeSearch('bc', 'ex', 'bc')">
+      </div>
+
       <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
         <img id="bc_ex_preview_img" src="${defaultPhoto}" style="width:45px; height:45px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #cbd5e1; flex-shrink:0;">
         <div style="display:flex; gap:6px; flex-wrap:wrap; flex:1;">
