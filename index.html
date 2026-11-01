@@ -4221,56 +4221,7 @@ function showExchangeSelector(saleId, itemIdx, oldItemId, oldColor, oldSize, qty
   `;
 }
 
-function handleExchangeBarcodeSearch(saleId, itemIdx, prefix) {
-  const barcodeInput = document.getElementById(`${prefix}_barcode_${saleId}_${itemIdx}`);
-  if (!barcodeInput) return;
-  const code = barcodeInput.value.trim().toLowerCase();
-  if (code.length < 3) return;
-
-  let matchedItem = null;
-  let foundCol = null;
-  let foundSz = null;
-
-  for (let it of items) {
-    if (it.colorData) {
-      for (let col in it.colorData) {
-        let bcMap = it.colorData[col].barcodes || {};
-        for (let sz in bcMap) {
-          if (bcMap[sz] && String(bcMap[sz]).trim().toLowerCase() === code) {
-            matchedItem = it;
-            foundCol = col;
-            foundSz = sz;
-            break;
-          }
-        }
-        if (matchedItem) break;
-      }
-    }
-    if (matchedItem) break;
-  }
-
-  if (matchedItem) {
-    const itemSel = document.getElementById(`${prefix}_item_${saleId}_${itemIdx}`);
-    if (itemSel) {
-      itemSel.value = matchedItem.id;
-      loadExchangeSizes(saleId, itemIdx, prefix);
-    }
-    setTimeout(() => {
-      const colorSel = document.getElementById(`${prefix}_color_${saleId}_${itemIdx}`);
-      if (colorSel) {
-        colorSel.value = foundCol;
-        loadExchangeSizeList(saleId, itemIdx, prefix);
-      }
-      setTimeout(() => {
-        const sizeSel = document.getElementById(`${prefix}_size_${saleId}_${itemIdx}`);
-        if (sizeSel) {
-          sizeSel.value = foundSz;
-        }
-      }, 50);
-    }, 50);
-  }
-}
-
+// Exchange item chunne par colors load karna (Fixed)
 function loadExchangeSizes(saleId, itemIdx, prefix) {
   const itemId = document.getElementById(`${prefix}_item_${saleId}_${itemIdx}`).value;
   const colorSel = document.getElementById(`${prefix}_color_${saleId}_${itemIdx}`);
@@ -4294,6 +4245,7 @@ function loadExchangeSizes(saleId, itemIdx, prefix) {
   }
 }
 
+// Color chunne par available sizes load karna (Fixed)
 function loadExchangeSizeList(saleId, itemIdx, prefix) {
   const itemId = document.getElementById(`${prefix}_item_${saleId}_${itemIdx}`).value;
   const colorName = document.getElementById(`${prefix}_color_${saleId}_${itemIdx}`).value;
@@ -4310,6 +4262,8 @@ function loadExchangeSizeList(saleId, itemIdx, prefix) {
   if (cData.media && cData.media.length > 0) {
     const firstImg = cData.media.find(m => m.type === 'image');
     if (firstImg) colorPhoto = firstImg.url;
+  } else if (cData.photos && cData.photos.length > 0) {
+    colorPhoto = cData.photos[0];
   }
   if (imgPrev && colorPhoto) imgPrev.src = colorPhoto;
 
@@ -4319,7 +4273,6 @@ function loadExchangeSizeList(saleId, itemIdx, prefix) {
     sizeSel.innerHTML += `<option value="${sz}">Sz ${sz} (${q} Jodi)</option>`;
   }
 }
-
 // 3. Exchange Finalize Karna (Purana stock me add + Naya stock se minus)
 function confirmExchangeTransaction(saleId, itemIdx, oldItemId, oldColor, oldSize, qty) {
   const newItemId = document.getElementById(`ex_item_${saleId}_${itemIdx}`).value;
