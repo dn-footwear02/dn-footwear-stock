@@ -3953,18 +3953,26 @@ function renderActiveBillItemsList() {
         totalUdhaar += amt;
         let dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
 
-        // WhatsApp Number Clean Karna aur Message banana
+        // WhatsApp Number Clean Karna
         let customerPhoneClean = s.phone ? s.phone.replace(/\D/g, '') : '';
         if (customerPhoneClean.length === 10) {
           customerPhoneClean = '91' + customerPhoneClean; // India Country Code
         }
 
+        // Dukaan ki UPI ID aur Exact Amount wala Payment Link
+        let shopUpiId = "7014401309@ybl"; 
+        let shopName = "DN%20Footwear%20and%20Sports";
+        let upiPaymentLink = `upi://pay?pa=${shopUpiId}&pn=${shopName}&am=${amt}&cu=INR`;
+
+        // WhatsApp Reminder Message with UPI Link
         let waUdhaarMsg = `*NAMASTE ${s.customer || 'Grahak'} Ji!*\n\n`;
         waUdhaarMsg += `Aapka *DN Footwear & Sports* (Siriyari) par udhaar baaki hai:\n`;
         waUdhaarMsg += `📋 *Bill No:* ${s.billNo || 'DN-Bill'}\n`;
         waUdhaarMsg += `🛍️ *Samaan:* ${s.name || 'Footwear'}\n`;
         waUdhaarMsg += `💰 *Kul Baaki Raashi:* ₹${amt}\n\n`;
-        waUdhaarMsg += `Kripya apna bhugtan jald se jald karein ya PhonePe/UPI dwara bhejein. Dhanyawad!\n`;
+        waUdhaarMsg += `Aap niche diye gaye link par click karke PhonePe/GooglePay se turant online bhugtan kar sakte hain:\n`;
+        waUdhaarMsg += `🔗 *Online Payment Link:* ${upiPaymentLink}\n\n`;
+        waUdhaarMsg += `Bhugtan karne ke baad screenshot zaroor bhejein. Dhanyawad!\n`;
         waUdhaarMsg += `📞 Mo: 8209452284`;
 
         let waUdhaarUrl = customerPhoneClean ? `https://wa.me/${customerPhoneClean}?text=` + encodeURIComponent(waUdhaarMsg) : '';
