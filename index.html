@@ -1142,7 +1142,19 @@
       </form>
     </div>
   </div>
-
+  
+<!-- ➕ MANUAL ITEM ADDITION BOX -->
+<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; margin-bottom:12px;">
+  <b style="font-size:11px; color:#166534; display:block; margin-bottom:6px;">+ Jo Item List Me Nahi Hai, Use Manual Jodein:</b>
+  <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap:6px; align-items:center;">
+    <input type="text" id="manItemName" placeholder="Item Naam..." class="form-control" style="font-size:11px; padding:5px;">
+    <input type="text" id="manItemColor" placeholder="Rang..." class="form-control" style="font-size:11px; padding:5px;">
+    <input type="text" id="manItemSize" placeholder="Size..." class="form-control" style="font-size:11px; padding:5px;">
+    <input type="number" id="manItemPrice" placeholder="Rate (₹)..." class="form-control" style="font-size:11px; padding:5px;">
+    <button type="button" class="btn btn-green" style="font-size:11px; padding:5px 10px;" onclick="addManualItemToBill()">+ Jodein</button>
+  </div>
+</div>
+  
   <!-- CHECK MODAL -->
   <div id="checkModal" class="modal">
     <div class="modal-box" style="max-width:500px; padding:22px;">
@@ -6095,6 +6107,40 @@ function printPLReport() {
     </html>
   `);
   printWindow.document.close();
+}
+    // ➕ Manual Item ko Bill me Jodne ka Function
+function addManualItemToBill() {
+  const name = document.getElementById('manItemName').value.trim();
+  const color = document.getElementById('manItemColor').value.trim() || 'General';
+  const size = document.getElementById('manItemSize').value.trim() || 'Standard';
+  const price = Number(document.getElementById('manItemPrice').value) || 0;
+
+  if (!name || price <= 0) {
+    alert("Kripya Item ka naam aur Sahi Rate (₹) bharein!");
+    return;
+  }
+
+  // Active bill items array me manual item add karna
+  activeBillItems.push({
+    itemId: 'manual_' + Date.now(),
+    name: name,
+    brand: 'Manual Item',
+    color: color,
+    size: size,
+    costPrice: 0, // Manual item ka cost 0 maana jayega
+    sellPrice: price,
+    qty: 1,
+    itemObj: null
+  });
+
+  // Inputs reset karein
+  document.getElementById('manItemName').value = '';
+  document.getElementById('manItemColor').value = '';
+  document.getElementById('manItemSize').value = '';
+  document.getElementById('manItemPrice').value = '';
+
+  // Bill list aur total update karein
+  renderActiveBillItemsList();
 }
     // initRozanaListeners();
     
