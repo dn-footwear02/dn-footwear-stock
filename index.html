@@ -4594,11 +4594,12 @@ window.onScanFound = function(code) {
 };
 
     // ==========================================
-// 📦 SUPPLIER & PURCHASE KHATA MODULE (COMPLETE)
+// 📦 SUPPLIER & PURCHASE KHATA MODULE (MULTI-ITEM & DELETE SUPPORT)
 // ==========================================
 
 let suppliersData = [];
 let supplierPurchases = [];
+let currentPurchaseItems = []; // Temporary cart for current purchase bill
 
 // Firebase listeners setup
 function initSupplierListeners() {
@@ -4618,7 +4619,11 @@ function initSupplierListeners() {
 function openSupplierModal() {
   document.getElementById('supplierActionArea').style.display = 'none';
   document.getElementById('supplierModal').style.display = 'flex';
-  renderSuppliersList();
+  db.ref('suppliers').once('value').then((snap) => {
+    const val = snap.val() || {};
+    suppliersData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    renderSuppliersList();
+  });
 }
 
 function closeSupplierModal() {
@@ -4632,111 +4637,120 @@ function showAddSupplierForm() {
   area.innerHTML = `
     <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:8px;">Naya Supplier / Holesale Company Jodein:</b>
     <div style="display:flex; gap:8px; flex-direction:column; margin-bottom:8px;">
-      <input type="text" id="supName" placeholder="Supplier / Company ka Naam..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-      <input type="text" id="supPerson" placeholder="Salesman / Malik ka Naam..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-      <input type="text" id="supPhone" placeholder="Mobile Number..." class="form-control" style="font-size:12px; margin-bottom:6px;">
-      <input type="text" id="supAddress" placeholder="Pata (Address/City)..." class="form-control" style="font-size:12px; margin-bottom:6px;">
+      <input type="text" id="supName" placeholder="Supplier / Company ka Naam..." class="form-control" style="font-size:12px; margin-bottom:6px; padding:6px; width:100%;">
+      <input type="text" id="supPerson" placeholder="Salesman / Malik ka Naam..." class="form-control" style="font-size:12px; margin-bottom:6px; padding:6px; width:100%;">
+      <input type="text" id="supPhone" placeholder="Mobile Number..." class="form-control" style="font-size:12px; margin-bottom:6px; padding:6px; width:100%;">
+      <input type="text" id="supAddress" placeholder="Pata (Address/City)..." class="form-control" style="font-size:12px; margin-bottom:6px; padding:6px; width:100%;">
     </div>
     <div style="display:flex; gap:6px;">
-      <button class="btn btn-green" style="font-size:11px; padding:6px 12px;" onclick="saveNewSupplier()">✓ Save Karein</button>
-      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('supplierActionArea').style.display='none'">Radd Karein</button>
+      <button class="btn btn-green" style="font-size:11px; padding:6px 12px; cursor:pointer;" onclick="saveNewSupplier()">✓ Save Karein</button>
+      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px; cursor:pointer;" onclick="document.getElementById('supplierActionArea').style.display='none'">Radd Karein</button>
     </div>
   `;
 }
 
 function saveNewSupplier() {
-  const nameInput = document.getElementById('supName');
-  const personInput = document.getElementById('supPerson');
-  const phoneInput = document.getElementById('supPhone');
-  const addressInput = document.getElementById('supAddress');
-
-  const name = nameInput ? nameInput.value.trim() : '';
-  const person = personInput ? personInput.value.trim() : '';
-  const phone = phoneInput ? phoneInput.value.trim() : '';
-  const address = addressInput ? addressInput.value.trim() : '';
+  const name = document.getElementById('supName').value.trim();
+  const person = document.getElementById('supPerson').value.trim();
+  const phone = document.getElementById('supPhone').value.trim();
+  const address = document.getElementById('supAddress').value.trim();
 
   if (!name) {
     alert("Kripya Supplier ka naam likhein!");
     return;
   }
 
-  if (typeof db === 'undefined' || !db) {
-    alert("Database connection (db) nahi mil raha hai! Kripya page refresh karein.");
-    return;
-  }
-
-  const newRef = db.ref('suppliers').push();
-  newRef.set({
-    name: name,
-    person: person,
-    phone: phone,
-    address: address,
+  db.ref('suppliers').push({
+    name, person, phone, address,
     balanceDue: 0,
     createdAt: Date.now()
-  }, (err) => {
-    if (!err) {
-      alert("✓ Supplier safalta-purvak jud gaya hai!");
-      document.getElementById('supplierActionArea').style.display = 'none';
-      if(nameInput) nameInput.value = '';
-      if(personInput) personInput.value = '';
-      if(phoneInput) phoneInput.value = '';
-      if(addressInput) addressInput.value = '';
-    } else {
-      alert("Supplier save karne me error aayi: " + err.message);
-    }
+  }).then(() => {
+    alert("✓ Supplier safalta-purvak jud gaya hai!");
+    document.getElementById('supplierActionArea').style.display = 'none';
+    db.ref('suppliers').once('value').then((snap) => {
+      const val = snap.val() || {};
+      suppliersData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+      renderSuppliersList();
+    });
+  }).catch((err) => {
+    alert("Error: " + err.message);
   });
 }
 
-// 2. Nayi Purchase (Item-wise Rate Tracking ke sath) Form
+// Supplier Delete Function
+function deleteSupplier(supId) {
+  if (confirm("Kya aap sach me is supplier ko delete karna chahte hain?")) {
+    db.ref('suppliers/' + supId).remove().then(() => {
+      alert("✓ Supplier delete ho gaya hai.");
+      db.ref('suppliers').once('value').then((snap) => {
+        const val = snap.val() || {};
+        suppliersData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+        renderSuppliersList();
+      });
+    });
+  }
+}
+
+// 2. Nayi Purchase Form (Multi-Item List Support)
 function showAddPurchaseForm() {
   const area = document.getElementById('supplierActionArea');
   if (suppliersData.length === 0) {
-    alert("Pehle kripya upar '+ Naya Supplier Jodein' par click karke ek supplier banayein!");
+    alert("Pehle kripya upar '+ Naya Supplier Jodein' karke supplier banayein!");
     return;
   }
 
+  currentPurchaseItems = []; // Reset cart list
+
   let supOptions = suppliersData.map(s => `<option value="${s.id}">${s.name} (${s.phone || 'No phone'})</option>`).join('');
-  let storeItemOptions = (typeof items !== 'undefined' ? items : []).map(it => `<option value="${it.name}" data-price="${it.price}">${it.name} (${it.brand || 'General'})</option>`).join('');
+  let storeItemOptions = (typeof items !== 'undefined' ? items : []).map(it => `<option value="${it.name}">${it.name} (${it.brand || 'General'})</option>`).join('');
 
   area.style.display = 'block';
   area.innerHTML = `
-    <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:8px;">📦 Item-wise Purchase Entry (Mal Kharid):</b>
+    <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:8px;">📦 Multi-Item Purchase Entry (Bill Banayein):</b>
     <div style="display:flex; gap:8px; flex-direction:column; margin-bottom:8px;">
-      <select id="purSupplierId" class="form-control" style="font-size:12px; margin-bottom:6px;">
+      <select id="purSupplierId" class="form-control" style="font-size:12px; margin-bottom:6px; padding:6px;">
         <option value="">-- Supplier Chunein --</option>
         ${supOptions}
       </select>
       
       <div style="display:flex; gap:6px;">
-        <input type="text" id="purBillNo" placeholder="Bill / Invoice No..." class="form-control" style="font-size:12px; flex:1; margin-bottom:6px;">
-        <input type="date" id="purDate" class="form-control" style="font-size:12px; width:130px; margin-bottom:6px;">
+        <input type="text" id="purBillNo" placeholder="Bill / Invoice No..." class="form-control" style="font-size:12px; flex:1; padding:6px;">
+        <input type="date" id="purDate" class="form-control" style="font-size:12px; width:130px; padding:6px;">
       </div>
 
-      <div style="background:#fff; border:1px solid #cbd5e1; padding:8px; border-radius:6px; margin-bottom:6px;">
-        <b style="font-size:11px; color:#475569; display:block; margin-bottom:4px;">Kharide Gaye Item ka Vivaran:</b>
+      <!-- Item Add Section -->
+      <div style="background:#fff; border:1px solid #cbd5e1; padding:8px; border-radius:6px; margin-top:6px;">
+        <b style="font-size:11px; color:#475569; display:block; margin-bottom:4px;">Ek-ek karke item list me jodein:</b>
         <div style="display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
-          <select id="purItemSelect" class="form-control" style="font-size:11px; flex:2;" onchange="checkPreviousItemRate(this)">
-            <option value="">-- Dukan ka Item Chunein (Ya Naya Naam Likhein) --</option>
+          <select id="purItemSelect" class="form-control" style="font-size:11px; flex:2; padding:5px;" onchange="document.getElementById('purItemNameCustom').value=this.value;">
+            <option value="">-- Dukan ka Item Chunein --</option>
             ${storeItemOptions}
           </select>
-          <input type="text" id="purItemNameCustom" placeholder="Ya Naya Item Naam..." class="form-control" style="font-size:11px; flex:2;">
+          <input type="text" id="purItemNameCustom" placeholder="Item Naam..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
         </div>
-        <div style="display:flex; gap:6px;">
-          <input type="number" id="purItemQty" placeholder="Quantity (Jodi/Pcs)..." class="form-control" style="font-size:11px; flex:1;" oninput="calcItemTotal()">
-          <input type="number" id="purItemRate" placeholder="Per Piece/Pair Rate (₹)..." class="form-control" style="font-size:11px; flex:1;" oninput="calcItemTotal()">
-          <input type="number" id="purItemTotal" placeholder="Total Amt (₹)..." class="form-control" style="font-size:11px; flex:1; background:#f1f5f9;" readonly>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="number" id="purItemQty" placeholder="Qty (Jodi)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
+          <input type="number" id="purItemRate" placeholder="Rate per Pair (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
+          <button class="btn btn-indigo" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="addItemToPurchaseList()">+ List Me Jodein</button>
         </div>
-        <small id="prevRateInfo" style="font-size:10px; color:#9333ea; display:block; margin-top:4px; font-weight:bold;"></small>
       </div>
 
-      <div style="display:flex; gap:6px;">
-        <input type="number" id="purPaidAmt" placeholder="Nadi Diya (Paid Cash/Online ₹)..." class="form-control" style="font-size:12px; flex:1;" oninput="calcRemainingUdhaar()">
+      <!-- Added Items Table/List Preview -->
+      <div id="purchaseItemsListContainer" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:8px; max-height:150px; overflow-y:auto;">
+        <i style="font-size:11px; color:#64748b;">Abhi koi item nahi joda gaya hai. Upar se item add karein.</i>
       </div>
-      <div style="font-size:11px; color:#475569; font-weight:bold; margin-top:2px;" id="purRemainingText">Baaki Udhaar: ₹0</div>
+
+      <!-- Bill Totals -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; padding:8px; border-radius:6px; font-size:12px;">
+        <b>Kul Bill Amount: <span id="displayTotalBillAmt">₹0</span></b>
+        <input type="number" id="purPaidAmt" placeholder="Nadi Diya (Paid ₹)..." class="form-control" style="font-size:11px; width:130px; padding:4px;" oninput="calcRemainingFromTotal()">
+      </div>
+      <div style="font-size:11px; color:#475569; font-weight:bold;" id="purRemainingText">Baaki Udhaar: ₹0</div>
     </div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-green" style="font-size:11px; padding:6px 12px;" onclick="saveItemWisePurchaseEntry()">✓ Purchase Save Karein</button>
-      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('supplierActionArea').style.display='none'">Radd Karein</button>
+    
+    <div style="display:flex; gap:6px; margin-top:8px;">
+      <button class="btn btn-green" style="font-size:11px; padding:6px 12px; cursor:pointer;" onclick="saveFullPurchaseBill()">✓ Poora Bill Save Karein</button>
+      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px; cursor:pointer;" onclick="document.getElementById('supplierActionArea').style.display='none'">Radd Karein</button>
     </div>
   `;
 
@@ -4745,105 +4759,120 @@ function showAddPurchaseForm() {
   if(dateInput) dateInput.value = today;
 }
 
-// Check previous item rate
-function checkPreviousItemRate(selectElem) {
-  const itemName = selectElem.value;
-  const customInput = document.getElementById('purItemNameCustom');
-  if(customInput) customInput.value = itemName;
+// Add item to temporary cart list
+function addItemToPurchaseList() {
+  const name = document.getElementById('purItemNameCustom').value.trim();
+  const qty = Number(document.getElementById('purItemQty').value) || 0;
+  const rate = Number(document.getElementById('purItemRate').value) || 0;
 
-  const infoText = document.getElementById('prevRateInfo');
-  if(!itemName || !supplierPurchases) {
-    if(infoText) infoText.innerText = '';
+  if (!name || qty <= 0 || rate <= 0) {
+    alert("Kripya Item ka naam, Quantity aur Rate sahi se bharein!");
     return;
   }
 
-  let lastPurchase = null;
-  for(let p of supplierPurchases) {
-    if(p.items && Array.isArray(p.items)) {
-      let found = p.items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
-      if(found) {
-        lastPurchase = found;
-        break;
-      }
-    }
-  }
-
-  if(lastPurchase && lastPurchase.rate) {
-    infoText.innerText = `💡 Pichhli khareed rate: ₹${lastPurchase.rate} per pair (${new Date(lastPurchase.date || Date.now()).toLocaleDateString('en-IN')})`;
-  } else {
-    infoText.innerText = `✨ Yeh pehli baar is item ki entry ho rahi hai.`;
-  }
-}
-
-function calcItemTotal() {
-  const qty = Number(document.getElementById('purItemQty').value) || 0;
-  const rate = Number(document.getElementById('purItemRate').value) || 0;
   const total = qty * rate;
+  currentPurchaseItems.push({ name, qty, rate, total });
 
-  document.getElementById('purItemTotal').value = total;
-  document.getElementById('purPaidAmt').value = total;
-  calcRemainingUdhaar();
+  // Reset item inputs for next item
+  document.getElementById('purItemNameCustom').value = '';
+  document.getElementById('purItemQty').value = '';
+  document.getElementById('purItemRate').value = '';
+  document.getElementById('purItemSelect').value = '';
+
+  renderPurchaseItemsTable();
 }
 
-function calcRemainingUdhaar() {
-  const total = Number(document.getElementById('purItemTotal').value) || 0;
+// Render temporary items list
+function renderPurchaseItemsTable() {
+  const container = document.getElementById('purchaseItemsListContainer');
+  if (!container) return;
+
+  if (currentPurchaseItems.length === 0) {
+    container.innerHTML = '<i style="font-size:11px; color:#64748b;">Abhi koi item nahi joda gaya hai.</i>';
+    document.getElementById('displayTotalBillAmt').innerText = '₹0';
+    document.getElementById('purPaidAmt').value = '';
+    calcRemainingFromTotal();
+    return;
+  }
+
+  let grandTotal = 0;
+  container.innerHTML = currentPurchaseItems.map((it, idx) => {
+    grandTotal += it.total;
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-bottom:1px solid #cbd5e1; font-size:11px; margin-bottom:3px; border-radius:4px;">
+        <div><b>${it.name}</b> - ${it.qty} Jodi @ ₹${it.rate} = <b>₹${it.total}</b></div>
+        <button class="btn btn-red" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="removePurchaseItem(${idx})">Hataayein</button>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('displayTotalBillAmt').innerText = '₹' + grandTotal;
+  document.getElementById('purPaidAmt').value = grandTotal;
+  calcRemainingFromTotal();
+}
+
+// Remove item from cart list
+function removePurchaseItem(index) {
+  currentPurchaseItems.splice(index, 1);
+  renderPurchaseItemsTable();
+}
+
+function calcRemainingFromTotal() {
+  const totalText = document.getElementById('displayTotalBillAmt').innerText.replace('₹', '');
+  const total = Number(totalText) || 0;
   const paid = Number(document.getElementById('purPaidAmt').value) || 0;
   const rem = total - paid;
   document.getElementById('purRemainingText').innerText = `Baaki Udhaar: ₹${rem} (${rem > 0 ? 'Denaa baaki hai' : 'Hisaab barabar'})`;
 }
 
-// Save Purchase Entry
-function saveItemWisePurchaseEntry() {
+// Save Full Multi-Item Purchase Bill
+function saveFullPurchaseBill() {
   const supId = document.getElementById('purSupplierId').value;
   const billNo = document.getElementById('purBillNo').value.trim();
-  const itemName = document.getElementById('purItemNameCustom').value.trim() || document.getElementById('purItemSelect').value;
-  const qty = Number(document.getElementById('purItemQty').value) || 0;
-  const rate = Number(document.getElementById('purItemRate').value) || 0;
-  const totalAmt = Number(document.getElementById('purItemTotal').value) || (qty * rate);
   const paidAmt = Number(document.getElementById('purPaidAmt').value) || 0;
 
-  if (!supId || !itemName || qty <= 0 || rate <= 0) {
-    alert("Kripya Supplier, Item Naam, Quantity aur Rate sahi se bharein!");
+  if (!supId) {
+    alert("Kripya Supplier chunein!");
+    return;
+  }
+  if (currentPurchaseItems.length === 0) {
+    alert("Kripya kam se kam ek item list me jodein!");
     return;
   }
 
-  const remaining = totalAmt - paidAmt;
+  let totalAmt = currentPurchaseItems.reduce((sum, it) => sum + it.total, 0);
+  let remaining = totalAmt - paidAmt;
   const purchaseDate = document.getElementById('purDate').value ? new Date(document.getElementById('purDate').value).getTime() : Date.now();
-
-  const itemObj = {
-    name: itemName,
-    qty: qty,
-    rate: rate,
-    total: totalAmt,
-    date: purchaseDate
-  };
 
   const pRef = db.ref('supplier_purchases').push();
   pRef.set({
     supplierId: supId,
     billNo: billNo || 'N/A',
-    items: [itemObj],
-    description: `${qty} Jodi ${itemName} @ ₹${rate}/pc`,
+    items: currentPurchaseItems,
+    description: `${currentPurchaseItems.length} items purchased`,
     totalAmount: totalAmt,
     paidAmount: paidAmt,
     remainingAmount: remaining,
     date: purchaseDate
-  });
+  }).then(() => {
+    // Update Supplier Balance Due
+    const supRef = db.ref('suppliers/' + supId);
+    supRef.once('value').then((snap) => {
+      const sup = snap.val();
+      if (sup) {
+        const curDue = Number(sup.balanceDue) || 0;
+        supRef.update({ balanceDue: curDue + remaining });
+      }
+    });
 
-  const supRef = db.ref('suppliers/' + supId);
-  supRef.once('value').then((snap) => {
-    const sup = snap.val();
-    if (sup) {
-      const curDue = Number(sup.balanceDue) || 0;
-      supRef.update({ balanceDue: curDue + remaining });
-    }
+    alert("✓ Poora purchase bill safalta-purvak save ho gaya hai!");
+    document.getElementById('supplierActionArea').style.display = 'none';
+  }).catch((err) => {
+    alert("Error: " + err.message);
   });
-
-  alert("✓ Item-wise Purchase entry safalta-purvak save ho gayi hai!");
-  document.getElementById('supplierActionArea').style.display = 'none';
 }
 
-// 3. Render Suppliers List & Balances
+// 3. Render Suppliers List (With Delete Option)
 function renderSuppliersList() {
   const container = document.getElementById('suppliersListContainer');
   if (!container) return;
@@ -4861,13 +4890,14 @@ function renderSuppliersList() {
           <b style="font-size:13px; color:#1e1b4b;">${s.name}</b> <small style="color:#64748b;">(${s.person || 'No person'} - ${s.phone || 'No phone'})</small><br>
           <small style="color:#64748b;">Pata: ${s.address || 'N/A'}</small>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <div style="text-align:right;">
-            <small style="font-size:10px; color:#64748b; display:block;">Baaki Denaa Hai:</small>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="text-align:right; margin-right:5px;">
+            <small style="font-size:10px; color:#64748b; display:block;">Baaki Denaa:</small>
             <b style="font-size:13px; color:${dueColor};">₹${s.balanceDue || 0}</b>
           </div>
-          <button class="btn btn-indigo" style="font-size:10px; padding:5px 10px;" onclick="openSupplierKhataDetail('${s.id}')">Khata Dekhein</button>
-          <button class="btn btn-green" style="font-size:10px; padding:5px 10px;" onclick="openPaySupplierModal('${s.id}', ${s.balanceDue || 0})">Paisa Chukaiye</button>
+          <button class="btn btn-indigo" style="font-size:10px; padding:5px 8px; cursor:pointer;" onclick="openSupplierKhataDetail('${s.id}')">Khata</button>
+          <button class="btn btn-green" style="font-size:10px; padding:5px 8px; cursor:pointer;" onclick="openPaySupplierModal('${s.id}', ${s.balanceDue || 0})">Payment</button>
+          <button class="btn btn-red" style="font-size:10px; padding:5px 8px; cursor:pointer;" onclick="deleteSupplier('${s.id}')">Delete</button>
         </div>
       </div>
     `;
@@ -4885,12 +4915,12 @@ function openPaySupplierModal(supId, currentDue) {
     <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:6px;">[${sup.name}] ko Payment Bhugtan Karein:</b>
     <p style="font-size:11px; color:#64748b; margin-bottom:6px;">Kul Baaki Udhaar: ₹${currentDue}</p>
     <div style="display:flex; gap:6px; margin-bottom:6px;">
-      <input type="number" id="payAmountInput" placeholder="Kitna paisa diya (₹)..." class="form-control" style="font-size:12px; flex:1;">
-      <input type="text" id="payNoteInput" placeholder="Remark / Notes..." class="form-control" style="font-size:12px; flex:1;">
+      <input type="number" id="payAmountInput" placeholder="Kitna paisa diya (₹)..." class="form-control" style="font-size:12px; flex:1; padding:5px;">
+      <input type="text" id="payNoteInput" placeholder="Remark / Notes..." class="form-control" style="font-size:12px; flex:1; padding:5px;">
     </div>
     <div style="display:flex; gap:6px;">
-      <button class="btn btn-green" style="font-size:11px; padding:6px 12px;" onclick="submitSupplierPayment('${supId}', ${currentDue})">✓ Payment Darj Karein</button>
-      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('supplierActionArea').style.display='none'">Band Karein</button>
+      <button class="btn btn-green" style="font-size:11px; padding:6px 12px; cursor:pointer;" onclick="submitSupplierPayment('${supId}', ${currentDue})">✓ Payment Darj Karein</button>
+      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px; cursor:pointer;" onclick="document.getElementById('supplierActionArea').style.display='none'">Band Karein</button>
     </div>
   `;
 }
@@ -4916,10 +4946,10 @@ function submitSupplierPayment(supId, currentDue) {
     paidAmount: payAmt,
     remainingAmount: -payAmt,
     date: Date.now()
+  }).then(() => {
+    alert("✓ Payment safalta-purvak jodh di gayi hai!");
+    document.getElementById('supplierActionArea').style.display = 'none';
   });
-
-  alert("✓ Payment safalta-purvak jodh di gayi hai!");
-  document.getElementById('supplierActionArea').style.display = 'none';
 }
 
 // 5. Khata Ledger History
@@ -4953,7 +4983,7 @@ function openSupplierKhataDetail(supId) {
   area.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <b style="font-size:13px; color:#1e1b4b;">📂 ${sup.name} ka Ledger Khata History</b>
-      <button class="btn btn-slate" style="font-size:10px; padding:3px 8px;" onclick="document.getElementById('supplierActionArea').style.display='none'">Band Karein</button>
+      <button class="btn btn-slate" style="font-size:10px; padding:3px 8px; cursor:pointer;" onclick="document.getElementById('supplierActionArea').style.display='none'">Band Karein</button>
     </div>
     <div style="max-height:240px; overflow-y:auto;">
       ${historyHtml}
