@@ -909,6 +909,20 @@
   <button class="btn btn-indigo" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="printMonthlyRozanaReport()">🖨️ Print / PDF Report</button>
 </div>
 
+    <!-- Custom Date Range & Print Report Box -->
+<div style="background:#f1f5f9; border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-bottom:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+  <div style="font-size:11px; font-weight:bold; color:#334155; width:100%;">Tarikhe Chunein (Report ke liye):</div>
+  <div style="display:flex; align-items:center; gap:4px; font-size:11px;">
+    <span>Se (From):</span>
+    <input type="date" id="reportStartDate" class="form-control" style="font-size:11px; padding:4px;">
+  </div>
+  <div style="display:flex; align-items:center; gap:4px; font-size:11px;">
+    <span>Tak (To):</span>
+    <input type="date" id="reportEndDate" class="form-control" style="font-size:11px; padding:4px;">
+  </div>
+  <button class="btn btn-indigo" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="printCustomRozanaReport()">🖨️ Report Print / PDF</button>
+</div>
+
     <div style="display:flex; justify-content:flex-end; margin-top:12px;">
       <button class="btn btn-slate" style="font-size:11px; padding:6px 12px;" onclick="closeRozanaModal()">Band Karein</button>
     </div>
@@ -5645,6 +5659,179 @@ function printMonthlyRozanaReport() {
           <tbody>
             ${monthlySalesList.length === 0 ? '<tr><td colspan="3" style="text-align:center; color:#64748b;">Is mahine ki koi cash bikri darj nahi hai.</td></tr>' : 
               monthlySalesList.map(s => `
+                <tr>
+                  <td>${new Date(s.date || Date.now()).toLocaleString('en-IN')}</td>
+                  <td><b>${s.title}</b></td>
+                  <td class="text-right" style="color: #15803d;">+₹${s.amount}</td>
+                </tr>
+              `).join('')
+            }
+          </tbody>
+        </table>
+
+        <div style="margin-top: 30px; text-align: center;" class="no-print">
+          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">Print / Save as PDF</button>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+    // ==========================================
+// 🖨️ CUSTOM DATE RANGE ROZANA & CASH REPORT (PRINT/PDF)
+// ==========================================
+
+// Modal khulte hi date inputs me aaj ki date default set karne ke liye
+function openRozanaModal() {
+  document.getElementById('rozanaModal').style.display = 'flex';
+  refreshRozanaData();
+
+  // Set default dates (Aaj ki date)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const startInput = document.getElementById('reportStartDate');
+  const endInput = document.getElementById('reportEndDate');
+  if(startInput && !startInput.value) startInput.value = todayStr;
+  if(endInput && !endInput.value) endInput.value = todayStr;
+}
+
+function printCustomRozanaReport() {
+  const startDateVal = document.getElementById('reportStartDate').value;
+  const endDateVal = document.getElementById('reportEndDate').value;
+
+  if (!startDateVal || !endDateVal) {
+    alert("Kripya Start Date aur End Date dono chunein!");
+    return;
+  }
+
+  const startTime = new Date(startDateVal).setHours(0, 0, 0, 0);
+  const endTime = new Date(endDateVal).setHours(23, 59, 59, 999);
+
+  if (startTime > endTime) {
+    alert("Start date, End date se badi nahi ho sakti!");
+    return;
+  }
+
+  // Filter expenses based on selected date range
+  const filteredExpenses = expensesData.filter(e => {
+    const eDate = e.date || Date.now();
+    return eDate >= startTime && eDate <= endTime;
+  });
+
+  const totalExp = filteredExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+  // Filter sales (system + manual) based on selected date range
+  let totalSales = 0;
+  let filteredSalesList = [];
+
+  if (salesHistory && salesHistory.length > 0) {
+    salesHistory.forEach(s => {
+      let sDate = s.date || Date.now();
+      if (sDate >= startTime && sDate <= endTime) {
+        filteredSalesList.push({ date: sDate, title: `Bill: ${s.billNo || 'N/A'} (${s.customerName || 'Cash'})`, amount: Number(s.total) || 0 });
+        totalSales += (Number(s.total) || 0);
+      }
+    });
+  }
+
+  if (manualSalesData && manualSalesData.length > 0) {
+    manualSalesData.forEach(m => {
+      let mDate = m.date || Date.now();
+      if (mDate >= startTime && mDate <= endTime) {
+        filteredSalesList.push({ date: mDate, title: `Manual: ${m.note || 'Cash Sale'}`, amount: Number(m.total) || 0 });
+        totalSales += (Number(m.total) || 0);
+      }
+    });
+  }
+
+  filteredSalesList.sort((a, b) => b.date - a.date);
+  filteredExpenses.sort((a, b) => b.date - a.date);
+
+  // Format dates for display
+  const formatDateStr = (dStr) => {
+    const d = new Date(dStr);
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+  };
+
+  const dateRangeTitle = startDateVal === endDateVal ? `Din: ${formatDateStr(startDateVal)}` : `Avadhi (From ${formatDateStr(startDateVal)} To ${formatDateStr(endDateVal)})`;
+
+  // Print Window HTML Layout
+  let printWindow = window.open('', '_blank', 'width=800,height=600');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Rozana Kharcha & Cash Report - ${startDateVal} to ${endDateVal}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          h2, h3 { text-align: center; margin: 5px 0; }
+          .shop-info { text-align: center; font-size: 12px; margin-bottom: 20px; color: #555; }
+          .summary-box { display: flex; justify-content: space-around; background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 20px; }
+          .summary-item { text-align: center; }
+          .summary-item b { font-size: 16px; display: block; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+          th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+          th { background: #f1f5f9; }
+          .text-right { text-align: right; }
+          @media print {
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <h2>DN FOOTWEAR & SPORTS</h2>
+        <div class="shop-info">Siriyari Bus Stand ke paas | Mob: 8209452284</div>
+        <h3>Rozana Kharcha & Cash Report</h3>
+        <div style="text-align: center; font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 15px;">${dateRangeTitle}</div>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+
+        <div class="summary-box">
+          <div class="summary-item">
+            <span style="color: #166534;">Kul Bikri Cash</span>
+            <b style="color: #15803d;">₹${totalSales}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #991b1b;">Kul Kharcha</span>
+            <b style="color: #dc2626;">₹${totalExp}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #1e40af;">Net Bachat / Galla Cash</span>
+            <b style="color: #2563eb;">₹${totalSales - totalExp}</b>
+          </div>
+        </div>
+
+        <h4>1. Kharche ki List:</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Tarikh & Samay</th>
+              <th>Kharche ka Karan (Reason)</th>
+              <th class="text-right">Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredExpenses.length === 0 ? '<tr><td colspan="3" style="text-align:center; color:#64748b;">Is avadhi me koi kharcha nahi hai.</td></tr>' : 
+              filteredExpenses.map(e => `
+                <tr>
+                  <td>${new Date(e.date || Date.now()).toLocaleString('en-IN')}</td>
+                  <td><b>${e.reason}</b></td>
+                  <td class="text-right" style="color: #dc2626;">-₹${e.amount}</td>
+                </tr>
+              `).join('')
+            }
+          </tbody>
+        </table>
+
+        <h4>2. Cash Bikri (Sales & Manual) ki List:</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Tarikh & Samay</th>
+              <th>Vivaran (Details)</th>
+              <th class="text-right">Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredSalesList.length === 0 ? '<tr><td colspan="3" style="text-align:center; color:#64748b;">Is avadhi me koi cash bikri darj nahi hai.</td></tr>' : 
+              filteredSalesList.map(s => `
                 <tr>
                   <td>${new Date(s.date || Date.now()).toLocaleString('en-IN')}</td>
                   <td><b>${s.title}</b></td>
