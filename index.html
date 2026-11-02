@@ -541,18 +541,27 @@
   <div class="modal-box" style="background:#fff; width:100%; max-width:700px; padding:20px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
       <div>
-        <h3 style="font-size:17px; font-weight:900; color:#1e1b4b; margin:0;">🏷️ Barcode Printing Module (Custom Size)</h3>
-        <p style="font-size:11px; color:#64748b; margin:2px 0 0 0;">Label ka size aur ek page par print hone wale barcode ki sankhya chunein</p>
+        <h3 style="font-size:17px; font-weight:900; color:#1e1b4b; margin:0;">🏷️ Advanced Barcode Printing Module</h3>
+        <p style="font-size:11px; color:#64748b; margin:2px 0 0 0;">Manual barcode code, alag-alag ya same barcodes print karne ka option</p>
       </div>
       <button class="btn btn-slate" onclick="closeBarcodeModal()" style="background:#64748b; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">✕</button>
     </div>
 
-    <!-- Select Item & Custom Settings -->
+    <!-- Mode Selection: Single Item (Same Barcodes) vs Multiple Items -->
+    <div style="display:flex; gap:10px; margin-bottom:10px; background:#f1f5f9; padding:8px; border-radius:6px; font-size:11px;">
+      <label style="font-weight:bold; color:#334155; align-self:center;">Print Mode:</label>
+      <label style="cursor:pointer;"><input type="radio" name="bcMode" value="single" checked onclick="toggleBarcodeMode()"> Ek hi Item ke Same Barcodes</label>
+      <label style="cursor:pointer;"><input type="radio" name="bcMode" value="manual" onclick="toggleBarcodeMode()"> Manual Code / Custom Item</label>
+    </div>
+
+    <!-- Stock / Manual Input Area -->
     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
-      <label style="font-size:12px; font-weight:bold; color:#334155;">Dukaan ka Item Chunein:</label>
-      <select id="bcItemSelect" class="form-control" style="font-size:12px; padding:6px;" onchange="loadBarcodeItemDetails()">
-        <option value="">-- Item Chunein --</option>
-      </select>
+      <div id="stockSelectBox">
+        <label style="font-size:12px; font-weight:bold; color:#334155;">Dukaan ke Stock se Chunein:</label>
+        <select id="bcItemSelect" class="form-control" style="font-size:12px; padding:6px; width:100%;" onchange="loadBarcodeItemDetails()">
+          <option value="">-- Item Chunein --</option>
+        </select>
+      </div>
 
       <div style="display:flex; gap:8px; margin-top:4px;">
         <div style="flex:2;">
@@ -563,6 +572,12 @@
           <label style="font-size:11px; color:#64748b; display:block; margin-bottom:2px;">Rate (₹):</label>
           <input type="number" id="bcItemPrice" class="form-control" style="font-size:11px; padding:5px; width:100%;" placeholder="Price">
         </div>
+      </div>
+
+      <!-- Manual Barcode Code Input -->
+      <div style="margin-top:2px;">
+        <label style="font-size:11px; color:#64748b; display:block; margin-bottom:2px;">Barcode Code (Manual ya Auto):</label>
+        <input type="text" id="bcCustomCode" class="form-control" style="font-size:11px; padding:5px; width:100%;" placeholder="Jaise: DN-1001 ya apni marzi ka code">
       </div>
 
       <!-- Custom Size & Page Layout Settings -->
@@ -576,14 +591,14 @@
           <input type="number" id="bcHeight" value="30" class="form-control" style="font-size:11px; padding:5px; width:100%;">
         </div>
         <div style="flex:1;">
-          <label style="font-size:11px; font-weight:bold; color:#334155; display:block; margin-bottom:2px;">Kul Print Sankhya (Qty):</label>
+          <label style="font-size:11px; font-weight:bold; color:#334155; display:block; margin-bottom:2px;">Print Qty (Sankhya):</label>
           <input type="number" id="bcQty" value="10" min="1" class="form-control" style="font-size:11px; padding:5px; width:100%;">
         </div>
       </div>
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:6px;">
-      <button class="btn btn-green" style="font-size:11px; padding:6px 14px; cursor:pointer; background:#10b981; color:#fff; border:none; border-radius:4px;" onclick="printCustomBarcodeLabels()">🖨️ Custom Barcode Print Karein</button>
+      <button class="btn btn-green" style="font-size:11px; padding:6px 14px; cursor:pointer; background:#10b981; color:#fff; border:none; border-radius:4px;" onclick="printAdvancedBarcodeLabels()">🖨️ Barcode Print Karein</button>
       <button class="btn btn-slate" style="font-size:11px; padding:6px 12px; background:#64748b; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="closeBarcodeModal()">Band Karein</button>
     </div>
   </div>
@@ -6151,13 +6166,16 @@ function printPLReport() {
   printWindow.document.close();
 }
 
-    // ==========================================
-// 🏷️ CUSTOM SIZE BARCODE PRINTING MODULE
+  // ==========================================
+// 🏷️ ADVANCED BARCODE PRINTING MODULE
 // ==========================================
 
 function openBarcodeModal() {
   document.getElementById('barcodeModal').style.display = 'flex';
   populateBarcodeItemDropdown();
+  
+  // Default random barcode code
+  document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
 }
 
 function closeBarcodeModal() {
@@ -6173,6 +6191,20 @@ function populateBarcodeItemDropdown() {
     allItems.map((it, idx) => `<option value="${idx}">${it.name} (₹${it.price || 0})</option>`).join('');
 }
 
+function toggleBarcodeMode() {
+  const mode = document.querySelector('input[name="bcMode"]:checked').value;
+  const stockBox = document.getElementById('stockSelectBox');
+  
+  if (mode === 'manual') {
+    stockBox.style.display = 'none';
+    document.getElementById('bcItemName').value = '';
+    document.getElementById('bcItemPrice').value = '';
+    document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+  } else {
+    stockBox.style.display = 'block';
+  }
+}
+
 function loadBarcodeItemDetails() {
   const idx = document.getElementById('bcItemSelect').value;
   if (idx === '') return;
@@ -6182,12 +6214,14 @@ function loadBarcodeItemDetails() {
   if (selectedItem) {
     document.getElementById('bcItemName').value = selectedItem.name || '';
     document.getElementById('bcItemPrice').value = selectedItem.price || 0;
+    document.getElementById('bcCustomCode').value = 'DN-' + (selectedItem.id || Math.floor(1000 + Math.random() * 9000));
   }
 }
 
-function printCustomBarcodeLabels() {
+function printAdvancedBarcodeLabels() {
   const name = document.getElementById('bcItemName').value.trim();
   const price = Number(document.getElementById('bcItemPrice').value) || 0;
+  const code = document.getElementById('bcCustomCode').value.trim() || 'DN-1001';
   const widthMm = Number(document.getElementById('bcWidth').value) || 50;
   const heightMm = Number(document.getElementById('bcHeight').value) || 30;
   const totalQty = Number(document.getElementById('bcQty').value) || 1;
@@ -6197,7 +6231,7 @@ function printCustomBarcodeLabels() {
     return;
   }
 
-  // Generate labels based on total quantity entered
+  // Generate labels based on quantity and custom code
   let labelsHtml = '';
   for (let i = 0; i < totalQty; i++) {
     labelsHtml += `
@@ -6206,7 +6240,7 @@ function printCustomBarcodeLabels() {
         <div style="font-size: 9px; font-weight: bold; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${name}</div>
         <div style="font-size: 10px; font-weight: bold; color: #000; margin-bottom: 2px; line-height: 1;">₹${price}</div>
         <div style="font-family: monospace; font-size: 12px; font-weight: bold; color: #000; letter-spacing: 1px; line-height: 1;">||| | |||| ||</div>
-        <div style="font-size: 7px; color: #333; margin-top: 1px;">*DN-${Math.floor(1000 + Math.random() * 9000)}*</div>
+        <div style="font-size: 7px; color: #333; margin-top: 1px;">*${code}*</div>
       </div>
     `;
   }
@@ -6215,7 +6249,7 @@ function printCustomBarcodeLabels() {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Custom Barcode Labels</title>
+        <title>Barcode Labels - ${code}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 0; padding: 5mm; }
           .container { display: flex; flex-wrap: wrap; align-content: flex-start; }
