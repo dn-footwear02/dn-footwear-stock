@@ -486,103 +486,72 @@
 
   <!-- ==================== MODALS ==================== -->
 
- let window.directSalesHistory = [];
+ <!-- ⚡ DIRECT SALE MODAL (ADMIN PANEL) -->
+<div id="directSaleModal" class="modal">
+  <div class="modal-box" style="max-width:420px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+      <h3 style="font-size:16px; font-weight:800; color:#0f172a;">⚡ Direct Bikri Darj Karein (Non-Stock)</h3>
+      <button class="btn btn-slate" onclick="closeDirectSaleModal()">✕</button>
+    </div>
 
-function openDirectSaleModal() {
-  document.getElementById('dsItemName').value = '';
-  document.getElementById('dsItemQty').value = '1';
-  document.getElementById('dsItemPrice').value = '';
-  document.getElementById('dsCustName').value = '';
-  document.getElementById('dsCustPhone').value = '';
-  document.querySelector('input[name="dsPayMode"][value="Cash"]').checked = true;
-  
-  renderRecentDirectSalesInModal();
-  document.getElementById('directSaleModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('dsItemName').focus(), 100);
-}
-
-function closeDirectSaleModal() {
-  document.getElementById('directSaleModal').style.display = 'none';
-}
-
-function submitDirectSaleEntry(e) {
-  e.preventDefault();
-
-  const itemName = document.getElementById('dsItemName').value.trim();
-  const itemQty = Number(document.getElementById('dsItemQty').value) || 1;
-  const itemPrice = Number(document.getElementById('dsItemPrice').value) || 0;
-  const payMode = document.querySelector('input[name="dsPayMode"]:checked').value;
-  const custName = document.getElementById('dsCustName').value.trim() || 'Walk-in Customer';
-  const custPhone = document.getElementById('dsCustPhone').value.trim() || '';
-
-  if (!itemName || itemPrice <= 0) {
-    alert("Kripya item ka naam aur sahi price likhein!");
-    return;
-  }
-
-  const billNo = 'DS-' + Math.floor(1000 + Math.random() * 9000);
-
-  const directSaleRecord = {
-    id: 'ds_' + Date.now(),
-    billNo: billNo,
-    date: new Date().toISOString(),
-    name: `${itemName} (Qty: ${itemQty})`,
-    sellPrice: itemPrice,
-    payMode: payMode,
-    customer: custName,
-    phone: custPhone
-  };
-
-  // Alag database node me save karna taaki delete me koi panga na ho
-  db.ref('direct_counter_sales/' + directSaleRecord.id).set(directSaleRecord).then(() => {
-    alert(`✓ Direct Bikri Safal! [${itemName}] (₹${itemPrice}) save ho gayi hai.`);
-    
-    document.getElementById('dsItemName').value = '';
-    document.getElementById('dsItemQty').value = '1';
-    document.getElementById('dsItemPrice').value = '';
-    document.getElementById('dsCustName').value = '';
-    document.getElementById('dsCustPhone').value = '';
-    
-    renderRecentDirectSalesInModal();
-  }).catch((err) => {
-    alert("Error saving sale: " + err.message);
-  });
-}
-
-function renderRecentDirectSalesInModal() {
-  const container = document.getElementById('recentDirectSalesList');
-  if (!container) return;
-
-  if (!window.directSalesHistory || window.directSalesHistory.length === 0) {
-    container.innerHTML = '<i style="font-size:10px; color:#94a3b8;">Koi direct sale record nahi hai.</i>';
-    return;
-  }
-
-  let sorted = [...window.directSalesHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  container.innerHTML = sorted.slice(0, 5).map(s => `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-bottom:1px solid #f1f5f9; font-size:11px; margin-bottom:3px; border-radius:4px;">
-      <div>
-        <b>${s.name}</b> - <span style="color:#10b981; font-weight:bold;">₹${s.sellPrice}</span><br>
-        <small style="color:#64748b;">${s.customer || 'Walk-in'} • ${s.payMode || 'Cash'}</small>
+    <form onsubmit="submitDirectSaleEntry(event)">
+      <div class="form-group">
+        <label>Samaan / Item Ka Naam *</label>
+        <input type="text" id="dsItemName" required placeholder="Jaise: Belt, Socks, Repairing, etc..." class="form-control">
       </div>
-      <div>
-        <button type="button" class="btn btn-red" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="deleteDirectCounterSale('${s.id}')">Delete</button>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Quantity (Jodi / Piece) *</label>
+          <input type="number" id="dsItemQty" required min="1" value="1" class="form-control" style="font-weight:bold;">
+        </div>
+        <div class="form-group">
+          <label>Kul Rate / Amount (₹) *</label>
+          <input type="number" id="dsItemPrice" required min="1" placeholder="e.g. 150" class="form-control" style="font-weight:bold; color:#10b981;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Mode (Kaise Paise Aaye):</label>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+          <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+            <input type="radio" name="dsPayMode" value="Cash" checked> 💵 Cash
+          </label>
+          <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+            <input type="radio" name="dsPayMode" value="UPI"> 📱 UPI
+          </label>
+          <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+            <input type="radio" name="dsPayMode" value="Udhaar"> 📋 Udhaar
+          </label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Grahak Ka Naam (Optional):</label>
+          <input type="text" id="dsCustName" placeholder="Customer name..." class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number (Optional):</label>
+          <input type="tel" id="dsCustPhone" placeholder="Mobile no..." class="form-control">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+        <button type="button" class="btn btn-slate" onclick="closeDirectSaleModal()">Cancel</button>
+        <button type="submit" class="btn btn-green" style="background:#10b981; color:#fff; padding:10px 18px;">✓ Bikri Save Karein</button>
+      </div>
+    </form>
+
+    <!-- RECENT DIRECT SALES LIST INSIDE MODAL (WITH DELETE) -->
+    <div style="margin-top:15px; border-top:1px solid #e2e8f0; padding-top:10px;">
+      <small style="font-weight:bold; color:#64748b; display:block; margin-bottom:6px;">Haal Hi Me Ki Gayi Direct Bikri (Delete):</small>
+      <div id="recentDirectSalesList" style="max-height:130px; overflow-y:auto; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:6px;">
+        <i style="font-size:10px; color:#94a3b8;">Load ho raha hai...</i>
       </div>
     </div>
-  `).join('');
-}
-
-function deleteDirectCounterSale(id) {
-  if (confirm("Kya aap is direct sale entry ko delete karna chahte hain?")) {
-    db.ref('direct_counter_sales/' + id).remove().then(() => {
-      alert("✓ Direct sale safalta-purvak delete ho gayi hai!");
-      renderRecentDirectSalesInModal();
-    }).catch(err => {
-      alert("Error: " + err.message);
-    });
-  }
-}
+  </div>
+</div>
   
   <!-- 📊 PROFIT & LOSS REPORT MODAL -->
 <div id="plModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
@@ -6314,6 +6283,110 @@ function renderRecentDirectSalesInModal() {
     `;
   }).join('');
 }
+    let window.directSalesHistory = [];
+
+function openDirectSaleModal() {
+  document.getElementById('dsItemName').value = '';
+  document.getElementById('dsItemQty').value = '1';
+  document.getElementById('dsItemPrice').value = '';
+  document.getElementById('dsCustName').value = '';
+  document.getElementById('dsCustPhone').value = '';
+  document.querySelector('input[name="dsPayMode"][value="Cash"]').checked = true;
+  
+  renderRecentDirectSalesInModal();
+  document.getElementById('directSaleModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('dsItemName').focus(), 100);
+}
+
+function closeDirectSaleModal() {
+  document.getElementById('directSaleModal').style.display = 'none';
+}
+
+function submitDirectSaleEntry(e) {
+  e.preventDefault();
+
+  const itemName = document.getElementById('dsItemName').value.trim();
+  const itemQty = Number(document.getElementById('dsItemQty').value) || 1;
+  const itemPrice = Number(document.getElementById('dsItemPrice').value) || 0;
+  const payMode = document.querySelector('input[name="dsPayMode"]:checked').value;
+  const custName = document.getElementById('dsCustName').value.trim() || 'Walk-in Customer';
+  const custPhone = document.getElementById('dsCustPhone').value.trim() || '';
+
+  if (!itemName || itemPrice <= 0) {
+    alert("Kripya item ka naam aur sahi price likhein!");
+    return;
+  }
+
+  const billNo = 'DS-' + Math.floor(1000 + Math.random() * 9000);
+
+  const directSaleRecord = {
+    id: 'ds_' + Date.now(),
+    billNo: billNo,
+    date: new Date().toISOString(),
+    name: `${itemName} (Qty: ${itemQty})`,
+    sellPrice: itemPrice,
+    payMode: payMode,
+    customer: custName,
+    phone: custPhone
+  };
+
+  // Alag database node me save karna taaki delete me koi panga na ho
+  db.ref('direct_counter_sales/' + directSaleRecord.id).set(directSaleRecord).then(() => {
+    alert(`✓ Direct Bikri Safal! [${itemName}] (₹${itemPrice}) save ho gayi hai.`);
+    
+    document.getElementById('dsItemName').value = '';
+    document.getElementById('dsItemQty').value = '1';
+    document.getElementById('dsItemPrice').value = '';
+    document.getElementById('dsCustName').value = '';
+    document.getElementById('dsCustPhone').value = '';
+    
+    renderRecentDirectSalesInModal();
+  }).catch((err) => {
+    alert("Error saving sale: " + err.message);
+  });
+}
+
+function renderRecentDirectSalesInModal() {
+  const container = document.getElementById('recentDirectSalesList');
+  if (!container) return;
+
+  if (!window.directSalesHistory || window.directSalesHistory.length === 0) {
+    container.innerHTML = '<i style="font-size:10px; color:#94a3b8;">Koi direct sale record nahi hai.</i>';
+    return;
+  }
+
+  let sorted = [...window.directSalesHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  container.innerHTML = sorted.slice(0, 5).map(s => `
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-bottom:1px solid #f1f5f9; font-size:11px; margin-bottom:3px; border-radius:4px;">
+      <div>
+        <b>${s.name}</b> - <span style="color:#10b981; font-weight:bold;">₹${s.sellPrice}</span><br>
+        <small style="color:#64748b;">${s.customer || 'Walk-in'} • ${s.payMode || 'Cash'}</small>
+      </div>
+      <div>
+        <button type="button" class="btn btn-red" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="deleteDirectCounterSale('${s.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteDirectCounterSale(id) {
+  if (confirm("Kya aap is direct sale entry ko delete karna chahte hain?")) {
+    db.ref('direct_counter_sales/' + id).remove().then(() => {
+      alert("✓ Direct sale safalta-purvak delete ho gayi hai!");
+      renderRecentDirectSalesInModal();
+    }).catch(err => {
+      alert("Error: " + err.message);
+    });
+  }
+}
+    db.ref('direct_counter_sales').on('value', (snapshot) => {
+    const data = snapshot.val();
+    window.directSalesHistory = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+    if (typeof renderRecentDirectSalesInModal === 'function') {
+      renderRecentDirectSalesInModal();
+    }
+  });
     // initRozanaListeners();
     
   </script>
