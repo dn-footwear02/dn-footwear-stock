@@ -599,6 +599,11 @@
       </div>
     </div>
 
+    <!-- Dukhan ke stock se select karne ke baad sabhi sizes ek sath jodne ka button -->
+<div style="margin-top:4px; margin-bottom:8px;">
+  <button class="btn btn-indigo" style="font-size:10px; padding:4px 10px; background:#4f46e5; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="addAllSizesForSelectedItem()">⚡ Iske Sabhi Sizes ke Barcodes Ek Sath Jodein</button>
+</div>
+    
     <div style="display:flex; justify-content:space-between; align-items:center; background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe; margin-bottom:12px; font-size:12px;">
       <div><b>Kul Stickers:</b> <span id="totalBarcodeCount" style="color:#2563eb; font-weight:bold;">0</span></div>
       <div style="color:#64748b; font-size:11px;">(A4 Sheet par 56 stickers fit aate hain)</div>
@@ -689,6 +694,8 @@
     </div>
   </div>
 </div>
+
+
   
   <!-- LOW STOCK ITEMS MODAL -->
   <div id="lowStockModal" class="modal">
@@ -6425,6 +6432,60 @@ function printA4BarcodeSheet() {
     </html>
   `);
   printWindow.document.close();
+}
+
+    // ==========================================
+// ⚡ ADD ALL SIZES AUTOMATICALLY FOR SELECTED ITEM
+// ==========================================
+
+function addAllSizesForSelectedItem() {
+  const idx = document.getElementById('bcStockDropdown').value;
+  if (idx === '') {
+    alert("Kripya pehle upar dropdown se koi item select karein!");
+    return;
+  }
+
+  let allItems = (typeof items !== 'undefined' ? items : []);
+  let selectedItem = allItems[idx];
+  if (!selectedItem) return;
+
+  let cleanName = (selectedItem.name || '').replace(/\(Size\s*\d+\)/gi, '').trim();
+  let price = Number(selectedItem.price) || 0;
+  let rawCode = selectedItem.barcode || selectedItem.code || selectedItem.id || ('DN-' + Math.floor(1000 + Math.random() * 9000));
+  let cleanBaseCode = rawCode.split('-S')[0];
+  let qtyPerSize = Number(document.getElementById('bcQty').value) || 5; // Har size ke kitne stickers chahiye
+
+  // Aap yahan size range tay kar sakte hain (Jaise Size 6 se lekar 10 tak, ya 1 se 13 tak)
+  const startSize = 6;
+  const endSize = 10;
+
+  // Loop chala kar sabhi sizes ke barcodes queue me jodna
+  for (let s = startSize; s <= endSize; s++) {
+    let itemSize = String(s);
+    let uniqueCode = `${cleanBaseCode}-S${itemSize}`;
+
+    // Check karein ki kya yeh code pehle se queue me toh nahi hai
+    let exists = barcodeQueue.some(q => q.code === uniqueCode);
+    if (!exists) {
+      barcodeQueue.push({
+        name: cleanName,
+        price: price,
+        size: itemSize,
+        code: uniqueCode,
+        qty: qtyPerSize
+      });
+    }
+  }
+
+  // Inputs reset karein
+  document.getElementById('bcStockDropdown').value = '';
+  document.getElementById('bcItemName').value = '';
+  document.getElementById('bcItemPrice').value = '';
+  document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+
+  // Queue table ko refresh karein
+  renderBarcodeQueue();
+  alert("✓ Size 6 se 10 tak ke sabhi barcodes queue me jud gaye hain!");
 }
     // initRozanaListeners();
     
