@@ -537,84 +537,15 @@
 </div>
 
 <!-- 🏷️ BARCODE PRINTING MODAL -->
-<!-- 🏷️ MULTI-ITEM A4 BARCODE PRINTING MODAL -->
 <div id="barcodeModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
-  <div class="modal-box" style="background:#fff; width:100%; max-width:800px; padding:20px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); max-height:90vh; overflow-y:auto;">
+  <div class="modal-box" style="background:#fff; width:100%; max-width:700px; padding:20px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
       <div>
-        <h3 style="font-size:17px; font-weight:900; color:#1e1b4b; margin:0;">🏷️ A4 Sheet Barcode Printing (56 Stickers Layout)</h3>
-        <p style="font-size:11px; color:#64748b; margin:2px 0 0 0;">Alag-alag items ko list me jodein aur ek hi A4 sheet par print karein</p>
+        <h3 style="font-size:17px; font-weight:900; color:#1e1b4b; margin:0;">🏷️ Advanced Barcode Printing Module</h3>
+        <p style="font-size:11px; color:#64748b; margin:2px 0 0 0;">Manual barcode code, alag-alag ya same barcodes print karne ka option</p>
       </div>
       <button class="btn btn-slate" onclick="closeBarcodeModal()" style="background:#64748b; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">✕</button>
     </div>
-
-    <!-- Add Item Form -->
-    <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-bottom:12px;">
-      <b style="font-size:11px; color:#334155; display:block; margin-bottom:6px;">+ Print List me Naya Item Jodein:</b>
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
-        <div style="flex:2; min-width:180px;">
-          <input type="text" id="bcItemName" placeholder="Item ka Naam (Jaise: Sports Shoe)" class="form-control" style="font-size:11px; padding:5px; width:100%;">
-        </div>
-        <div style="flex:1; min-width:90px;">
-          <input type="number" id="bcItemPrice" placeholder="MRP (₹)..." class="form-control" style="font-size:11px; padding:5px; width:100%;">
-        </div>
-        <div style="flex:1; min-width:90px;">
-          <select id="bcItemSize" class="form-control" style="font-size:11px; padding:5px; width:100%;">
-            <option value="1">Size 1</option><option value="2">Size 2</option><option value="3">Size 3</option><option value="4">Size 4</option><option value="5">Size 5</option>
-            <option value="6">Size 6</option><option value="7" selected>Size 7</option><option value="8">Size 8</option><option value="9">Size 9</option><option value="10">Size 10</option>
-            <option value="11">Size 11</option><option value="12">Size 12</option><option value="13">Size 13</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex; gap:6px; align-items:center;">
-        <div style="flex:1;">
-          <input type="text" id="bcCustomCode" placeholder="Barcode Code (Jaise: DN-1001)" class="form-control" style="font-size:11px; padding:5px; width:100%;">
-        </div>
-        <div style="width:110px;">
-          <input type="number" id="bcQty" value="5" min="1" placeholder="Qty" class="form-control" style="font-size:11px; padding:5px; width:100%;" title="Kitne sticker chahiye">
-        </div>
-        <button class="btn btn-green" style="font-size:11px; padding:5px 12px; cursor:pointer; background:#10b981; color:#fff; border:none; border-radius:4px;" onclick="addBarcodeToList()">+ List me Jodein</button>
-      </div>
-    </div>
-
-    <!-- Added Items Queue Table -->
-    <div style="margin-bottom:12px;">
-      <h4 style="font-size:12px; font-weight:bold; color:#1e1b4b; margin-bottom:6px;">Print hone wale Items ki List (Queue):</h4>
-      <div style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
-        <table style="width:100%; border-collapse:collapse; font-size:11px;">
-          <thead>
-            <tr style="background:#f1f5f9; border-bottom:1px solid #cbd5e1;">
-              <th style="padding:6px; text-align:left;">Item Name</th>
-              <th style="padding:6px; text-align:center;">Size</th>
-              <th style="padding:6px; text-align:center;">MRP</th>
-              <th style="padding:6px; text-align:center;">Code</th>
-              <th style="padding:6px; text-align:center;">Stickers Qty</th>
-              <th style="padding:6px; text-align:center;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="barcodeQueueTableBody">
-            <tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">Abhi koi item list me nahi hai. Upar se jodein.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Dukhan ke stock se select karne ke baad sabhi sizes ek sath jodne ka button -->
-<div style="margin-top:4px; margin-bottom:8px;">
-  <button class="btn btn-indigo" style="font-size:10px; padding:4px 10px; background:#4f46e5; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="addAllSizesForSelectedItem()">⚡ Iske Sabhi Sizes ke Barcodes Ek Sath Jodein</button>
-</div>
-    
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe; margin-bottom:12px; font-size:12px;">
-      <div><b>Kul Stickers:</b> <span id="totalBarcodeCount" style="color:#2563eb; font-weight:bold;">0</span></div>
-      <div style="color:#64748b; font-size:11px;">(A4 Sheet par 56 stickers fit aate hain)</div>
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; gap:6px;">
-      <button class="btn btn-indigo" style="font-size:11px; padding:7px 16px; cursor:pointer; background:#4f46e5; color:#fff; border:none; border-radius:4px; font-weight:bold;" onclick="printA4BarcodeSheet()">🖨️ Print A4 Sheet (56 Layout)</button>
-      <button class="btn btn-slate" style="font-size:11px; padding:7px 12px; background:#64748b; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="closeBarcodeModal()">Band Karein</button>
-    </div>
-  </div>
-</div>
 
     <!-- Mode Selection: Single Item (Same Barcodes) vs Multiple Items -->
     <div style="display:flex; gap:10px; margin-bottom:10px; background:#f1f5f9; padding:8px; border-radius:6px; font-size:11px;">
@@ -694,8 +625,6 @@
     </div>
   </div>
 </div>
-
-
   
   <!-- LOW STOCK ITEMS MODAL -->
   <div id="lowStockModal" class="modal">
@@ -6260,232 +6189,117 @@ function printPLReport() {
 }
 
 // ==========================================
-// 🏷️ MULTI-ITEM A4 SHEET BARCODE MODULE
+// 🏷️ ADVANCED BARCODE PRINTING MODULE (MRP LABEL FIX)
 // ==========================================
-
-let barcodeQueue = []; // Alag-alag items ki list jo print honi hai
 
 function openBarcodeModal() {
   document.getElementById('barcodeModal').style.display = 'flex';
+  populateBarcodeItemDropdown();
+  
+  // Default random barcode code
   document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
-  renderBarcodeQueue();
 }
 
 function closeBarcodeModal() {
   document.getElementById('barcodeModal').style.display = 'none';
 }
 
-// List me naya item jodna
-function addBarcodeToList() {
+function populateBarcodeItemDropdown() {
+  const select = document.getElementById('bcItemSelect');
+  if (!select) return;
+
+  let allItems = (typeof items !== 'undefined' ? items : []);
+  select.innerHTML = `<option value="">-- Dukan ke Stock se Chunein --</option>` + 
+    allItems.map((it, idx) => `<option value="${idx}">${it.name} (MRP: ₹${it.price || 0})</option>`).join('');
+}
+
+function toggleBarcodeMode() {
+  const mode = document.querySelector('input[name="bcMode"]:checked').value;
+  const stockBox = document.getElementById('stockSelectBox');
+  
+  if (mode === 'manual') {
+    stockBox.style.display = 'none';
+    document.getElementById('bcItemName').value = '';
+    document.getElementById('bcItemPrice').value = '';
+    document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+  } else {
+    stockBox.style.display = 'block';
+  }
+}
+
+function loadBarcodeItemDetails() {
+  const idx = document.getElementById('bcItemSelect').value;
+  if (idx === '') return;
+
+  let allItems = (typeof items !== 'undefined' ? items : []);
+  let selectedItem = allItems[idx];
+  if (selectedItem) {
+    document.getElementById('bcItemName').value = selectedItem.name || '';
+    document.getElementById('bcItemPrice').value = selectedItem.price || 0; // Yeh MRP/Price hai
+    
+    // Yahan item ka code/ID apne-aap barcode box me chala jayega
+    const itemCode = selectedItem.barcode || selectedItem.code || selectedItem.id || ('DN-' + Math.floor(1000 + Math.random() * 9000));
+    document.getElementById('bcCustomCode').value = itemCode;
+  }
+}
+// ==========================================
+// 🏷️ SIZE-WISE UNIQUE BARCODE PRINTING
+// ==========================================
+
+function printAdvancedBarcodeLabels() {
   const name = document.getElementById('bcItemName').value.trim();
   const price = Number(document.getElementById('bcItemPrice').value) || 0;
-  const size = document.getElementById('bcItemSize').value;
-  let code = document.getElementById('bcCustomCode').value.trim() || 'DN-1001';
-  const qty = Number(document.getElementById('bcQty').value) || 1;
+  let baseCode = document.getElementById('bcCustomCode').value.trim() || 'DN-1001';
+  const widthMm = Number(document.getElementById('bcWidth').value) || 50;
+  const heightMm = Number(document.getElementById('bcHeight').value) || 30;
+  const totalQty = Number(document.getElementById('bcQty').value) || 1;
+  
+  // Size select karne ka option (Agar aapne HTML me size input joda ho)
+  const itemSize = (typeof document.getElementById('bcItemSize') !== 'undefined' && document.getElementById('bcItemSize')) ? document.getElementById('bcItemSize').value : '6';
 
   if (!name || price <= 0) {
-    alert("Kripya item ka naam aur sahi MRP likhein!");
+    alert("Kripya item ka naam aur sahi MRP/Price likhein!");
     return;
   }
 
-  let cleanBaseCode = code.split('-S')[0];
-  const uniqueCode = `${cleanBaseCode}-S${size}`;
+  // Har size ke liye alag barcode code banana (jaise DN-1001-S7)
+  const uniqueBarcodeCode = `${baseCode}-S${itemSize}`;
 
-  // Queue me push karna
-  barcodeQueue.push({
-    name: name,
-    price: price,
-    size: size,
-    code: uniqueCode,
-    qty: qty
-  });
-
-  // Inputs reset karein naye item ke liye
-  document.getElementById('bcItemName').value = '';
-  document.getElementById('bcItemPrice').value = '';
-  document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
-  document.getElementById('bcQty').value = '5';
-
-  renderBarcodeQueue();
-}
-
-// List se item hatana
-function removeBarcodeFromQueue(index) {
-  barcodeQueue.splice(index, 1);
-  renderBarcodeQueue();
-}
-
-// Queue table render karna
-function renderBarcodeQueue() {
-  const tbody = document.getElementById('barcodeQueueTableBody');
-  const totalCountSpan = document.getElementById('totalBarcodeCount');
-  if (!tbody) return;
-
-  let totalStickers = barcodeQueue.reduce((sum, item) => sum + item.qty, 0);
-  if(totalCountSpan) totalCountSpan.innerText = totalStickers;
-
-  if (barcodeQueue.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">Abhi koi item list me nahi hai. Upar se jodein.</td></tr>`;
-    return;
+  let labelsHtml = '';
+  for (let i = 0; i < totalQty; i++) {
+    labelsHtml += `
+      <div style="width: ${widthMm}mm; height: ${heightMm}mm; border: 1px dashed #333; padding: 4px; text-align: center; display: inline-flex; flex-direction: column; justify-content: center; align-items: center; margin: 2mm; box-sizing: border-box; page-break-inside: avoid; overflow: hidden;">
+        <div style="font-size: 8px; font-weight: bold; color: #000; line-height: 1;">DN FOOTWEAR & SPORTS</div>
+        <div style="font-size: 9px; font-weight: bold; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${name} (Size: ${itemSize})</div>
+        <div style="font-size: 10px; font-weight: bold; color: #000; margin-bottom: 2px; line-height: 1;">MRP: ₹${price}</div>
+        <div style="letter-spacing: 2px; font-family: monospace; font-size: 12px; font-weight: bold; color: #000; line-height: 1;">||| | |||| ||</div>
+        <div style="font-size: 7px; color: #333; margin-top: 1px;">*${uniqueBarcodeCode}*</div>
+      </div>
+    `;
   }
 
-  tbody.innerHTML = barcodeQueue.map((item, idx) => `
-    <tr style="border-bottom:1px solid #e2e8f0;">
-      <td style="padding:6px;"><b>${item.name}</b></td>
-      <td style="padding:6px; text-align:center;">Size ${item.size}</td>
-      <td style="padding:6px; text-align:center;">₹${item.price}</td>
-      <td style="padding:6px; text-align:center; font-family:monospace;">${item.code}</td>
-      <td style="padding:6px; text-align:center; font-weight:bold; color:#15803d;">${item.qty}</td>
-      <td style="padding:6px; text-align:center;">
-        <button class="btn btn-red" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="removeBarcodeFromQueue(${idx})">Hataein</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// A4 Sheet Print Function (56 Label Layout style grid)
-function printA4BarcodeSheet() {
-  if (barcodeQueue.length === 0) {
-    alert("Kripya pehle list me kam se kam ek item jodein!");
-    return;
-  }
-
-  let allStickersHtml = '';
-
-  // Har item ke queue ke hisab se stickers generate karna aur stock me save karna
-  barcodeQueue.forEach(item => {
-    // 1. 🔥 Firebase Stock me Automatic Save
-    const newItemRef = db.ref('items').push();
-    const stockItemData = {
-      id: item.code,
-      name: `${item.name} (Size ${item.size})`,
-      price: item.price,
-      size: item.size,
-      stock: item.qty,
-      barcode: item.code,
-      date: Date.now()
-    };
-    newItemRef.set(stockItemData).catch(err => console.error(err));
-
-    // 2. 🖨️ Sticker HTML Layout (A4 56-up sticker sheet compatible size e.g., ~38mm x 21mm per label)
-    for (let i = 0; i < item.qty; i++) {
-      allStickersHtml += `
-        <div class="sticker">
-          <div class="brand">DN FOOTWEAR</div>
-          <div class="item-name">${item.name} (S:${item.size})</div>
-          <div class="price">MRP: ₹${item.price}</div>
-          <div class="barcode-lines">||| | |||| ||</div>
-          <div class="code-text">*${item.code}*</div>
-        </div>
-      `;
-    }
-  });
-
-  // Print Window Open Karein
-  let printWindow = window.open('', '_blank', 'width=900,height=700');
+  let printWindow = window.open('', '_blank', 'width=800,height=600');
   printWindow.document.write(`
     <html>
       <head>
-        <title>A4 Barcode Sheet (56 Layout)</title>
+        <title>Barcode - Size ${itemSize}</title>
         <style>
-          @page { size: A4; margin: 10mm; }
-          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
-          .sheet {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Ek row me 4 ya 5 column sheet ke hisab se */
-            gap: 2mm;
-            width: 100%;
-          }
-          .sticker {
-            width: 45mm;
-            height: 22mm;
-            border: 1px dotted #999;
-            padding: 2mm;
-            box-sizing: border-box;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            page-break-inside: avoid;
-          }
-          .brand { font-size: 7px; font-weight: bold; line-height: 1; }
-          .item-name { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-          .price { font-size: 9px; font-weight: bold; margin-bottom: 1px; line-height: 1; }
-          .barcode-lines { font-family: monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; line-height: 1; }
-          .code-text { font-size: 6px; color: #333; margin-top: 1px; }
-          @media print {
-            .no-print { display: none; }
-          }
+          body { font-family: Arial, sans-serif; margin: 0; padding: 5mm; }
+          .container { display: flex; flex-wrap: wrap; align-content: flex-start; }
+          @media print { .no-print { display: none; } }
         </style>
       </head>
       <body>
-        <div style="text-align: center; margin-bottom: 15px;" class="no-print">
-          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold;">Print A4 Sheet Now</button>
-          <p style="font-size: 12px; color: #555; margin-top: 5px;">Printer settings me Margins ko 'None' ya 'Minimum' rakhein.</p>
+        <div style="text-align: center; margin-bottom: 10px;" class="no-print">
+          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; font-size: 14px; border-radius: 4px; cursor: pointer;">Print Size ${itemSize} Labels</button>
         </div>
-        <div class="sheet">
-          ${allStickersHtml}
+        <div class="container">
+          ${labelsHtml}
         </div>
       </body>
     </html>
   `);
   printWindow.document.close();
-}
-
-    // ==========================================
-// ⚡ ADD ALL SIZES AUTOMATICALLY FOR SELECTED ITEM
-// ==========================================
-
-function addAllSizesForSelectedItem() {
-  const idx = document.getElementById('bcStockDropdown').value;
-  if (idx === '') {
-    alert("Kripya pehle upar dropdown se koi item select karein!");
-    return;
-  }
-
-  let allItems = (typeof items !== 'undefined' ? items : []);
-  let selectedItem = allItems[idx];
-  if (!selectedItem) return;
-
-  let cleanName = (selectedItem.name || '').replace(/\(Size\s*\d+\)/gi, '').trim();
-  let price = Number(selectedItem.price) || 0;
-  let rawCode = selectedItem.barcode || selectedItem.code || selectedItem.id || ('DN-' + Math.floor(1000 + Math.random() * 9000));
-  let cleanBaseCode = rawCode.split('-S')[0];
-  let qtyPerSize = Number(document.getElementById('bcQty').value) || 5; // Har size ke kitne stickers chahiye
-
-  // Aap yahan size range tay kar sakte hain (Jaise Size 6 se lekar 10 tak, ya 1 se 13 tak)
-  const startSize = 6;
-  const endSize = 10;
-
-  // Loop chala kar sabhi sizes ke barcodes queue me jodna
-  for (let s = startSize; s <= endSize; s++) {
-    let itemSize = String(s);
-    let uniqueCode = `${cleanBaseCode}-S${itemSize}`;
-
-    // Check karein ki kya yeh code pehle se queue me toh nahi hai
-    let exists = barcodeQueue.some(q => q.code === uniqueCode);
-    if (!exists) {
-      barcodeQueue.push({
-        name: cleanName,
-        price: price,
-        size: itemSize,
-        code: uniqueCode,
-        qty: qtyPerSize
-      });
-    }
-  }
-
-  // Inputs reset karein
-  document.getElementById('bcStockDropdown').value = '';
-  document.getElementById('bcItemName').value = '';
-  document.getElementById('bcItemPrice').value = '';
-  document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
-
-  // Queue table ko refresh karein
-  renderBarcodeQueue();
-  alert("✓ Size 6 se 10 tak ke sabhi barcodes queue me jud gaye hain!");
 }
     // initRozanaListeners();
     
