@@ -6220,29 +6220,38 @@ function loadBarcodeItemDetails() {
     document.getElementById('bcCustomCode').value = itemCode;
   }
 }
+// ==========================================
+// 🏷️ SIZE-WISE UNIQUE BARCODE PRINTING
+// ==========================================
+
 function printAdvancedBarcodeLabels() {
   const name = document.getElementById('bcItemName').value.trim();
   const price = Number(document.getElementById('bcItemPrice').value) || 0;
-  const code = document.getElementById('bcCustomCode').value.trim() || 'DN-1001';
+  let baseCode = document.getElementById('bcCustomCode').value.trim() || 'DN-1001';
   const widthMm = Number(document.getElementById('bcWidth').value) || 50;
   const heightMm = Number(document.getElementById('bcHeight').value) || 30;
   const totalQty = Number(document.getElementById('bcQty').value) || 1;
+  
+  // Size select karne ka option (Agar aapne HTML me size input joda ho)
+  const itemSize = (typeof document.getElementById('bcItemSize') !== 'undefined' && document.getElementById('bcItemSize')) ? document.getElementById('bcItemSize').value : '6';
 
   if (!name || price <= 0) {
     alert("Kripya item ka naam aur sahi MRP/Price likhein!");
     return;
   }
 
-  // Generate labels with MRP label explicitly shown on sticker
+  // Har size ke liye alag barcode code banana (jaise DN-1001-S7)
+  const uniqueBarcodeCode = `${baseCode}-S${itemSize}`;
+
   let labelsHtml = '';
   for (let i = 0; i < totalQty; i++) {
     labelsHtml += `
       <div style="width: ${widthMm}mm; height: ${heightMm}mm; border: 1px dashed #333; padding: 4px; text-align: center; display: inline-flex; flex-direction: column; justify-content: center; align-items: center; margin: 2mm; box-sizing: border-box; page-break-inside: avoid; overflow: hidden;">
         <div style="font-size: 8px; font-weight: bold; color: #000; line-height: 1;">DN FOOTWEAR & SPORTS</div>
-        <div style="font-size: 9px; font-weight: bold; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${name}</div>
+        <div style="font-size: 9px; font-weight: bold; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${name} (Size: ${itemSize})</div>
         <div style="font-size: 10px; font-weight: bold; color: #000; margin-bottom: 2px; line-height: 1;">MRP: ₹${price}</div>
         <div style="letter-spacing: 2px; font-family: monospace; font-size: 12px; font-weight: bold; color: #000; line-height: 1;">||| | |||| ||</div>
-        <div style="font-size: 7px; color: #333; margin-top: 1px;">*${code}*</div>
+        <div style="font-size: 7px; color: #333; margin-top: 1px;">*${uniqueBarcodeCode}*</div>
       </div>
     `;
   }
@@ -6251,18 +6260,16 @@ function printAdvancedBarcodeLabels() {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Barcode Labels - ${code}</title>
+        <title>Barcode - Size ${itemSize}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 0; padding: 5mm; }
           .container { display: flex; flex-wrap: wrap; align-content: flex-start; }
-          @media print {
-            .no-print { display: none; }
-          }
+          @media print { .no-print { display: none; } }
         </style>
       </head>
       <body>
         <div style="text-align: center; margin-bottom: 10px;" class="no-print">
-          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; font-size: 14px; border-radius: 4px; cursor: pointer;">Print Labels Now</button>
+          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; font-size: 14px; border-radius: 4px; cursor: pointer;">Print Size ${itemSize} Labels</button>
         </div>
         <div class="container">
           ${labelsHtml}
