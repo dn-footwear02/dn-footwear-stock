@@ -831,18 +831,18 @@
     </div>
   </div>
 
-  <!-- 💰 ROZANA KHARCHA & CASH REGISTER MODAL -->
+ <!-- 💰 ROZANA KHARCHA & CASH REGISTER MODAL -->
 <div id="rozanaModal" class="modal">
-  <div class="modal-box" style="max-width:700px;">
+  <div class="modal-box" style="max-width:750px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
       <div>
         <h3 style="font-size:17px; font-weight:900; color:#1e1b4b;">💰 Rozana Kharcha & Cash Register</h3>
-        <p style="font-size:11px; color:#64748b;">Dukaan ke rozaana kharche aur galla (cash) ka hisaab</p>
+        <p style="font-size:11px; color:#64748b;">Dukaan ki bikri, rozaana kharche aur galla (cash) ka hisaab</p>
       </div>
       <button class="btn btn-slate" onclick="closeRozanaModal()">✕</button>
     </div>
 
-    {/* Summary Cards */}
+    <!-- Summary Cards -->
     <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
       <div style="flex:1; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px; border-radius:6px; text-align:center;">
         <small style="font-size:10px; color:#166534;">Aaj ki Bikri Cash:</small>
@@ -858,22 +858,34 @@
       </div>
     </div>
 
-    {/* Add Expense Form Box */}
+    <!-- Add Expense Form Box -->
     <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
-      <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:6px;">+ Naya Kharcha Darj Karein:</b>
+      <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:6px;">+ Naya Kharcha Darj Karein / Update Karein:</b>
       <div style="display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
-        <input type="text" id="expReason" placeholder="Kharche ka karan (jaise: Chai Pani, Bijli Bill)..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
+        <input type="text" id="expReason" placeholder="Kharche ka karan (jaise: Chai Pani)..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
         <input type="number" id="expAmount" placeholder="Amount (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
       </div>
-      <div style="display:flex; justify-content:flex-end;">
+      <div style="display:flex; justify-content:flex-end; gap:6px;">
         <button id="expSaveBtn" class="btn btn-green" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="saveDailyExpense()">✓ Kharcha Save Karein</button>
+        <button class="btn btn-slate" style="font-size:11px; padding:5px 12px; cursor:pointer; display:none;" id="expCancelBtn" onclick="cancelEditExpense()">Radd Karein</button>
       </div>
     </div>
 
-    {/* Expenses History List */}
-    <h4 style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:6px;">Aaj ke Kharche ki History:</h4>
-    <div id="rozanaExpenseList" style="max-height:200px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
-      <i style="font-size:11px; color:#64748b;">Load ho raha hai...</i>
+    <!-- Two Columns: Today's Sales & Today's Expenses -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:300px;">
+        <h4 style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:6px;">Aaj ki Cash Bikri (Sales History):</h4>
+        <div id="rozanaSalesList" style="max-height:180px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+          <i style="font-size:11px; color:#64748b;">Load ho raha hai...</i>
+        </div>
+      </div>
+
+      <div style="flex:1; min-width:300px;">
+        <h4 style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:6px;">Aaj ke Kharche ki History:</h4>
+        <div id="rozanaExpenseList" style="max-height:180px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+          <i style="font-size:11px; color:#64748b;">Load ho raha hai...</i>
+        </div>
+      </div>
     </div>
 
     <div style="display:flex; justify-content:flex-end; margin-top:12px;">
@@ -881,7 +893,7 @@
     </div>
   </div>
 </div>
-
+  
   <!-- PIN CHANGE MODAL -->
   <div id="pinChangeModal" class="modal">
     <div class="modal-box" style="max-width:380px;">
@@ -5046,11 +5058,11 @@ function openSupplierKhataDetail(supId) {
 initSupplierListeners();
 
     // ==========================================
-// 💰 ROZANA KHARCHA & CASH REGISTER MODULE (EDIT, DELETE & FIX)
+// 💰 ROZANA KHARCHA & CASH REGISTER MODULE (FULL EDIT/DELETE)
 // ==========================================
 
 let expensesData = [];
-let editingExpenseId = null; // Track karne ke liye ki konsa kharcha edit ho raha hai
+let editingExpenseId = null;
 
 function initRozanaListeners() {
   db.ref('expenses').on('value', (snap) => {
@@ -5062,12 +5074,7 @@ function initRozanaListeners() {
 
 function openRozanaModal() {
   document.getElementById('rozanaModal').style.display = 'flex';
-  // Turant data fetch karke render karein taaki khali na dikhe
-  db.ref('expenses').once('value').then((snap) => {
-    const val = snap.val() || {};
-    expensesData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
-    renderRozanaRegister();
-  });
+  refreshRozanaData();
 }
 
 function closeRozanaModal() {
@@ -5075,7 +5082,7 @@ function closeRozanaModal() {
   cancelEditExpense();
 }
 
-// Kharcha Save ya Update karne ka function
+// Kharcha Save or Update
 function saveDailyExpense() {
   const reasonInput = document.getElementById('expReason');
   const amountInput = document.getElementById('expAmount');
@@ -5089,7 +5096,6 @@ function saveDailyExpense() {
   }
 
   if (editingExpenseId) {
-    // Agar edit mode me hai toh update karein
     db.ref('expenses/' + editingExpenseId).update({
       reason: reason,
       amount: amount
@@ -5101,7 +5107,6 @@ function saveDailyExpense() {
       alert("Error: " + err.message);
     });
   } else {
-    // Naya kharcha save karein
     db.ref('expenses').push({
       reason: reason,
       amount: amount,
@@ -5117,7 +5122,6 @@ function saveDailyExpense() {
   }
 }
 
-// Refresh data helper
 function refreshRozanaData() {
   db.ref('expenses').once('value').then((snap) => {
     const val = snap.val() || {};
@@ -5126,7 +5130,6 @@ function refreshRozanaData() {
   });
 }
 
-// Kharcha Delete karne ka option
 function deleteExpense(expId) {
   if (confirm("Kya aap is kharche ki entry ko delete karna chahte hain?")) {
     db.ref('expenses/' + expId).remove().then(() => {
@@ -5136,7 +5139,6 @@ function deleteExpense(expId) {
   }
 }
 
-// Kharcha Edit karne ke liye form me data load karna
 function editExpense(expId) {
   const exp = expensesData.find(e => e.id === expId);
   if (!exp) return;
@@ -5145,15 +5147,15 @@ function editExpense(expId) {
   document.getElementById('expAmount').value = exp.amount;
   editingExpenseId = exp.id;
 
-  // Button ka text badal kar "Update Karein" kar dena
   const saveBtn = document.getElementById('expSaveBtn');
+  const cancelBtn = document.getElementById('expCancelBtn');
   if (saveBtn) {
     saveBtn.innerText = "🔄 Update Karein";
     saveBtn.style.background = "#d97706";
   }
+  if (cancelBtn) cancelBtn.style.display = 'inline-block';
 }
 
-// Edit cancel karne ke liye
 function cancelEditExpense() {
   editingExpenseId = null;
   const reasonInput = document.getElementById('expReason');
@@ -5162,35 +5164,66 @@ function cancelEditExpense() {
   if(amountInput) amountInput.value = '';
 
   const saveBtn = document.getElementById('expSaveBtn');
+  const cancelBtn = document.getElementById('expCancelBtn');
   if (saveBtn) {
     saveBtn.innerText = "✓ Kharcha Save Karein";
     saveBtn.style.background = "";
   }
+  if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
-// Render Rozana Register (Sabhi kharche niche dikhane ke liye - bina date strictness ke taaki turant dikhe)
+// Sales record edit/delete functions
+function editSaleRecord(saleId) {
+  let newAmount = prompt("Naya Cash Amount likhein:");
+  if(newAmount !== null) {
+    let amt = Number(newAmount);
+    if(amt > 0) {
+      db.ref('sales_history/' + saleId).update({ total: amt }).then(() => {
+        alert("✓ Bikri amount update ho gaya hai!");
+        if(typeof fetchSalesHistory === 'function') fetchSalesHistory();
+        renderRozanaRegister();
+      });
+    } else {
+      alert("Kripya sahi amount likhein!");
+    }
+  }
+}
+
+function deleteSaleRecord(saleId) {
+  if(confirm("Kya aap is bikri entry ko delete karna chahte hain?")) {
+    db.ref('sales_history/' + saleId).remove().then(() => {
+      alert("✓ Bikri record delete ho gaya hai.");
+      if(typeof fetchSalesHistory === 'function') fetchSalesHistory();
+      renderRozanaRegister();
+    });
+  }
+}
+
+// Render Rozana Register & Cash Register
 function renderRozanaRegister() {
-  const listContainer = document.getElementById('rozanaExpenseList');
-  if (!listContainer) return;
+  const expenseContainer = document.getElementById('rozanaExpenseList');
+  const salesContainer = document.getElementById('rozanaSalesList');
 
-  // Sabhi expenses ko naye se purane ke kram me dikhana
+  // Today's Expenses
   let sortedExpenses = [...expensesData].sort((a, b) => (b.date || 0) - (a.date || 0));
-
   let totalExpensesToday = sortedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
 
-  // Aaj ki bikri cash calculate karna
+  // Today's Sales
+  let todayStr = new Date().toDateString();
+  let todaySales = [];
   let totalCashSalesToday = 0;
-  const todayStr = new Date().toDateString();
+
   if (typeof salesHistory !== 'undefined' && salesHistory.length > 0) {
     salesHistory.forEach(s => {
       let sDate = new Date(s.date || Date.now()).toDateString();
       if (sDate === todayStr) {
+        todaySales.push(s);
         totalCashSalesToday += (Number(s.total) || 0);
       }
     });
   }
 
-  // UI update
+  // Update Summary UI
   const cashInElem = document.getElementById('rozanaCashIn');
   const cashOutElem = document.getElementById('rozanaCashOut');
   const netCashElem = document.getElementById('rozanaNetCash');
@@ -5199,24 +5232,47 @@ function renderRozanaRegister() {
   if(cashOutElem) cashOutElem.innerText = '₹' + totalExpensesToday;
   if(netCashElem) netCashElem.innerText = '₹' + (totalCashSalesToday - totalExpensesToday);
 
-  if (sortedExpenses.length === 0) {
-    listContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Abhi koi kharcha darj nahi kiya gaya hai.</i>';
-    return;
+  // Render Sales List
+  if (salesContainer) {
+    if (todaySales.length === 0) {
+      salesContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Aaj ki koi cash bikri darj nahi hai.</i>';
+    } else {
+      salesContainer.innerHTML = todaySales.map(s => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:5px 8px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
+          <div>
+            <b>Bill: ${s.billNo || 'N/A'}</b> (${s.customerName || 'Cash Customer'})<br>
+            <small style="color:#64748b;">${new Date(s.date || Date.now()).toLocaleTimeString('en-IN')}</small>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <b style="color:#15803d;">+₹${s.total || 0}</b>
+            <button class="btn btn-indigo" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="editSaleRecord('${s.id}')">Edit</button>
+            <button class="btn btn-red" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="deleteSaleRecord('${s.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
   }
 
-  listContainer.innerHTML = sortedExpenses.map(e => `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:6px 8px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
-      <div>
-        <b>${e.reason}</b><br>
-        <small style="color:#64748b;">${new Date(e.date || Date.now()).toLocaleString('en-IN')}</small>
-      </div>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <b style="color:#dc2626;">-₹${e.amount}</b>
-        <button class="btn btn-indigo" style="font-size:9px; padding:2px 5px; cursor:pointer;" onclick="editExpense('${e.id}')">Edit</button>
-        <button class="btn btn-red" style="font-size:9px; padding:2px 5px; cursor:pointer;" onclick="deleteExpense('${e.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('');
+  // Render Expense List
+  if (expenseContainer) {
+    if (sortedExpenses.length === 0) {
+      expenseContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Abhi koi kharcha darj nahi hai.</i>';
+    } else {
+      expenseContainer.innerHTML = sortedExpenses.map(e => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:5px 8px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
+          <div>
+            <b>${e.reason}</b><br>
+            <small style="color:#64748b;">${new Date(e.date || Date.now()).toLocaleTimeString('en-IN')}</small>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <b style="color:#dc2626;">-₹${e.amount}</b>
+            <button class="btn btn-indigo" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="editExpense('${e.id}')">Edit</button>
+            <button class="btn btn-red" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="deleteExpense('${e.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }
 // Apne script ke aakhri me ise call karna na bhulein:
 // initRozanaListeners();
