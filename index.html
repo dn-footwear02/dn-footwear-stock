@@ -234,6 +234,7 @@
         <button class="btn btn-purple" onclick="openReturnExchangeModal()" title="Item Badalna ya Wapas Karna">🔄 Return/Exchange</button>
         <button class="btn btn-indigo" onclick="openSupplierModal()" title="Supplier aur Purchase Khata">📦 Supplier Khata</button>
         <button class="btn btn-purple" onclick="openRozanaModal()" title="Rozana Kharcha aur Cash Register">💰 Rozana Kharcha</button>
+        <button class="btn.btn-indigo btn" onclick="openPLModal()" title="Profit & Loss Report" style="background:#4f46e5; color:#fff; padding:6px 12px; border-radius:6px; border:none; cursor:pointer;">📊 Profit & Loss</button>    
       </span>
     </div>
   </header>
@@ -481,6 +482,58 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
+
+  <!-- 📊 PROFIT & LOSS REPORT MODAL -->
+<div id="plModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+  <div class="modal-box" style="background:#fff; width:100%; max-width:750px; padding:20px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+      <div>
+        <h3 style="font-size:17px; font-weight:900; color:#1e1b4b; margin:0;">📊 Profit & Loss (P&L) Report</h3>
+        <p style="font-size:11px; color:#64748b; margin:2px 0 0 0;">Mahine ki kul kamai, kharid kharcha, rozaana kharche aur shuddh munafa</p>
+      </div>
+      <button class="btn btn-slate" onclick="closePLModal()" style="background:#64748b; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Month Selection & Print Button -->
+    <div style="display:flex; gap:8px; margin-bottom:14px; align-items:center; background:#f1f5f9; padding:10px; border-radius:6px; flex-wrap:wrap;">
+      <span style="font-size:11px; font-weight:bold; color:#334155;">Mahina Chunein:</span>
+      <input type="month" id="plMonthInput" class="form-control" style="font-size:11px; padding:5px;" onchange="calculateAndRenderPLReport()">
+      <button class="btn btn-indigo" style="font-size:11px; padding:6px 12px; cursor:pointer; background:#4f46e5; color:#fff; border:none; border-radius:4px;" onclick="printPLReport()">🖨️ Print / PDF Report</button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:14px;">
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px;">
+        <small style="font-size:10px; color:#166534; font-weight:bold;">Kul Bikri (Total Revenue):</small>
+        <div id="plTotalSales" style="font-size:16px; font-weight:bold; color:#15803d; margin-top:4px;">₹0</div>
+      </div>
+      <div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:6px;">
+        <small style="font-size:10px; color:#991b1b; font-weight:bold;">Mal Kharid Kharcha (Purchases):</small>
+        <div id="plTotalPurchases" style="font-size:16px; font-weight:bold; color:#dc2626; margin-top:4px;">₹0</div>
+      </div>
+      <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px; border-radius:6px;">
+        <small style="font-size:10px; color:#92400e; font-weight:bold;">Rozana Kharche (Expenses):</small>
+        <div id="plTotalExpenses" style="font-size:16px; font-weight:bold; color:#d97706; margin-top:4px;">₹0</div>
+      </div>
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:6px;">
+        <small style="font-size:10px; color:#1e40af; font-weight:bold;">Shuddh Munafa (Net Profit):</small>
+        <div id="plNetProfit" style="font-size:16px; font-weight:bold; color:#2563eb; margin-top:4px;">₹0</div>
+      </div>
+    </div>
+
+    <!-- Details Box -->
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:10px; font-size:11px; color:#334155;">
+      <b>💡 P&L Formula:</b>
+      <div style="margin-top:4px; color:#64748b; line-height:1.4;">
+        • <b>Net Profit (Shuddh Munafa)</b> = Kul Bikri (Sales) - Mal Kharid (Purchases) - Rozana Kharche (Expenses)
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+      <button class="btn btn-slate" style="font-size:11px; padding:6px 12px; background:#64748b; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="closePLModal()">Band Karein</button>
+    </div>
+  </div>
+</div>
 
   <!-- LOW STOCK ITEMS MODAL -->
   <div id="lowStockModal" class="modal">
@@ -5840,6 +5893,199 @@ function printCustomRozanaReport() {
               `).join('')
             }
           </tbody>
+        </table>
+
+        <div style="margin-top: 30px; text-align: center;" class="no-print">
+          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">Print / Save as PDF</button>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+        // ==========================================
+// 📊 PROFIT & LOSS (P&L) REPORT MODULE
+// ==========================================
+
+function openPLModal() {
+  document.getElementById('plModal').style.display = 'flex';
+  
+  // Set current month default in month input (YYYY-MM)
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const monthInput = document.getElementById('plMonthInput');
+  if (monthInput && !monthInput.value) {
+    monthInput.value = `${year}-${month}`;
+  }
+  calculateAndRenderPLReport();
+}
+
+function closePLModal() {
+  document.getElementById('plModal').style.display = 'none';
+}
+
+function calculateAndRenderPLReport() {
+  const monthInputVal = document.getElementById('plMonthInput').value;
+  if (!monthInputVal) return;
+
+  const [selectedYear, selectedMonth] = monthInputVal.split('-').map(Number);
+
+  // 1. Calculate Total Sales (salesHistory + manualSalesData) for selected month
+  let totalSales = 0;
+  if (typeof salesHistory !== 'undefined' && salesHistory.length > 0) {
+    salesHistory.forEach(s => {
+      const d = new Date(s.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalSales += (Number(s.total) || 0);
+      }
+    });
+  }
+  if (typeof manualSalesData !== 'undefined' && manualSalesData.length > 0) {
+    manualSalesData.forEach(m => {
+      const d = new Date(m.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalSales += (Number(m.total) || 0);
+      }
+    });
+  }
+
+  // 2. Calculate Total Purchase Cost (supplierPurchases) for selected month
+  let totalPurchases = 0;
+  if (typeof supplierPurchases !== 'undefined' && supplierPurchases.length > 0) {
+    supplierPurchases.forEach(p => {
+      const d = new Date(p.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalPurchases += (Number(p.totalAmount) || 0);
+      }
+    });
+  }
+
+  // 3. Calculate Total Operating Expenses (expensesData) for selected month
+  let totalExpenses = 0;
+  if (typeof expensesData !== 'undefined' && expensesData.length > 0) {
+    expensesData.forEach(e => {
+      const d = new Date(e.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalExpenses += (Number(e.amount) || 0);
+      }
+    });
+  }
+
+  // 4. Net Profit Calculation
+  let netProfit = totalSales - totalPurchases - totalExpenses;
+
+  // Update UI
+  document.getElementById('plTotalSales').innerText = '₹' + totalSales;
+  document.getElementById('plTotalPurchases').innerText = '₹' + totalPurchases;
+  document.getElementById('plTotalExpenses').innerText = '₹' + totalExpenses;
+  
+  const netProfitElem = document.getElementById('plNetProfit');
+  netProfitElem.innerText = '₹' + netProfit;
+  netProfitElem.style.color = netProfit >= 0 ? '#2563eb' : '#dc2626';
+}
+
+function printPLReport() {
+  const monthInputVal = document.getElementById('plMonthInput').value;
+  if (!monthInputVal) {
+    alert("Kripya mahina chunein!");
+    return;
+  }
+
+  const [selectedYear, selectedMonth] = monthInputVal.split('-').map(Number);
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthTitle = `${monthNames[selectedMonth - 1]} ${selectedYear}`;
+
+  let totalSales = 0;
+  if (typeof salesHistory !== 'undefined') {
+    salesHistory.forEach(s => {
+      const d = new Date(s.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalSales += (Number(s.total) || 0);
+      }
+    });
+  }
+  if (typeof manualSalesData !== 'undefined') {
+    manualSalesData.forEach(m => {
+      const d = new Date(m.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalSales += (Number(m.total) || 0);
+      }
+    });
+  }
+
+  let totalPurchases = 0;
+  if (typeof supplierPurchases !== 'undefined') {
+    supplierPurchases.forEach(p => {
+      const d = new Date(p.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalPurchases += (Number(p.totalAmount) || 0);
+      }
+    });
+  }
+
+  let totalExpenses = 0;
+  if (typeof expensesData !== 'undefined') {
+    expensesData.forEach(e => {
+      const d = new Date(e.date || Date.now());
+      if (d.getFullYear() === selectedYear && (d.getMonth() + 1) === selectedMonth) {
+        totalExpenses += (Number(e.amount) || 0);
+      }
+    });
+  }
+
+  let netProfit = totalSales - totalPurchases - totalExpenses;
+
+  let printWindow = window.open('', '_blank', 'width=800,height=600');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Profit & Loss Report - ${monthTitle}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          h2, h3 { text-align: center; margin: 5px 0; }
+          .shop-info { text-align: center; font-size: 12px; margin-bottom: 20px; color: #555; }
+          .summary-box { display: flex; justify-content: space-around; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
+          .summary-item { text-align: center; }
+          .summary-item b { font-size: 16px; display: block; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+          th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+          th { background: #f1f5f9; }
+          .text-right { text-align: right; }
+          @media print { .no-print { display: none; } }
+        </style>
+      </head>
+      <body>
+        <h2>DN FOOTWEAR & SPORTS</h2>
+        <div class="shop-info">Siriyari Bus Stand ke paas | Mob: 8209452284</div>
+        <h3>Profit & Loss (P&L) Report (${monthTitle})</h3>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+
+        <div class="summary-box">
+          <div class="summary-item">
+            <span style="color: #166534;">Kul Bikri (Revenue)</span>
+            <b style="color: #15803d;">₹${totalSales}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #991b1b;">Mal Kharid (Purchases)</span>
+            <b style="color: #dc2626;">₹${totalPurchases}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #92400e;">Rozana Kharche</span>
+            <b style="color: #d97706;">₹${totalExpenses}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #1e40af;">Shuddh Munafa (Net Profit)</span>
+            <b style="color: ${netProfit >= 0 ? '#2563eb' : '#dc2626'};">₹${netProfit}</b>
+          </div>
+        </div>
+
+        <h4>Hisaab ka Saransh (Summary Table):</h4>
+        <table>
+          <tr><td><b>Kul Bikri (Total Sales)</b></td><td class="text-right" style="color: #15803d;">+₹${totalSales}</td></tr>
+          <tr><td><b>Ghatayein: Mal Kharid Kharcha (Total Purchases)</b></td><td class="text-right" style="color: #dc2626;">-₹${totalPurchases}</td></tr>
+          <tr><td><b>Ghatayein: Rozana Operating Kharche (Expenses)</b></td><td class="text-right" style="color: #d97706;">-₹${totalExpenses}</td></tr>
+          <tr style="background: #f1f5f9; font-weight: bold; font-size: 14px;"><td><b>Shuddh Munafa (Net Profit)</b></td><td class="text-right" style="color: ${netProfit >= 0 ? '#2563eb' : '#dc2626'};">₹${netProfit}</td></tr>
         </table>
 
         <div style="margin-top: 30px; text-align: center;" class="no-print">
