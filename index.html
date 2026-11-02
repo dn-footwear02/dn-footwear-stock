@@ -235,6 +235,9 @@
         <button class="btn btn-indigo" onclick="openSupplierModal()" title="Supplier aur Purchase Khata">📦 Supplier Khata</button>
         <button class="btn btn-purple" onclick="openRozanaModal()" title="Rozana Kharcha aur Cash Register">💰 Rozana Kharcha</button>
         <button class="btn.btn-indigo btn" onclick="openPLModal()" title="Profit & Loss Report" style="background:#4f46e5; color:#fff; padding:6px 12px; border-radius:6px; border:none; cursor:pointer;">📊 Profit & Loss</button>
+         <button class="btn btn-amber" style="background:#f59e0b; color:#000; font-weight:800;" onclick="openDirectSaleModal()" title="Bina stock ke seedhe bikri darj karein">
+  ⚡ Direct Bikri Jodein
+</button>
       </span>
     </div>
   </header>
@@ -483,6 +486,73 @@
 
   <!-- ==================== MODALS ==================== -->
 
+  <!-- ⚡ DIRECT SALE MODAL (ADMIN PANEL) -->
+<div id="directSaleModal" class="modal">
+  <div class="modal-box" style="max-width:420px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+      <h3 style="font-size:16px; font-weight:800; color:#0f172a;">⚡ Direct Bikri Darj Karein (Non-Stock)</h3>
+      <button class="btn btn-slate" onclick="closeDirectSaleModal()">✕</button>
+    </div>
+
+    <form onsubmit="submitDirectSaleEntry(event)">
+      <div class="form-group">
+        <label>Samaan / Item Ka Naam *</label>
+        <input type="text" id="dsItemName" required placeholder="Jaise: Belt, Socks, Repairing, etc..." class="form-control">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Quantity (Jodi / Piece) *</label>
+          <input type="number" id="dsItemQty" required min="1" value="1" class="form-control" style="font-weight:bold;">
+        </div>
+        <div class="form-group">
+          <label>Kul Rate / Amount (₹) *</label>
+          <input type="number" id="dsItemPrice" required min="1" placeholder="e.g. 150" class="form-control" style="font-weight:bold; color:#10b981;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Mode (Kaise Paise Aaye):</label>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+          <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+            <input type="radio" name="dsPayMode" value="Cash" checked> 💵 Cash
+          </label>
+          <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+            <input type="radio" name="dsPayMode" value="UPI"> 📱 UPI
+          </label>
+          <label style="border:1px solid #cbd5e1; padding:7px; border-radius:6px; text-align:center; font-size:12px; font-weight:bold; cursor:pointer;">
+            <input type="radio" name="dsPayMode" value="Udhaar"> 📋 Udhaar
+          </label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Grahak Ka Naam (Optional):</label>
+          <input type="text" id="dsCustName" placeholder="Customer name..." class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number (Optional):</label>
+          <input type="tel" id="dsCustPhone" placeholder="Mobile no..." class="form-control">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+        <button type="button" class="btn btn-slate" onclick="closeDirectSaleModal()">Cancel</button>
+        <button type="submit" class="btn btn-green" style="background:#10b981; color:#fff; padding:10px 18px;">✓ Bikri Save Karein</button>
+      </div>
+    </form>
+
+    <!-- RECENT DIRECT SALES LIST INSIDE MODAL (WITH EDIT & DELETE) -->
+    <div style="margin-top:15px; border-top:1px solid #e2e8f0; padding-top:10px;">
+      <small style="font-weight:bold; color:#64748b; display:block; margin-bottom:6px;">Haal Hi Me Ki Gayi Direct Bikri (Edit/Delete):</small>
+      <div id="recentDirectSalesList" style="max-height:130px; overflow-y:auto; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:6px;">
+        <i style="font-size:10px; color:#94a3b8;">Load ho raha hai...</i>
+      </div>
+    </div>
+  </div>
+</div>
+  
   <!-- 📊 PROFIT & LOSS REPORT MODAL -->
 <div id="plModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
   <div class="modal-box" style="background:#fff; width:100%; max-width:750px; padding:20px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -574,20 +644,6 @@
         <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Is Bill Me Jude Items:</label>
         <div id="activeBillItemsContainer" style="max-height:35vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
       </div>
-
-      <!-- CURRENT ITEMS LIST IN THIS BILL -->
-<div style="margin-bottom:12px;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-    <label style="font-size:11px; font-weight:bold; color:#475569;">Is Bill Me Jude Items:</label>
-    
-    <!-- 🛒 Bilkul Alag Button: Sirf Direct Bikri ke liye -->
-    <button type="button" class="btn btn-amber" style="font-size:11px; padding:5px 12px; background:#f59e0b; color:#000; font-weight:800; border-radius:6px;" onclick="openDirectQuickSalePrompt()">
-      ⚡ + Direct Bikri Jodein (Non-Stock)
-    </button>
-  </div>
-  
-  <div id="activeBillItemsContainer" style="max-height:30vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
-</div>
 
       <!-- ADD ANOTHER ITEM BUTTON -->
       <div style="margin-bottom:14px; text-align:right;">
@@ -6110,50 +6166,115 @@ function printPLReport() {
   `);
   printWindow.document.close();
 }
-    // ⚡ डायरेक्ट बिकरी आइटम जोड़ने का प्रॉम्प्ट (बिना स्टॉक जोड़े सीधे बिल और रिपोर्ट में)
-function openDirectQuickSalePrompt() {
-  let itemName = prompt("Jo item list me nahi hai uska naam likhein (Jaise: Belt, Socks, Repairing, Miscellaneous):");
-  if (!itemName || !itemName.trim()) return;
-
-  let itemRate = prompt(`[${itemName.trim()}] ka Selling Price (Rate ₹) likhein:`, "100");
-  let parsedRate = Number(itemRate);
+    // ⚡ Direct Sale Modal Open Functions
+function openDirectSaleModal() {
+  document.getElementById('dsItemName').value = '';
+  document.getElementById('dsItemQty').value = '1';
+  document.getElementById('dsItemPrice').value = '';
+  document.getElementById('dsCustName').value = '';
+  document.getElementById('dsCustPhone').value = '';
+  document.querySelector('input[name="dsPayMode"][value="Cash"]').checked = true;
   
-  if (isNaN(parsedRate) || parsedRate <= 0) {
-    alert("Kripya sahi rate likhein!");
+  renderRecentDirectSalesInModal();
+  document.getElementById('directSaleModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('dsItemName').focus(), 100);
+}
+
+// ⚡ Direct Sale Modal Close Functions
+function closeDirectSaleModal() {
+  document.getElementById('directSaleModal').style.display = 'none';
+}
+
+// ⚡ Direct Sale Entry Submit and Save to Firebase (Bikri Report)
+function submitDirectSaleEntry(e) {
+  e.preventDefault();
+
+  const itemName = document.getElementById('dsItemName').value.trim();
+  const itemQty = Number(document.getElementById('dsItemQty').value) || 1;
+  const itemPrice = Number(document.getElementById('dsItemPrice').value) || 0;
+  const payMode = document.querySelector('input[name="dsPayMode"]:checked').value;
+  const custName = document.getElementById('dsCustName').value.trim() || 'Walk-in Customer';
+  const custPhone = document.getElementById('dsCustPhone').value.trim() || '';
+
+  if (!itemName || itemPrice <= 0) {
+    alert("Kripya item ka naam aur sahi price likhein!");
     return;
   }
 
-  // Active bill items me direct jodh do (Stock me koi chhedkhani nahi hogi)
-  activeBillItems.push({
-    itemId: 'direct_sale_' + Date.now(),
-    name: itemName.trim(),
-    brand: 'Direct Sale',
+  const billNo = 'DS-' + Math.floor(1000 + Math.random() * 9000);
+  const nowIso = new Date().toISOString();
+
+  const directSaleRecord = {
+    id: 'ds_sale_' + Date.now(),
+    billNo: billNo,
+    date: nowIso,
+    name: `${itemName} (Qty: ${itemQty})`,
+    brand: 'Direct Counter Sale',
     color: '-',
     size: '-',
     costPrice: 0,
-    sellPrice: parsedRate,
-    qty: 1,
-    itemObj: null
-  });
+    tagPrice: itemPrice,
+    sellPrice: itemPrice,
+    profit: itemPrice,
+    payMode: payMode,
+    customer: custName,
+    phone: custPhone,
+    status: payMode === 'Udhaar' ? 'Pending' : 'Completed'
+  };
 
-  renderActiveBillItemsList();
-  alert(`✓ [${itemName.trim()}] (₹${parsedRate}) direct bill me jud gaya hai! Bill save karte hi Bikri Report me aa jayega.`);
+  db.ref('footwear_sales/' + directSaleRecord.id).set(directSaleRecord).then(() => {
+    alert(`✓ Direct Bikri Safal! [${itemName}] ka bill [${billNo}] (₹${itemPrice}) Bikri Report me jud gaya hai.`);
+    
+    // Form reset & list refresh
+    document.getElementById('dsItemName').value = '';
+    document.getElementById('dsItemQty').value = '1';
+    document.getElementById('dsItemPrice').value = '';
+    document.getElementById('dsCustName').value = '';
+    document.getElementById('dsCustPhone').value = '';
+    
+    renderRecentDirectSalesInModal();
+
+    if (typeof calculateSalesReport === 'function' && document.getElementById('salesReportModal').style.display === 'flex') {
+      calculateSalesReport();
+    }
+  }).catch((err) => {
+    alert("Error saving sale: " + err.message);
+  });
 }
 
-// ✏️ Bill ke andar hi direct item ki Qty ya Rate badlne ka function
-function updateBillItemQtyOrRate(index, type, val) {
-  let bi = activeBillItems[index];
-  if (!bi) return;
+// 📋 Modal ke andar recent direct sales ki list dikhana jisse edit/delete kar sakein
+function renderRecentDirectSalesInModal() {
+  const container = document.getElementById('recentDirectSalesList');
+  if (!container) return;
 
-  if (type === 'qty') {
-    let q = Number(val);
-    if (q > 0) bi.qty = q;
-  } else if (type === 'rate') {
-    let r = Number(val);
-    if (!isNaN(r) && r >= 0) bi.sellPrice = r;
+  if (typeof salesHistory === 'undefined' || salesHistory.length === 0) {
+    container.innerHTML = '<i style="font-size:10px; color:#94a3b8;">Koi bikri record nahi hai.</i>';
+    return;
   }
 
-  renderActiveBillItemsList();
+  let directSales = salesHistory.filter(s => s.brand === 'Direct Counter Sale');
+  directSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (directSales.length === 0) {
+    container.innerHTML = '<i style="font-size:10px; color:#94a3b8;">Abhi koi direct sale darj nahi ki gayi.</i>';
+    return;
+  }
+
+  container.innerHTML = directSales.slice(0, 5).map(s => {
+    let safeRecStr = encodeURIComponent(JSON.stringify(s));
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-bottom:1px solid #f1f5f9; font-size:11px; margin-bottom:3px; border-radius:4px;">
+        <div>
+          <b>${s.name}</b> - <span style="color:#10b981; font-weight:bold;">₹${s.sellPrice}</span><br>
+          <small style="color:#64748b;">${s.customer || 'Walk-in'} • ${s.payMode || 'Cash'}</small>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <button type="button" class="btn btn-amber" style="font-size:9px; padding:2px 6px;" onclick="openEditSaleModal('${safeRecStr}')">Edit</button>
+          <button type="button" class="btn btn-red" style="font-size:9px; padding:2px 6px;" onclick="deleteSaleRecord('${s.id}'); setTimeout(renderRecentDirectSalesInModal, 400);">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
     // initRozanaListeners();
     
