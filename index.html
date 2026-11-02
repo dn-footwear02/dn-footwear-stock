@@ -858,31 +858,46 @@
       </div>
     </div>
 
-    <!-- Add Expense Form Box -->
-    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
-      <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:6px;">+ Naya Kharcha Darj Karein / Update Karein:</b>
-      <div style="display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
-        <input type="text" id="expReason" placeholder="Kharche ka karan (jaise: Chai Pani)..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
-        <input type="number" id="expAmount" placeholder="Amount (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
+    <!-- Forms Row: Manual Cash Sale & Expense Add -->
+    <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+      <!-- Manual Cash Sale Add Box -->
+      <div style="flex:1; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; min-width:280px;">
+        <b style="font-size:11px; color:#166534; display:block; margin-bottom:6px;">+ Manual Cash Bikri Jodein (Non-system items):</b>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="text" id="manualSaleNote" placeholder="Vivarann (jaise: Chhapal repair, etc)..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
+          <input type="number" id="manualSaleAmount" placeholder="Amount (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn btn-green" style="font-size:10px; padding:4px 10px; cursor:pointer;" onclick="saveManualCashSale()">✓ Cash Jodein</button>
+        </div>
       </div>
-      <div style="display:flex; justify-content:flex-end; gap:6px;">
-        <button id="expSaveBtn" class="btn btn-green" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="saveDailyExpense()">✓ Kharcha Save Karein</button>
-        <button class="btn btn-slate" style="font-size:11px; padding:5px 12px; cursor:pointer; display:none;" id="expCancelBtn" onclick="cancelEditExpense()">Radd Karein</button>
+
+      <!-- Expense Add Box -->
+      <div style="flex:1; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; min-width:280px;">
+        <b style="font-size:11px; color:#1e1b4b; display:block; margin-bottom:6px;">+ Kharcha Darj Karein:</b>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="text" id="expReason" placeholder="Kharche ka karan..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
+          <input type="number" id="expAmount" placeholder="Amount (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:6px;">
+          <button id="expSaveBtn" class="btn.btn-green btn" style="font-size:10px; padding:4px 10px; cursor:pointer; background:#10b981; color:#fff;" onclick="saveDailyExpense()">✓ Save</button>
+          <button class="btn btn-slate" style="font-size:10px; padding:4px 10px; cursor:pointer; display:none;" id="expCancelBtn" onclick="cancelEditExpense()">Radd</button>
+        </div>
       </div>
     </div>
 
-    <!-- Two Columns: Today's Sales & Today's Expenses -->
+    <!-- Two Columns: Today's Sales & Expenses Lists -->
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
       <div style="flex:1; min-width:300px;">
-        <h4 style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:6px;">Aaj ki Cash Bikri (Sales History):</h4>
-        <div id="rozanaSalesList" style="max-height:180px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+        <h4 style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:6px;">Aaj ki Cash Bikri (Sales & Manual):</h4>
+        <div id="rozanaSalesList" style="max-height:160px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
           <i style="font-size:11px; color:#64748b;">Load ho raha hai...</i>
         </div>
       </div>
 
       <div style="flex:1; min-width:300px;">
         <h4 style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:6px;">Aaj ke Kharche ki History:</h4>
-        <div id="rozanaExpenseList" style="max-height:180px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+        <div id="rozanaExpenseList" style="max-height:160px; overflow-y:auto; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
           <i style="font-size:11px; color:#64748b;">Load ho raha hai...</i>
         </div>
       </div>
@@ -5276,6 +5291,233 @@ function renderRozanaRegister() {
 }
 // Apne script ke aakhri me ise call karna na bhulein:
 // initRozanaListeners();
+    
+    // ==========================================
+// 💰 MANUAL CASH SALE & EXPENSES MODULE
+// ==========================================
+
+let manualSalesData = [];
+
+// initRozanaListeners me manual_sales bhi sync karein
+function initRozanaListeners() {
+  db.ref('expenses').on('value', (snap) => {
+    const val = snap.val() || {};
+    expensesData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    renderRozanaRegister();
+  });
+
+  db.ref('sales_history').on('value', (snap) => {
+    const val = snap.val() || {};
+    salesHistory = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    renderRozanaRegister();
+  });
+
+  db.ref('manual_sales').on('value', (snap) => {
+    const val = snap.val() || {};
+    manualSalesData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    renderRozanaRegister();
+  });
+}
+
+function openRozanaModal() {
+  document.getElementById('rozanaModal').style.display = 'flex';
+  refreshRozanaData();
+}
+
+function closeRozanaModal() {
+  document.getElementById('rozanaModal').style.display = 'none';
+  cancelEditExpense();
+}
+
+// Manual Cash Sale Save karne ka function
+function saveManualCashSale() {
+  const noteInput = document.getElementById('manualSaleNote');
+  const amountInput = document.getElementById('manualSaleAmount');
+
+  const note = noteInput ? noteInput.value.trim() : 'Manual Cash Sale';
+  const amount = Number(amountInput ? amountInput.value : 0) || 0;
+
+  if (amount <= 0) {
+    alert("Kripya sahi cash amount likhein!");
+    return;
+  }
+
+  db.ref('manual_sales').push({
+    note: note,
+    total: amount,
+    date: Date.now()
+  }).then(() => {
+    alert("✓ Manual cash bikri jud gayi hai!");
+    if(noteInput) noteInput.value = '';
+    if(amountInput) amountInput.value = '';
+    refreshRozanaData();
+  }).catch((err) => {
+    alert("Error: " + err.message);
+  });
+}
+
+// Manual Sale Delete
+function deleteManualSale(saleId) {
+  if(confirm("Kya aap is manual cash entry ko delete karna chahte hain?")) {
+    db.ref('manual_sales/' + saleId).remove().then(() => {
+      refreshRozanaData();
+    });
+  }
+}
+
+// Refresh data helper
+function refreshRozanaData() {
+  db.ref('expenses').once('value').then((snap) => {
+    expensesData = Object.keys(snap.val() || {}).map(k => ({ id: k, ...snap.val()[k] }));
+    
+    db.ref('sales_history').once('value').then((sSnap) => {
+      salesHistory = Object.keys(sSnap.val() || {}).map(k => ({ id: k, ...sSnap.val()[k] }));
+      
+      db.ref('manual_sales').once('value').then((mSnap) => {
+        manualSalesData = Object.keys(mSnap.val() || {}).map(k => ({ id: k, ...mSnap.val()[k] }));
+        renderRozanaRegister();
+      });
+    });
+  });
+}
+
+// Kharcha functions
+function saveDailyExpense() {
+  const reasonInput = document.getElementById('expReason');
+  const amountInput = document.getElementById('expAmount');
+  const reason = reasonInput ? reasonInput.value.trim() : '';
+  const amount = Number(amountInput ? amountInput.value : 0) || 0;
+
+  if (!reason || amount <= 0) {
+    alert("Kripya kharche ka karan aur sahi amount likhein!");
+    return;
+  }
+
+  if (editingExpenseId) {
+    db.ref('expenses/' + editingExpenseId).update({ reason, amount }).then(() => {
+      alert("✓ Kharcha update ho gaya hai!");
+      cancelEditExpense();
+      refreshRozanaData();
+    });
+  } else {
+    db.ref('expenses').push({ reason, amount, date: Date.now() }).then(() => {
+      alert("✓ Kharcha save ho gaya hai!");
+      if(reasonInput) reasonInput.value = '';
+      if(amountInput) amountInput.value = '';
+      refreshRozanaData();
+    });
+  }
+}
+
+function deleteExpense(expId) {
+  if (confirm("Kya aap is kharche ko delete karna chahte hain?")) {
+    db.ref('expenses/' + expId).remove().then(() => refreshRozanaData());
+  }
+}
+
+function editExpense(expId) {
+  const exp = expensesData.find(e => e.id === expId);
+  if (!exp) return;
+  document.getElementById('expReason').value = exp.reason;
+  document.getElementById('expAmount').value = exp.amount;
+  editingExpenseId = exp.id;
+  document.getElementById('expSaveBtn').innerText = "🔄 Update";
+  document.getElementById('expCancelBtn').style.display = 'inline-block';
+}
+
+function cancelEditExpense() {
+  editingExpenseId = null;
+  document.getElementById('expReason').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expSaveBtn').innerText = "✓ Save";
+  document.getElementById('expCancelBtn').style.display = 'none';
+}
+
+// Render Rozana Register & Total Calculations
+function renderRozanaRegister() {
+  const expenseContainer = document.getElementById('rozanaExpenseList');
+  const salesContainer = document.getElementById('rozanaSalesList');
+
+  let todayStr = new Date().toDateString();
+
+  // Expenses Calculation
+  let sortedExpenses = [...expensesData].sort((a, b) => (b.date || 0) - (a.date || 0));
+  let totalExpensesToday = sortedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+  // System Sales + Manual Sales Calculation for Today
+  let totalCashSalesToday = 0;
+  let combinedSalesList = [];
+
+  if (salesHistory && salesHistory.length > 0) {
+    salesHistory.forEach(s => {
+      let sDate = new Date(s.date || Date.now()).toDateString();
+      if (sDate === todayStr) {
+        combinedSalesList.push({ id: s.id, title: `Bill: ${s.billNo || 'N/A'} (${s.customerName || 'Cash'})`, total: Number(s.total) || 0, type: 'system', date: s.date });
+        totalCashSalesToday += (Number(s.total) || 0);
+      }
+    });
+  }
+
+  if (manualSalesData && manualSalesData.length > 0) {
+    manualSalesData.forEach(m => {
+      let mDate = new Date(m.date || Date.now()).toDateString();
+      if (mDate === todayStr) {
+        combinedSalesList.push({ id: m.id, title: `Manual: ${m.note || 'Cash Sale'}`, total: Number(m.total) || 0, type: 'manual', date: m.date });
+        totalCashSalesToday += (Number(m.total) || 0);
+      }
+    });
+  }
+
+  // Sort combined sales by newest first
+  combinedSalesList.sort((a, b) => (b.date || 0) - (a.date || 0));
+
+  // Update Summary Cards
+  document.getElementById('rozanaCashIn').innerText = '₹' + totalCashSalesToday;
+  document.getElementById('rozanaCashOut').innerText = '₹' + totalExpensesToday;
+  document.getElementById('rozanaNetCash').innerText = '₹' + (totalCashSalesToday - totalExpensesToday);
+
+  // Render Sales List UI
+  if (salesContainer) {
+    if (combinedSalesList.length === 0) {
+      salesContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Aaj ki koi cash bikri darj nahi hai.</i>';
+    } else {
+      salesContainer.innerHTML = combinedSalesList.map(s => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:5px 8px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
+          <div>
+            <b>${s.title}</b><br>
+            <small style="color:#64748b;">${new Date(s.date || Date.now()).toLocaleTimeString('en-IN')}</small>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <b style="color:#15803d;">+₹${s.total}</b>
+            ${s.type === 'manual' ? `<button class="btn btn-red" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="deleteManualSale('${s.id}')">Delete</button>` : `<span style="font-size:9px; color:#64748b;">(System)</span>`}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Render Expense List UI
+  if (expenseContainer) {
+    if (sortedExpenses.length === 0) {
+      expenseContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Abhi koi kharcha darj nahi hai.</i>';
+    } else {
+      expenseContainer.innerHTML = sortedExpenses.map(e => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:5px 8px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
+          <div>
+            <b>${e.reason}</b><br>
+            <small style="color:#64748b;">${new Date(e.date || Date.now()).toLocaleTimeString('en-IN')}</small>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <b style="color:#dc2626;">-₹${e.amount}</b>
+            <button class="btn btn-indigo" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="editExpense('${e.id}')">Edit</button>
+            <button class="btn btn-red" style="font-size:9px; padding:2px 4px; cursor:pointer;" onclick="deleteExpense('${e.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+    // initRozanaListeners();
     
   </script>
 </body>
