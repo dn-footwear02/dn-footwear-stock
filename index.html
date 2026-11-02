@@ -6166,8 +6166,8 @@ function printPLReport() {
   printWindow.document.close();
 }
 
-  // ==========================================
-// 🏷️ ADVANCED BARCODE PRINTING MODULE
+ // ==========================================
+// 🏷️ ADVANCED BARCODE PRINTING MODULE (MRP LABEL FIX)
 // ==========================================
 
 function openBarcodeModal() {
@@ -6188,7 +6188,7 @@ function populateBarcodeItemDropdown() {
 
   let allItems = (typeof items !== 'undefined' ? items : []);
   select.innerHTML = `<option value="">-- Dukan ke Stock se Chunein --</option>` + 
-    allItems.map((it, idx) => `<option value="${idx}">${it.name} (₹${it.price || 0})</option>`).join('');
+    allItems.map((it, idx) => `<option value="${idx}">${it.name} (MRP: ₹${it.price || 0})</option>`).join('');
 }
 
 function toggleBarcodeMode() {
@@ -6206,14 +6206,14 @@ function toggleBarcodeMode() {
 }
 
 function loadBarcodeItemDetails() {
-  const idx = document.getElementById('bcItemSelect').value;
+  const idx = document.getElementById('bcItemSelect'].value;
   if (idx === '') return;
 
   let allItems = (typeof items !== 'undefined' ? items : []);
   let selectedItem = allItems[idx];
   if (selectedItem) {
     document.getElementById('bcItemName').value = selectedItem.name || '';
-    document.getElementById('bcItemPrice').value = selectedItem.price || 0;
+    document.getElementById('bcItemPrice').value = selectedItem.price || 0; // Yeh MRP / Price hai
     document.getElementById('bcCustomCode').value = 'DN-' + (selectedItem.id || Math.floor(1000 + Math.random() * 9000));
   }
 }
@@ -6227,19 +6227,19 @@ function printAdvancedBarcodeLabels() {
   const totalQty = Number(document.getElementById('bcQty').value) || 1;
 
   if (!name || price <= 0) {
-    alert("Kripya item ka naam aur sahi price likhein!");
+    alert("Kripya item ka naam aur sahi MRP/Price likhein!");
     return;
   }
 
-  // Generate labels based on quantity and custom code
+  // Generate labels with MRP label explicitly shown on sticker
   let labelsHtml = '';
   for (let i = 0; i < totalQty; i++) {
     labelsHtml += `
       <div style="width: ${widthMm}mm; height: ${heightMm}mm; border: 1px dashed #333; padding: 4px; text-align: center; display: inline-flex; flex-direction: column; justify-content: center; align-items: center; margin: 2mm; box-sizing: border-box; page-break-inside: avoid; overflow: hidden;">
-        <div style="font-size: 8px; font-weight: bold; color: #000; line-height: 1;">DN FOOTWEAR</div>
+        <div style="font-size: 8px; font-weight: bold; color: #000; line-height: 1;">DN FOOTWEAR & SPORTS</div>
         <div style="font-size: 9px; font-weight: bold; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${name}</div>
-        <div style="font-size: 10px; font-weight: bold; color: #000; margin-bottom: 2px; line-height: 1;">₹${price}</div>
-        <div style="font-family: monospace; font-size: 12px; font-weight: bold; color: #000; letter-spacing: 1px; line-height: 1;">||| | |||| ||</div>
+        <div style="font-size: 10px; font-weight: bold; color: #000; margin-bottom: 2px; line-height: 1;">MRP: ₹${price}</div>
+        <div style="letter-spacing: 2px; font-family: monospace; font-size: 12px; font-weight: bold; color: #000; line-height: 1;">||| | |||| ||</div>
         <div style="font-size: 7px; color: #333; margin-top: 1px;">*${code}*</div>
       </div>
     `;
