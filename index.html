@@ -2270,6 +2270,9 @@ function deleteSaleRecord(saleId) {
         if (typeof renderUdhaarTable === 'function' && document.getElementById('udhaarReportModal').style.display === 'flex') {
           renderUdhaarTable();
         }
+        if (typeof renderRecentDirectSalesInModal === 'function') {
+          renderRecentDirectSalesInModal();
+        }
       });
 
     }).catch((err) => {
