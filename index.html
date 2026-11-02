@@ -6166,64 +6166,109 @@ function printPLReport() {
   printWindow.document.close();
 }
 
- // Jab aap billing cart me items dikhate hain, toh rate ko input box bana dein taaki bargain ke waqt turant change kiya ja sake:
-function renderCartItems() {
-  const cartContainer = document.getElementById('cartItemsContainer');
-  if (!cartContainer) return;
+// ==========================================
+// 🏷️ ADVANCED BARCODE PRINTING MODULE (MRP LABEL FIX)
+// ==========================================
 
-  if (typeof cart === 'undefined' || cart.length === 0) {
-    cartContainer.innerHTML = '<div style="font-size:11px; color:#64748b; text-align:center; padding:10px;">Cart khali hai</div>';
-    return;
-  }
+function openBarcodeModal() {
+  document.getElementById('barcodeModal').style.display = 'flex';
+  populateBarcodeItemDropdown();
+  
+  // Default random barcode code
+  document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+}
 
-  cartContainer.innerHTML = cart.map((item, index) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:6px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
-      <div style="flex:2;">
-        <b>${item.name}</b><br>
-        <small style="color:#64748b;">Stock: ${item.stock || 0}</small>
-      </div>
-      
-      <!-- Quantity Control -->
-      <div style="flex:1; text-align:center;">
-        <input type="number" value="${item.qty}" min="1" style="width:40px; padding:2px; font-size:11px; text-align:center;" onchange="updateCartQty(${index}, this.value)">
-      </div>
+function closeBarcodeModal() {
+  document.getElementById('barcodeModal').style.display = 'none';
+}
 
-      <!-- Bargain / Editable Selling Rate Input -->
-      <div style="flex:1.2; text-align:center;">
-        <input type="number" value="${item.price}" style="width:65px; padding:2px; font-size:11px; text-align:right; font-weight:bold; color:#15803d;" title="Bargain rate yahan badlein" onchange="updateBargainRate(${index}, this.value)">
-      </div>
+function populateBarcodeItemDropdown() {
+  const select = document.getElementById('bcItemSelect');
+  if (!select) return;
 
-      <!-- Total Amount -->
-      <div style="flex:1; text-align:right; font-weight:bold;">
-        ₹${item.qty * item.price}
-      </div>
+  let allItems = (typeof items !== 'undefined' ? items : []);
+  select.innerHTML = `<option value="">-- Dukan ke Stock se Chunein --</option>` + 
+    allItems.map((it, idx) => `<option value="${idx}">${it.name} (MRP: ₹${it.price || 0})</option>`).join('');
+}
 
-      <!-- Remove Button -->
-      <div style="margin-left:6px;">
-        <button class="btn btn-red" style="font-size:9px; padding:2px 5px; cursor:pointer;" onclick="removeFromCart(${index})">✕</button>
-      </div>
-    </div>
-  `).join('');
-
-  // Total calculate karne ka function call
-  if (typeof calculateCartTotal === 'function') {
-    calculateCartTotal();
+function toggleBarcodeMode() {
+  const mode = document.querySelector('input[name="bcMode"]:checked').value;
+  const stockBox = document.getElementById('stockSelectBox');
+  
+  if (mode === 'manual') {
+    stockBox.style.display = 'none';
+    document.getElementById('bcItemName').value = '';
+    document.getElementById('bcItemPrice').value = '';
+    document.getElementById('bcCustomCode').value = 'DN-' + Math.floor(1000 + Math.random() * 9000);
+  } else {
+    stockBox.style.display = 'block';
   }
 }
 
-// Bargain ya direct rate change hone par cart update karne ka function
-function updateBargainRate(index, newRate) {
-  const price = Number(newRate);
-  if (isNaN(price) || price < 0) {
-    alert("Kripya sahi rate likhein!");
-    renderCartItems();
+function loadBarcodeItemDetails() {
+  const idx = document.getElementById('bcItemSelect'].value;
+  if (idx === '') return;
+
+  let allItems = (typeof items !== 'undefined' ? items : []);
+  let selectedItem = allItems[idx];
+  if (selectedItem) {
+    document.getElementById('bcItemName').value = selectedItem.name || '';
+    document.getElementById('bcItemPrice').value = selectedItem.price || 0; // Yeh MRP / Price hai
+    document.getElementById('bcCustomCode').value = 'DN-' + (selectedItem.id || Math.floor(1000 + Math.random() * 9000));
+  }
+}
+
+function printAdvancedBarcodeLabels() {
+  const name = document.getElementById('bcItemName').value.trim();
+  const price = Number(document.getElementById('bcItemPrice').value) || 0;
+  const code = document.getElementById('bcCustomCode').value.trim() || 'DN-1001';
+  const widthMm = Number(document.getElementById('bcWidth').value) || 50;
+  const heightMm = Number(document.getElementById('bcHeight').value) || 30;
+  const totalQty = Number(document.getElementById('bcQty').value) || 1;
+
+  if (!name || price <= 0) {
+    alert("Kripya item ka naam aur sahi MRP/Price likhein!");
     return;
   }
 
-  if (typeof cart !== 'undefined' && cart[index]) {
-    cart[index].price = price; // Nayi bargaining rate set ho gayi
-    renderCartItems(); // Total dubara calculate hoga
+  // Generate labels with MRP label explicitly shown on sticker
+  let labelsHtml = '';
+  for (let i = 0; i < totalQty; i++) {
+    labelsHtml += `
+      <div style="width: ${widthMm}mm; height: ${heightMm}mm; border: 1px dashed #333; padding: 4px; text-align: center; display: inline-flex; flex-direction: column; justify-content: center; align-items: center; margin: 2mm; box-sizing: border-box; page-break-inside: avoid; overflow: hidden;">
+        <div style="font-size: 8px; font-weight: bold; color: #000; line-height: 1;">DN FOOTWEAR & SPORTS</div>
+        <div style="font-size: 9px; font-weight: bold; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${name}</div>
+        <div style="font-size: 10px; font-weight: bold; color: #000; margin-bottom: 2px; line-height: 1;">MRP: ₹${price}</div>
+        <div style="letter-spacing: 2px; font-family: monospace; font-size: 12px; font-weight: bold; color: #000; line-height: 1;">||| | |||| ||</div>
+        <div style="font-size: 7px; color: #333; margin-top: 1px;">*${code}*</div>
+      </div>
+    `;
   }
+
+  let printWindow = window.open('', '_blank', 'width=800,height=600');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Barcode Labels - ${code}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 5mm; }
+          .container { display: flex; flex-wrap: wrap; align-content: flex-start; }
+          @media print {
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div style="text-align: center; margin-bottom: 10px;" class="no-print">
+          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; font-size: 14px; border-radius: 4px; cursor: pointer;">Print Labels Now</button>
+        </div>
+        <div class="container">
+          ${labelsHtml}
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
 }
     // initRozanaListeners();
     
