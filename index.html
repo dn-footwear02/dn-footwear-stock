@@ -6206,18 +6206,20 @@ function toggleBarcodeMode() {
 }
 
 function loadBarcodeItemDetails() {
-  const idx = document.getElementById('bcItemSelect'].value;
+  const idx = document.getElementById('bcItemSelect').value;
   if (idx === '') return;
 
   let allItems = (typeof items !== 'undefined' ? items : []);
   let selectedItem = allItems[idx];
   if (selectedItem) {
     document.getElementById('bcItemName').value = selectedItem.name || '';
-    document.getElementById('bcItemPrice').value = selectedItem.price || 0; // Yeh MRP / Price hai
-    document.getElementById('bcCustomCode').value = 'DN-' + (selectedItem.id || Math.floor(1000 + Math.random() * 9000));
+    document.getElementById('bcItemPrice').value = selectedItem.price || 0; // Yeh MRP/Price hai
+    
+    // Yahan item ka code/ID apne-aap barcode box me chala jayega
+    const itemCode = selectedItem.barcode || selectedItem.code || selectedItem.id || ('DN-' + Math.floor(1000 + Math.random() * 9000));
+    document.getElementById('bcCustomCode').value = itemCode;
   }
 }
-
 function printAdvancedBarcodeLabels() {
   const name = document.getElementById('bcItemName').value.trim();
   const price = Number(document.getElementById('bcItemPrice').value) || 0;
