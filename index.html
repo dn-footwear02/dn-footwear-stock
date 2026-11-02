@@ -866,7 +866,7 @@
         <input type="number" id="expAmount" placeholder="Amount (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
       </div>
       <div style="display:flex; justify-content:flex-end;">
-        <button class="btn btn-green" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="saveDailyExpense()">✓ Kharcha Save Karein</button>
+        <button id="expSaveBtn" class="btn btn-green" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="saveDailyExpense()">✓ Kharcha Save Karein</button>
       </div>
     </div>
 
@@ -5046,10 +5046,11 @@ function openSupplierKhataDetail(supId) {
 initSupplierListeners();
 
     // ==========================================
-// 💰 ROZANA KHARCHA & CASH REGISTER MODULE
+// 💰 ROZANA KHARCHA & CASH REGISTER MODULE (EDIT, DELETE & FIX)
 // ==========================================
 
 let expensesData = [];
+let editingExpenseId = null; // Track karne ke liye ki konsa kharcha edit ho raha hai
 
 function initRozanaListeners() {
   db.ref('expenses').on('value', (snap) => {
@@ -5061,52 +5062,125 @@ function initRozanaListeners() {
 
 function openRozanaModal() {
   document.getElementById('rozanaModal').style.display = 'flex';
-  renderRozanaRegister();
+  // Turant data fetch karke render karein taaki khali na dikhe
+  db.ref('expenses').once('value').then((snap) => {
+    const val = snap.val() || {};
+    expensesData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    renderRozanaRegister();
+  });
 }
 
 function closeRozanaModal() {
   document.getElementById('rozanaModal').style.display = 'none';
+  cancelEditExpense();
 }
 
+// Kharcha Save ya Update karne ka function
 function saveDailyExpense() {
-  const reason = document.getElementById('expReason').value.trim();
-  const amount = Number(document.getElementById('expAmount').value) || 0;
+  const reasonInput = document.getElementById('expReason');
+  const amountInput = document.getElementById('expAmount');
+
+  const reason = reasonInput ? reasonInput.value.trim() : '';
+  const amount = Number(amountInput ? amountInput.value : 0) || 0;
 
   if (!reason || amount <= 0) {
     alert("Kripya kharche ka karan aur sahi amount likhein!");
     return;
   }
 
-  db.ref('expenses').push({
-    reason: reason,
-    amount: amount,
-    date: Date.now()
-  }).then(() => {
-    alert("✓ Kharcha safalta-purvak save ho gaya hai!");
-    document.getElementById('expReason').value = '';
-    document.getElementById('expAmount').value = '';
-  }).catch((err) => {
-    alert("Error: " + err.message);
-  });
-}
-
-function deleteExpense(expId) {
-  if (confirm("Kya aap is kharche ki entry ko delete karna chahte hain?")) {
-    db.ref('expenses/' + expId).remove();
+  if (editingExpenseId) {
+    // Agar edit mode me hai toh update karein
+    db.ref('expenses/' + editingExpenseId).update({
+      reason: reason,
+      amount: amount
+    }).then(() => {
+      alert("✓ Kharcha safalta-purvak update ho gaya hai!");
+      cancelEditExpense();
+      refreshRozanaData();
+    }).catch((err) => {
+      alert("Error: " + err.message);
+    });
+  } else {
+    // Naya kharcha save karein
+    db.ref('expenses').push({
+      reason: reason,
+      amount: amount,
+      date: Date.now()
+    }).then(() => {
+      alert("✓ Kharcha safalta-purvak save ho gaya hai!");
+      reasonInput.value = '';
+      amountInput.value = '';
+      refreshRozanaData();
+    }).catch((err) => {
+      alert("Error: " + err.message);
+    });
   }
 }
 
+// Refresh data helper
+function refreshRozanaData() {
+  db.ref('expenses').once('value').then((snap) => {
+    const val = snap.val() || {};
+    expensesData = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    renderRozanaRegister();
+  });
+}
+
+// Kharcha Delete karne ka option
+function deleteExpense(expId) {
+  if (confirm("Kya aap is kharche ki entry ko delete karna chahte hain?")) {
+    db.ref('expenses/' + expId).remove().then(() => {
+      alert("✓ Kharcha delete ho gaya hai.");
+      refreshRozanaData();
+    });
+  }
+}
+
+// Kharcha Edit karne ke liye form me data load karna
+function editExpense(expId) {
+  const exp = expensesData.find(e => e.id === expId);
+  if (!exp) return;
+
+  document.getElementById('expReason').value = exp.reason;
+  document.getElementById('expAmount').value = exp.amount;
+  editingExpenseId = exp.id;
+
+  // Button ka text badal kar "Update Karein" kar dena
+  const saveBtn = document.getElementById('expSaveBtn');
+  if (saveBtn) {
+    saveBtn.innerText = "🔄 Update Karein";
+    saveBtn.style.background = "#d97706";
+  }
+}
+
+// Edit cancel karne ke liye
+function cancelEditExpense() {
+  editingExpenseId = null;
+  const reasonInput = document.getElementById('expReason');
+  const amountInput = document.getElementById('expAmount');
+  if(reasonInput) reasonInput.value = '';
+  if(amountInput) amountInput.value = '';
+
+  const saveBtn = document.getElementById('expSaveBtn');
+  if (saveBtn) {
+    saveBtn.innerText = "✓ Kharcha Save Karein";
+    saveBtn.style.background = "";
+  }
+}
+
+// Render Rozana Register (Sabhi kharche niche dikhane ke liye - bina date strictness ke taaki turant dikhe)
 function renderRozanaRegister() {
   const listContainer = document.getElementById('rozanaExpenseList');
-  
-  // Filter today's expenses
-  const todayStr = new Date().toDateString();
-  const todayExpenses = expensesData.filter(e => new Date(e.date || Date.now()).toDateString() === todayStr);
+  if (!listContainer) return;
 
-  let totalExpensesToday = todayExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  // Sabhi expenses ko naye se purane ke kram me dikhana
+  let sortedExpenses = [...expensesData].sort((a, b) => (b.date || 0) - (a.date || 0));
 
-  // Calculate today's cash sales
+  let totalExpensesToday = sortedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+  // Aaj ki bikri cash calculate karna
   let totalCashSalesToday = 0;
+  const todayStr = new Date().toDateString();
   if (typeof salesHistory !== 'undefined' && salesHistory.length > 0) {
     salesHistory.forEach(s => {
       let sDate = new Date(s.date || Date.now()).toDateString();
@@ -5116,32 +5190,34 @@ function renderRozanaRegister() {
     });
   }
 
-  // Update Summary UI
-  document.getElementById('rozanaCashIn').innerText = '₹' + totalCashSalesToday;
-  document.getElementById('rozanaCashOut').innerText = '₹' + totalExpensesToday;
-  document.getElementById('rozanaNetCash').innerText = '₹' + (totalCashSalesToday - totalExpensesToday);
+  // UI update
+  const cashInElem = document.getElementById('rozanaCashIn');
+  const cashOutElem = document.getElementById('rozanaCashOut');
+  const netCashElem = document.getElementById('rozanaNetCash');
 
-  if (!listContainer) return;
+  if(cashInElem) cashInElem.innerText = '₹' + totalCashSalesToday;
+  if(cashOutElem) cashOutElem.innerText = '₹' + totalExpensesToday;
+  if(netCashElem) netCashElem.innerText = '₹' + (totalCashSalesToday - totalExpensesToday);
 
-  if (todayExpenses.length === 0) {
-    listContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Aaj koi kharcha darj nahi kiya gaya hai.</i>';
+  if (sortedExpenses.length === 0) {
+    listContainer.innerHTML = '<i style="font-size:11px; color:#64748b;">Abhi koi kharcha darj nahi kiya gaya hai.</i>';
     return;
   }
 
-  listContainer.innerHTML = todayExpenses.map(e => `
+  listContainer.innerHTML = sortedExpenses.map(e => `
     <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:6px 8px; border-bottom:1px solid #e2e8f0; font-size:11px; margin-bottom:4px; border-radius:4px;">
       <div>
         <b>${e.reason}</b><br>
-        <small style="color:#64748b;">${new Date(e.date || Date.now()).toLocaleTimeString('en-IN')}</small>
+        <small style="color:#64748b;">${new Date(e.date || Date.now()).toLocaleString('en-IN')}</small>
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
+      <div style="display:flex; align-items:center; gap:6px;">
         <b style="color:#dc2626;">-₹${e.amount}</b>
-        <button class="btn btn-red" style="font-size:9px; padding:2px 6px; cursor:pointer;" onclick="deleteExpense('${e.id}')">Hataayein</button>
+        <button class="btn btn-indigo" style="font-size:9px; padding:2px 5px; cursor:pointer;" onclick="editExpense('${e.id}')">Edit</button>
+        <button class="btn btn-red" style="font-size:9px; padding:2px 5px; cursor:pointer;" onclick="deleteExpense('${e.id}')">Delete</button>
       </div>
     </div>
   `).join('');
 }
-
 // Apne script ke aakhri me ise call karna na bhulein:
 // initRozanaListeners();
     
