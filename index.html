@@ -2262,58 +2262,165 @@
       document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
-    // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka function
-    // 🗑️ Galti se judi bikri entry ko delete karne aur stock ko wapas item me add karne ka function
-    function deleteSaleRecord(saleId) {
-      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse stock wapas usi item, size aur color me add ho jayega.)")) {
-        
-        // Pehle sales record ko dhoondo taaki pata chale kaunsa item wapas jodna hai
-        db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
-          const saleRec = snapshot.val();
+   // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka sahi function
+function deleteSaleRecord(saleId) {
+  if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse stock wapas usi item, size aur color me add ho jayega.)")) {
+    
+    // 1. Pehle 'footwear_sales' se record dhoondo
+    db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
+      let saleRec = snapshot.val();
 
-          if (saleRec) {
-            // Agar multi-item bill hai ya single item bill hai
-            const itemsToRestore = saleRec.itemsList || [{
-              itemId: saleRec.itemId,
-              color: saleRec.color,
-              size: saleRec.size,
-              qty: 1
-            }];
+      // Agar footwear_sales me na mile, toh 'sales_history' ya 'rozana_sales' me check karo
+      if (!saleRec) {
+        db.ref('sales_history/' + saleId).once('value').then((snap2) => {
+          saleRec = snap2.val();
+          executeSaleDeletion(saleId, saleRec, 'sales_history');
+        });
+      } else {
+        executeSaleDeletion(saleId, saleRec, 'footwear_sales');
+      }
+    }).catch((err) => {
+      alert("Error finding record: " + err.message);
+    });
+  }
+}
 
-            // Har item ke stock ko wapas database me update karo
-            itemsToRestore.forEach(ri => {
-              if (ri.itemId) {
-                db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
-                  const stockItem = stockSnap.val();
-                  if (stockItem) {
-                    const restoreQty = Number(ri.qty) || 1;
+// Helper function jo stock wapas jodkar database se record uda dega
+function executeSaleDeletion(saleId, saleRec, primaryNodeName) {
+  if (saleRec) {
+    const itemsToRestore = saleRec.itemsList || [{
+      itemId: saleRec.itemId,
+      color: saleRec.color,
+      size: saleRec.size,
+      qty: 1
+    }];
 
-                    if (stockItem.itemType === 'general') {
-                      stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
-                    } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
-                      const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
-                      stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
-                    }
+    // Har item ke stock ko wapas database me update karo
+    itemsToRestore.forEach(ri => {
+      if (ri.itemId) {
+        db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
+          const stockItem = stockSnap.val();
+          if (stockItem) {
+            const restoreQty = Number(ri.qty) || 1;
 
-                    // Stock wapas save karo
-                    db.ref('footwear_stock/' + ri.itemId).set(stockItem);
-                  }
-                });
-              }
-            });
+            if (stockItem.itemType === 'general') {
+              stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
+            } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
+              const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
+              stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
+            }
+
+            db.ref('footwear_stock/' + ri.itemId).set(stockItem);
           }
-
-          // Ab sales record ko delete kar do
-          db.ref('footwear_sales/' + saleId).remove().then(() => {
-            alert("✓ Bikri entry delete ho gayi aur stock wapas apne item me jud gaya!");
-            calculateSalesReport();
-          });
-
-        }).catch((err) => {
-          alert("Error: " + err.message);
         });
       }
+    });
+  }
+
+  // 2. Main node se delete karo
+  db.ref(primaryNodeName + '/' + saleId).remove().then(() => {
+    // Agar 'sales_history' ya 'rozana_sales' me bhi ho sakta hai, toh wahan se bhi saaf kar do
+    db.ref('sales_history/' + saleId).remove();
+    db.ref('rozana_sales/' + saleId).remove();
+
+    alert("✓ Bikri entry safalta-purvak delete ho gayi aur stock wapas jud gaya!");
+    if (typeof calculateSalesReport === 'function') calculateSalesReport();
+    if (typeof renderRozanaRegister === 'function') renderRozanaRegister();
+  }).catch((err) => {
+    alert("Delete error: " + err.message);
+  });
+}
+
+// ✏️ Edit Sale Modal (Rate, Customer Name aur Sales Date update karne ke liye sahi tarika)
+function openEditSaleModal(encodedStr) {
+  try {
+    const record = JSON.parse(decodeURIComponent(encodedStr));
+    
+    let itemsList = record.itemsList ? JSON.parse(JSON.stringify(record.itemsList)) : null;
+    
+    let defaultRates = itemsList ? itemsList.map(bi => bi.sellPrice).join(', ') : (record.sellPrice || record.total || 0);
+    let defaultName = record.customer || record.customerName || 'Walk-in Customer';
+    
+    let defaultDate = record.date ? record.date.slice(0, 16).replace('T', ' ') : new Date().toISOString().slice(0, 16).replace('T', ' ');
+    let defaultPayMode = record.payMode || 'Cash';
+
+    let userInput = prompt(
+      `Bikri Edit Karein (Sabhi details ek hi line me bharein):\n\n` +
+      `Format: [Rates] | [Naam] | [Date & Time YYYY-MM-DD HH:MM] | [Payment: Cash/UPI/Udhaar]\n\n` +
+      `Udaharan:\n${defaultRates} | ${defaultName} | ${defaultDate} | ${defaultPayMode}`,
+      `${defaultRates} | ${defaultName} | ${defaultDate} | ${defaultPayMode}`
+    );
+
+    if (userInput === null) return;
+
+    let parts = userInput.split('|').map(p => p.trim());
+    if (parts.length < 4) {
+      alert("Kripya sahi format me bharein ( beech me 3 jagah pipe '|' lagana zaroori hai ).");
+      return;
     }
+
+    let ratesArr = parts[0].split(',').map(r => Number(r.trim()));
+    let newCustName = parts[1];
+    let newDateVal = parts[2];
+    let newPayMode = parts[3];
+
+    let newTotalSellPrice = 0;
+    if (itemsList && itemsList.length > 0) {
+      if (ratesArr.length !== itemsList.length || ratesArr.some(isNaN)) {
+        alert("Rates ki sankhya items se match nahi ho rahi! Jitne items hain utne hi rates hone chahiye.");
+        return;
+      }
+      for (let i = 0; i < itemsList.length; i++) {
+        itemsList[i].sellPrice = ratesArr[i];
+        newTotalSellPrice += (itemsList[i].qty * ratesArr[i]);
+      }
+    } else {
+      newTotalSellPrice = ratesArr[0] || 0;
+    }
+
+    let finalDateTime = record.date;
+    if (newDateVal.trim() !== '') {
+      try {
+        let formattedStr = newDateVal.trim().replace(' ', 'T');
+        if (formattedStr.length === 16) formattedStr += ':00.000Z';
+        finalDateTime = new Date(formattedStr).toISOString();
+      } catch(e) {
+        finalDateTime = newDateVal.trim() + ':00.000Z';
+      }
+    }
+
+    let multiNamesDesc = itemsList ? itemsList.map(bi => `${bi.name} (${bi.color} Sz:${bi.size}) x ${bi.qty}`) : (record.name || 'Sale Item');
+
+    const updatedData = {
+      ...record,
+      name: Array.isArray(multiNamesDesc) ? multiNamesDesc.join(', ') : multiNamesDesc,
+      sellPrice: newTotalSellPrice,
+      total: newTotalSellPrice, // Rozana report compatibility ke liye
+      tagPrice: newTotalSellPrice,
+      profit: newTotalSellPrice - (record.costPrice || 0),
+      customer: newCustName || 'Walk-in Customer',
+      customerName: newCustName || 'Walk-in Customer',
+      date: finalDateTime,
+      payMode: newPayMode || 'Cash',
+      itemsList: itemsList
+    };
+
+    // Dono jagah update kar do taaki kahin bhi miss na ho
+    const targetNode = record.id.startsWith('manual_') ? 'manual_sales' : 'footwear_sales';
+    
+    db.ref(targetNode + '/' + record.id).set(updatedData).then(() => {
+      db.ref('sales_history/' + record.id).set(updatedData); // Backup sync
+      alert("✓ Bikri ki saari details safalta-purvak update ho gayi!");
+      if (typeof calculateSalesReport === 'function') calculateSalesReport();
+      if (typeof renderRozanaRegister === 'function') renderRozanaRegister();
+    }).catch(err => {
+      alert("Error: " + err.message);
+    });
+
+  } catch(e) {
+    alert("Edit karne me error aayi: " + e.message);
+  }
+}
 
     function downloadSalesCSV(type) {
       let filtered = [];
