@@ -575,6 +575,20 @@
         <div id="activeBillItemsContainer" style="max-height:35vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
       </div>
 
+      <!-- CURRENT ITEMS LIST IN THIS BILL -->
+<div style="margin-bottom:12px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+    <label style="font-size:11px; font-weight:bold; color:#475569;">Is Bill Me Jude Items:</label>
+    
+    <!-- 🛒 Bilkul Alag Button: Sirf Direct Bikri ke liye -->
+    <button type="button" class="btn btn-amber" style="font-size:11px; padding:5px 12px; background:#f59e0b; color:#000; font-weight:800; border-radius:6px;" onclick="openDirectQuickSalePrompt()">
+      ⚡ + Direct Bikri Jodein (Non-Stock)
+    </button>
+  </div>
+  
+  <div id="activeBillItemsContainer" style="max-height:30vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
+</div>
+
       <!-- ADD ANOTHER ITEM BUTTON -->
       <div style="margin-bottom:14px; text-align:right;">
         <button type="button" class="btn btn-indigo" onclick="openScannerModal('sale')" style="font-size:11px; padding:6px 12px;">
@@ -6095,6 +6109,51 @@ function printPLReport() {
     </html>
   `);
   printWindow.document.close();
+}
+    // ⚡ डायरेक्ट बिकरी आइटम जोड़ने का प्रॉम्प्ट (बिना स्टॉक जोड़े सीधे बिल और रिपोर्ट में)
+function openDirectQuickSalePrompt() {
+  let itemName = prompt("Jo item list me nahi hai uska naam likhein (Jaise: Belt, Socks, Repairing, Miscellaneous):");
+  if (!itemName || !itemName.trim()) return;
+
+  let itemRate = prompt(`[${itemName.trim()}] ka Selling Price (Rate ₹) likhein:`, "100");
+  let parsedRate = Number(itemRate);
+  
+  if (isNaN(parsedRate) || parsedRate <= 0) {
+    alert("Kripya sahi rate likhein!");
+    return;
+  }
+
+  // Active bill items me direct jodh do (Stock me koi chhedkhani nahi hogi)
+  activeBillItems.push({
+    itemId: 'direct_sale_' + Date.now(),
+    name: itemName.trim(),
+    brand: 'Direct Sale',
+    color: '-',
+    size: '-',
+    costPrice: 0,
+    sellPrice: parsedRate,
+    qty: 1,
+    itemObj: null
+  });
+
+  renderActiveBillItemsList();
+  alert(`✓ [${itemName.trim()}] (₹${parsedRate}) direct bill me jud gaya hai! Bill save karte hi Bikri Report me aa jayega.`);
+}
+
+// ✏️ Bill ke andar hi direct item ki Qty ya Rate badlne ka function
+function updateBillItemQtyOrRate(index, type, val) {
+  let bi = activeBillItems[index];
+  if (!bi) return;
+
+  if (type === 'qty') {
+    let q = Number(val);
+    if (q > 0) bi.qty = q;
+  } else if (type === 'rate') {
+    let r = Number(val);
+    if (!isNaN(r) && r >= 0) bi.sellPrice = r;
+  }
+
+  renderActiveBillItemsList();
 }
     // initRozanaListeners();
     
