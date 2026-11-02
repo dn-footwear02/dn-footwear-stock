@@ -903,6 +903,12 @@
       </div>
     </div>
 
+    <!-- Top Action / Print Button -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#f1f5f9; padding:8px; border-radius:6px;">
+  <span style="font-size:11px; font-weight:bold; color:#334155;">Mahine ki Report PDF / Print Karein:</span>
+  <button class="btn btn-indigo" style="font-size:11px; padding:5px 12px; cursor:pointer;" onclick="printMonthlyRozanaReport()">🖨️ Print / PDF Report</button>
+</div>
+
     <div style="display:flex; justify-content:flex-end; margin-top:12px;">
       <button class="btn btn-slate" style="font-size:11px; padding:6px 12px;" onclick="closeRozanaModal()">Band Karein</button>
     </div>
@@ -5516,6 +5522,146 @@ function renderRozanaRegister() {
       `).join('');
     }
   }
+}
+
+    // ==========================================
+// 🖨️ MONTHLY ROZANA KHARCHA & CASH REPORT (PRINT/PDF)
+// ==========================================
+
+function printMonthlyRozanaReport() {
+  // Current month aur year nikalna
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthTitle = `${monthNames[currentMonth]} ${currentYear}`;
+
+  // Is mahine ke sabhi kharche filter karna
+  const monthlyExpenses = expensesData.filter(e => {
+    const eDate = new Date(e.date || Date.now());
+    return eDate.getMonth() === currentMonth && eDate.getFullYear() === currentYear;
+  });
+
+  const totalMonthlyExp = monthlyExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+  // Is mahine ki sabhi sales (system + manual) filter karna
+  let totalMonthlySales = 0;
+  let monthlySalesList = [];
+
+  if (salesHistory && salesHistory.length > 0) {
+    salesHistory.forEach(s => {
+      let sDate = new Date(s.date || Date.now());
+      if (sDate.getMonth() === currentMonth && sDate.getFullYear() === currentYear) {
+        monthlySalesList.push({ date: sDate, title: `Bill: ${s.billNo || 'N/A'} (${s.customerName || 'Cash'})`, amount: Number(s.total) || 0 });
+        totalMonthlySales += (Number(s.total) || 0);
+      }
+    });
+  }
+
+  if (manualSalesData && manualSalesData.length > 0) {
+    manualSalesData.forEach(m => {
+      let mDate = new Date(m.date || Date.now());
+      if (mDate.getMonth() === currentMonth && mDate.getFullYear() === currentYear) {
+        monthlySalesList.push({ date: mDate, title: `Manual: ${m.note || 'Cash Sale'}`, amount: Number(m.total) || 0 });
+        totalMonthlySales += (Number(m.total) || 0);
+      }
+    });
+  }
+
+  // Print Window HTML Layout
+  let printWindow = window.open('', '_blank', 'width=800,height=600');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Rozana Kharcha & Cash Report - ${monthTitle}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          h2, h3 { text-align: center; margin: 5px 0; }
+          .shop-info { text-align: center; font-size: 12px; margin-bottom: 20px; color: #555; }
+          .summary-box { display: flex; justify-content: space-around; background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 20px; }
+          .summary-item { text-align: center; }
+          .summary-item b { font-size: 16px; display: block; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+          th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+          th { background: #f1f5f9; }
+          .text-right { text-align: right; }
+          @media print {
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <h2>DN FOOTWEAR & SPORTS</h2>
+        <div class="shop-info">Siriyari Bus Stand ke paas | Mob: 8209452284</div>
+        <h3>Mahine ki Rozana Report (${monthTitle})</h3>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+
+        <div class="summary-box">
+          <div class="summary-item">
+            <span style="color: #166534;">Kul Mahina Bikri Cash</span>
+            <b style="color: #15803d;">₹${totalMonthlySales}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #991b1b;">Kul Mahina Kharcha</span>
+            <b style="color: #dc2626;">₹${totalMonthlyExp}</b>
+          </div>
+          <div class="summary-item">
+            <span style="color: #1e40af;">Net Bachat / Galla Cash</span>
+            <b style="color: #2563eb;">₹${totalMonthlySales - totalMonthlyExp}</b>
+          </div>
+        </div>
+
+        <h4>1. Mahine ke Sabhi Kharche:</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Tarikh & Samay</th>
+              <th>Kharche ka Karan (Reason)</th>
+              <th class="text-right">Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${monthlyExpenses.length === 0 ? '<tr><td colspan="3" style="text-align:center; color:#64748b;">Is mahine koi kharcha nahi hai.</td></tr>' : 
+              monthlyExpenses.map(e => `
+                <tr>
+                  <td>${new Date(e.date || Date.now()).toLocaleString('en-IN')}</td>
+                  <td><b>${e.reason}</b></td>
+                  <td class="text-right" style="color: #dc2626;">-₹${e.amount}</td>
+                </tr>
+              `).join('')
+            }
+          </tbody>
+        </table>
+
+        <h4>2. Mahine ki Sabhi Cash Bikri (Sales):</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Tarikh & Samay</th>
+              <th>Vivaran (Details)</th>
+              <th class="text-right">Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${monthlySalesList.length === 0 ? '<tr><td colspan="3" style="text-align:center; color:#64748b;">Is mahine ki koi cash bikri darj nahi hai.</td></tr>' : 
+              monthlySalesList.map(s => `
+                <tr>
+                  <td>${new Date(s.date || Date.now()).toLocaleString('en-IN')}</td>
+                  <td><b>${s.title}</b></td>
+                  <td class="text-right" style="color: #15803d;">+₹${s.amount}</td>
+                </tr>
+              `).join('')
+            }
+          </tbody>
+        </table>
+
+        <div style="margin-top: 30px; text-align: center;" class="no-print">
+          <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">Print / Save as PDF</button>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
 }
     // initRozanaListeners();
     
