@@ -482,32 +482,43 @@
 
   <!-- ==================== MODALS ==================== -->
 
-<!-- ⚡ DIRECT MANUAL SALE MODAL (Admin Panel Alag Button) -->
+<!-- ⚡ DIRECT MANUAL SALE MODAL (Multi-Item Support) -->
 <div id="directManualSaleModal" class="modal">
-  <div class="modal-box" style="max-width:440px;">
+  <div class="modal-box" style="max-width:480px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
       <div>
         <h3 style="font-size:16px; font-weight:800; color:#b45309;">⚡ Direct Manual Sale Counter</h3>
-        <p style="font-size:11px; color:#64748b;">जो सामान स्टॉक लिस्ट में नहीं है, उसका सीधा बिल बनाएं</p>
+        <p style="font-size:11px; color:#64748b;">जो सामान स्टॉक में नहीं है, उसके एक से ज्यादा आइटम जोड़कर बिल बनाएं</p>
       </div>
       <button class="btn btn-slate" onclick="closeDirectManualSaleModal()">✕</button>
     </div>
 
-    <form onsubmit="confirmDirectManualSale(event)">
-      <div class="form-group">
-        <label>Samaan / Item Ka Naam (जैसे: Old Chappal, Repair, etc) *</label>
-        <input type="text" id="admManualItemName" required placeholder="Item name..." class="form-control">
+    <!-- Naya Item Jodne ke liye Input Fields -->
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
+      <b style="font-size:11px; color:#475569; display:block; margin-bottom:6px;">Ek-ek karke manual item jodein:</b>
+      
+      <div class="form-group" style="margin-bottom:8px;">
+        <input type="text" id="admManualItemName" placeholder="Item Ka Naam (जैसे: Old Chappal, Repair)..." class="form-control" style="font-size:12px;">
       </div>
 
-      <div class="row">
-        <div class="form-group">
-          <label>Kitne Me Becha (Price ₹) *</label>
-          <input type="number" id="admManualItemPrice" required min="1" placeholder="Amount ₹..." class="form-control" style="font-weight:800; color:#10b981;">
-        </div>
-        <div class="form-group">
-          <label>Grahak Ka Naam (Optional):</label>
-          <input type="text" id="admManualCustName" placeholder="Customer name..." class="form-control">
-        </div>
+      <div style="display:flex; gap:6px; margin-bottom:6px;">
+        <input type="number" id="admManualItemPrice" min="1" placeholder="Rate / Price (₹)..." class="form-control" style="font-size:12px; font-weight:bold; color:#10b981;">
+        <button type="button" class="btn btn-indigo" style="font-size:11px; padding:6px 12px; white-space:nowrap;" onclick="addManualItemToList()">+ List Me Jodein</button>
+      </div>
+    </div>
+
+    <!-- Is Bill me jude items ki list -->
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Is Manual Bill Me Jude Items:</label>
+      <div id="activeManualBillContainer" style="max-height:30vh; overflow-y:auto; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:8px;">
+        <i style="font-size:11px; color:#94a3b8;">Abhi koi item nahi joda gaya hai.</i>
+      </div>
+    </div>
+
+    <form onsubmit="confirmDirectManualSale(event)">
+      <div style="background:#e2e8f0; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:13px; font-weight:bold; color:#334155;">Kul Bill Raashi (Total):</span>
+        <b style="font-size:18px; color:#10b981;" id="manualModalTotalAmount">₹0</b>
       </div>
 
       <div class="form-group">
@@ -523,6 +534,11 @@
             <input type="radio" name="admManualPayMode" value="Udhaar"> 📋 Udhaar
           </label>
         </div>
+      </div>
+
+      <div class="form-group" style="margin-top:10px;">
+        <label>Grahak Ka Naam (Optional):</label>
+        <input type="text" id="admManualCustName" placeholder="Customer name..." class="form-control">
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
@@ -5042,52 +5058,129 @@ function openSupplierKhataDetail(supId) {
     </div>
   `;
 }
-    // ⚡ Open/Close Direct Manual Sale Modal from Admin Panel
+    let activeManualBillItems = [];
+
+// ⚡ Open Direct Manual Sale Modal
 function openDirectManualSaleModal() {
+  activeManualBillItems = [];
   document.getElementById('admManualItemName').value = '';
   document.getElementById('admManualItemPrice').value = '';
   document.getElementById('admManualCustName').value = '';
+  renderManualBillItemsList();
   document.getElementById('directManualSaleModal').style.display = 'flex';
 }
 
 function closeDirectManualSaleModal() {
+  activeManualBillItems = [];
   document.getElementById('directManualSaleModal').style.display = 'none';
 }
 
-// ⚡ Save Direct Manual Sale to Firebase Sales History
-function confirmDirectManualSale(e) {
-  e.preventDefault();
-  const itemName = document.getElementById('admManualItemName').value.trim();
-  const itemPrice = Number(document.getElementById('admManualItemPrice').value) || 0;
-  const custName = document.getElementById('admManualCustName').value.trim() || 'Walk-in Customer';
-  const payMode = document.querySelector('input[name="admManualPayMode"]:checked').value;
+// ⚡ Add item to manual bill list
+function addManualItemToList() {
+  const name = document.getElementById('admManualItemName').value.trim();
+  const price = Number(document.getElementById('admManualItemPrice').value) || 0;
 
-  if (!itemName || itemPrice <= 0) {
+  if (!name || price <= 0) {
     alert("Kripya item ka naam aur sahi price likhein!");
     return;
   }
+
+  activeManualBillItems.push({
+    name: name,
+    sellPrice: price,
+    qty: 1
+  });
+
+  // Reset inputs
+  document.getElementById('admManualItemName').value = '';
+  document.getElementById('admManualItemPrice').value = '';
+  document.getElementById('admManualItemName').focus();
+
+  renderManualBillItemsList();
+}
+
+// ⚡ Render Manual Bill Items UI
+function renderManualBillItemsList() {
+  const container = document.getElementById('activeManualBillContainer');
+  let totalAmount = 0;
+
+  if (activeManualBillItems.length === 0) {
+    container.innerHTML = '<i style="font-size:11px; color:#94a3b8;">Abhi koi item nahi joda gaya hai.</i>';
+    document.getElementById('manualModalTotalAmount').innerText = '₹0';
+    return;
+  }
+
+  let html = activeManualBillItems.map((bi, index) => {
+    const rowTotal = bi.qty * bi.sellPrice;
+    totalAmount += rowTotal;
+
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:12px;">
+        <div>
+          <b>${bi.name}</b><br>
+          <span style="color:#10b981; font-weight:bold;">₹${bi.sellPrice}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <b>₹${rowTotal}</b>
+          <button type="button" onclick="removeManualBillItem(${index})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Hatao">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = html;
+  document.getElementById('manualModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
+}
+
+
+    // ⚡ Remove item from manual list
+function removeManualBillItem(index) {
+  activeManualBillItems.splice(index, 1);
+  renderManualBillItemsList();
+}
+
+// ⚡ Save Multi-Item Direct Manual Sale to Firebase
+function confirmDirectManualSale(e) {
+  e.preventDefault();
+  
+  if (activeManualBillItems.length === 0) {
+    alert("Bill me kam se kam ek item jorna zaroori hai!");
+    return;
+  }
+
+  const custName = document.getElementById('admManualCustName').value.trim() || 'Walk-in Customer';
+  const payMode = document.querySelector('input[name="admManualPayMode"]:checked').value;
+
+  let totalBillAmt = 0;
+  let multiNamesDesc = [];
+
+  activeManualBillItems.forEach(bi => {
+    totalBillAmt += (bi.qty * bi.sellPrice);
+    multiNamesDesc.push(`${bi.name} (₹${bi.sellPrice})`);
+  });
 
   const billNo = 'DNM-' + Math.floor(1000 + Math.random() * 9000);
   const saleRecord = {
     id: 'manual_sale_' + Date.now(),
     billNo: billNo,
     date: new Date().toISOString(),
-    name: itemName,
+    name: multiNamesDesc.join(', '),
     brand: 'Manual',
     color: 'Custom',
     size: '-',
     costPrice: 0,
-    tagPrice: itemPrice,
-    sellPrice: itemPrice,
-    profit: itemPrice, // Manual item ka poora amount profit/revenue maana jayega
+    tagPrice: totalBillAmt,
+    sellPrice: totalBillAmt,
+    profit: totalBillAmt,
     payMode: payMode,
     customer: custName,
-    phone: ''
+    phone: '',
+    itemsList: activeManualBillItems
   };
 
   db.ref('footwear_sales/' + saleRecord.id).set(saleRecord).then(() => {
     closeDirectManualSaleModal();
-    alert(`✓ Manual Bill [${billNo}] (${itemName} - ₹${itemPrice}) safalta-purvak save ho gaya hai!`);
+    alert(`✓ Manual Bill [${billNo}] (Kul Raashi: ₹${totalBillAmt}) safalta-purvak save ho gaya hai!`);
   }).catch(err => {
     alert("Error: " + err.message);
   });
