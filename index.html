@@ -234,7 +234,6 @@
         <button class="btn btn-purple" onclick="openReturnExchangeModal()" title="Item Badalna ya Wapas Karna">🔄 Return/Exchange</button>
         <button class="btn btn-indigo" onclick="openSupplierModal()" title="Supplier aur Purchase Khata">📦 Supplier Khata</button>
         <button class="btn btn-purple" onclick="openRozanaModal()" title="Rozana Kharcha aur Cash Register">💰 Rozana Kharcha</button>
-        <button class="btn btn-green" onclick="openProfitLossModal()" title="Profit & Loss Dashboard">📈 Profit & Loss</button>
       </span>
     </div>
   </header>
@@ -482,55 +481,6 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
-
-  <!-- 📈 PROFIT & LOSS DASHBOARD MODAL -->
-<div id="profitLossModal" class="modal">
-  <div class="modal-box" style="max-width:750px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-      <div>
-        <h3 style="font-size:17px; font-weight:900; color:#1e1b4b;">📈 Profit & Loss (मुनाफा और नुकसान) डैशबोर्ड</h3>
-        <p style="font-size:11px; color:#64748b;">दुकान का कुल मुनाफा, खर्च और शुद्ध बचत का हिसाब</p>
-      </div>
-      <button class="btn btn-slate" onclick="closeProfitLossModal()">✕</button>
-    </div>
-
-    <!-- Summary Cards -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:16px;">
-      <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:8px; text-align:center;">
-        <small style="font-size:11px; color:#1e40af; font-weight:bold;">KUL BIKRI (TOTAL SALES)</small>
-        <div id="plTotalSales" style="font-size:18px; font-weight:800; color:#2563eb; margin-top:4px;">₹0</div>
-      </div>
-      <div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px; text-align:center;">
-        <small style="font-size:11px; color:#991b1b; font-weight:bold;">KUL KHARCHA (EXPENSES)</small>
-        <div id="plTotalExpenses" style="font-size:18px; font-weight:800; color:#dc2626; margin-top:4px;">₹0</div>
-      </div>
-      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:8px; text-align:center;">
-        <small style="font-size:11px; color:#166534; font-weight:bold;">NET PROFIT (शुद्ध मुनाफा)</small>
-        <div id="plNetProfit" style="font-size:18px; font-weight:800; color:#15803d; margin-top:4px;">₹0</div>
-      </div>
-    </div>
-
-    <!-- Category Wise Profit Breakdown Table -->
-    <h4 style="font-size:13px; font-weight:bold; color:#334155; margin-bottom:8px;">Category Wise Profit Breakdown:</h4>
-    <div style="max-height:35vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:14px;">
-      <table>
-        <thead>
-          <tr style="background:#f8fafc;">
-            <th style="padding:8px;">Category / Brand</th>
-            <th style="padding:8px; text-align:center;">Items Sold</th>
-            <th style="padding:8px; text-align:right;">Total Revenue</th>
-            <th style="padding:8px; text-align:right;">Estimated Profit</th>
-          </tr>
-        </thead>
-        <tbody id="plCategoryTableBody"></tbody>
-      </table>
-    </div>
-
-    <div style="display:flex; justify-content:flex-end;">
-      <button class="btn btn-slate" onclick="closeProfitLossModal()">Band Karein</button>
-    </div>
-  </div>
-</div>
 
   <!-- LOW STOCK ITEMS MODAL -->
   <div id="lowStockModal" class="modal">
@@ -5899,80 +5849,6 @@ function printCustomRozanaReport() {
     </html>
   `);
   printWindow.document.close();
-}
-
-    function openProfitLossModal() {
-  calculateProfitAndLoss();
-  document.getElementById('profitLossModal').style.display = 'flex';
-}
-
-function closeProfitLossModal() {
-  document.getElementById('profitLossModal').style.display = 'none';
-}
-
-function calculateProfitAndLoss() {
-  let totalSalesAmt = 0;
-  let totalProfitAmt = 0;
-  let categoryMap = {};
-
-  // 1. Sales se revenue aur profit nikalna
-  if (typeof salesHistory !== 'undefined' && salesHistory.length > 0) {
-    salesHistory.forEach(s => {
-      let sellPr = Number(s.sellPrice) || 0;
-      let costPr = Number(s.costPrice) || 0;
-      let profit = Number(s.profit) || (sellPr - costPr);
-
-      totalSalesAmt += sellPr;
-      totalProfitAmt += profit;
-
-      // Category tracking (agar item data me category hai)
-      let matchedItem = items.find(i => i.id === s.itemId);
-      let catName = matchedItem ? (matchedItem.category || 'Footwear') : 'General Sales';
-
-      if (!categoryMap[catName]) {
-        categoryMap[catName] = { count: 0, revenue: 0, profit: 0 };
-      }
-      categoryMap[catName].count += 1;
-      categoryMap[catName].revenue += sellPr;
-      categoryMap[catName].profit += profit;
-    });
-  }
-
-  // 2. Expenses nikalna
-  let totalExp = 0;
-  if (typeof expensesData !== 'undefined' && expensesData.length > 0) {
-    expensesData.forEach(e => {
-      totalExp += Number(e.amount) || 0;
-    });
-  }
-
-  let netPureProfit = totalProfitAmt - totalExp;
-
-  // UI me values update karna
-  document.getElementById('plTotalSales').innerText = '₹' + totalSalesAmt.toLocaleString('en-IN');
-  document.getElementById('plTotalExpenses').innerText = '₹' + totalExp.toLocaleString('en-IN');
-  
-  let netProfitEl = document.getElementById('plNetProfit');
-  netProfitEl.innerText = '₹' + netPureProfit.toLocaleString('en-IN');
-  netProfitEl.style.color = netPureProfit >= 0 ? '#15803d' : '#dc2626';
-
-  // Category Table Render
-  let tbody = document.getElementById('plCategoryTableBody');
-  let catHtml = '';
-
-  for (let cat in categoryMap) {
-    let data = categoryMap[cat];
-    catHtml += `
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:8px;"><b>${cat}</b></td>
-        <td style="padding:8px; text-align:center;">${data.count} Items</td>
-        <td style="padding:8px; text-align:right;">₹${data.revenue.toLocaleString('en-IN')}</td>
-        <td style="padding:8px; text-align:right;"><b style="color:#10b981;">₹${data.profit.toLocaleString('en-IN')}</b></td>
-      </tr>
-    `;
-  }
-
-  tbody.innerHTML = catHtml || '<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">Koi sales data uplabdh nahi hai.</td></tr>';
 }
     // initRozanaListeners();
     
