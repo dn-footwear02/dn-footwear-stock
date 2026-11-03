@@ -235,7 +235,6 @@
         <button class="btn btn-indigo" onclick="openSupplierModal()" title="Supplier aur Purchase Khata">📦 Supplier Khata</button>
         <button class="btn btn-purple" onclick="openRozanaModal()" title="Rozana Kharcha aur Cash Register">💰 Rozana Kharcha</button>
         <button class="btn btn-green" onclick="openProfitLossModal()" title="Profit & Loss Dashboard">📈 Profit & Loss</button>
-        <button class="btn btn-purple" onclick="openManualSalesLogModal()" title="Manual Sales & Service List">📋 Manual Sales List</button>
       </span>
     </div>
   </header>
@@ -483,61 +482,6 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
-
-  <!-- 📋 MANUAL SALES & SERVICES LOG MODAL -->
-<div id="manualSalesLogModal" class="modal">
-  <div class="modal-box" style="max-width:700px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-      <div>
-        <h3 style="font-size:17px; font-weight:900; color:#9333ea;">📋 Manual Sales & Service Khata</h3>
-        <p style="font-size:11px; color:#64748b;">बिना स्टॉक वाले सामान या सर्विस (जैसे Repair) की अलग लिस्ट और हिसाब</p>
-      </div>
-      <button class="btn btn-slate" onclick="closeManualSalesLogModal()">✕</button>
-    </div>
-
-    <!-- Nayi Manual Entry Form Box -->
-    <div style="background:#faf5ff; border:1px solid #e9d5ff; padding:12px; border-radius:8px; margin-bottom:16px;">
-      <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:8px;">+ Nayi Manual Bikri / Service Darj Karein:</b>
-      <form onsubmit="saveSeparateManualSale(event)">
-        <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
-          <input type="text" id="sepManualName" required placeholder="Vivaran (jaise: Chappal Repair, etc)..." class="form-control" style="font-size:12px;">
-          <input type="number" id="sepManualPrice" required min="1" placeholder="Amount (₹)..." class="form-control" style="font-size:12px; font-weight:bold; color:#10b981;">
-          <input type="text" id="sepManualCust" placeholder="Grahak Naam..." class="form-control" style="font-size:12px;">
-          <select id="sepManualPayMode" class="form-control" style="font-size:12px; font-weight:bold;">
-            <option value="Cash">💵 Cash</option>
-            <option value="UPI">📱 UPI</option>
-          </select>
-        </div>
-        <div style="text-align:right;">
-          <button type="submit" class="btn btn-purple" style="padding:6px 14px; font-size:11px;">✓ List Me Jodein</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Manual Sales List Table -->
-    <h4 style="font-size:13px; font-weight:bold; color:#334155; margin-bottom:8px;">Sabhi Manual Bikri ki List (Yahan se aasaani se Delete karein):</h4>
-    <div style="max-height:40vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
-      <table>
-        <thead>
-          <tr style="background:#f8fafc;">
-            <th style="padding:8px;">Tarikh & Samay</th>
-            <th style="padding:8px;">Vivaran (Item / Service)</th>
-            <th style="padding:8px;">Grahak</th>
-            <th style="padding:8px;">Payment</th>
-            <th style="padding:8px; text-align:right;">Amount</th>
-            <th style="padding:8px; text-align:right;">Action</th>
-          </tr>
-        </thead>
-        <tbody id="separateManualSalesTableBody"></tbody>
-      </table>
-    </div>
-
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; background:#f1f5f9; padding:10px; border-radius:8px;">
-      <b>Kul Manual Bikri: <span id="totalSeparateManualAmt" style="color:#15803d;">₹0</span></b>
-      <button class="btn btn-slate" onclick="closeManualSalesLogModal()">Band Karein</button>
-    </div>
-  </div>
-</div>
 
   <!-- 📈 PROFIT & LOSS DASHBOARD MODAL -->
 <div id="profitLossModal" class="modal">
@@ -6197,111 +6141,6 @@ function updateDynamicUpiQrCodeForSplit() {
   const qrImgElem = document.getElementById('storeDynamicQrImg');
   if (qrImgElem) qrImgElem.src = qrImageUrl;
 }
-    // 📋 Manual Sales Modal Controls
-function openManualSalesLogModal() {
-  renderSeparateManualSalesTable();
-  document.getElementById('manualSalesLogModal').style.display = 'flex';
-}
-
-function closeManualSalesLogModal() {
-  document.getElementById('manualSalesLogModal').style.display = 'none';
-}
-
-// 📋 Save Separate Manual Sale
-function saveSeparateManualSale(e) {
-  e.preventDefault();
-  const name = document.getElementById('sepManualName').value.trim();
-  const amount = Number(document.getElementById('sepManualPrice').value) || 0;
-  const customer = document.getElementById('sepManualCust').value.trim() || 'Walk-in';
-  const payMode = document.getElementById('sepManualPayMode').value;
-
-  if (!name || amount <= 0) {
-    alert("Kripya vivaran aur sahi amount likhein!");
-    return;
-  }
-
-  const record = {
-    id: 'sep_manual_' + Date.now(),
-    date: new Date().toISOString(),
-    name: name,
-    amount: amount,
-    customer: customer,
-    payMode: payMode
-  };
-
-  db.ref('separate_manual_sales/' + record.id).set(record).then(() => {
-    document.getElementById('sepManualName').value = '';
-    document.getElementById('sepManualPrice').value = '';
-    document.getElementById('sepManualCust').value = '';
-    alert("✓ Manual bikri safalta-purvak jud gayi hai!");
-    renderSeparateManualSalesTable();
-  }).catch(err => {
-    alert("Error: " + err.message);
-  });
-}
-
-// 📋 Render Separate Manual Sales Table & Sync with Sales Report
-let globalSeparateManualSales = [];
-
-function initSeparateManualSalesSync() {
-  db.ref('separate_manual_sales').on('value', (snap) => {
-    const val = snap.val() || {};
-    globalSeparateManualSales = Object.keys(val).map(k => ({ id: k, ...val[k] }));
-    renderSeparateManualSalesTable();
-    
-    // Agar sales report ya rozana register khula hai toh update karo
-    if (typeof calculateSalesReport === 'function') calculateSalesReport();
-    if (typeof renderRozanaRegister === 'function') renderRozanaRegister();
-  });
-}
-
-function renderSeparateManualSalesTable() {
-  const tbody = document.getElementById('separateManualSalesTableBody');
-  if (!tbody) return;
-
-  let sorted = [...globalSeparateManualSales].sort((a, b) => new Date(b.date) - new Date(a.date));
-  let totalAmt = 0;
-
-  let html = sorted.map(s => {
-    totalAmt += (Number(s.amount) || 0);
-    let dateStr = s.date ? new Date(s.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
-
-    return `
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:8px;"><small style="color:#64748b;">${dateStr}</small></td>
-        <td style="padding:8px;"><b>${s.name}</b></td>
-        <td style="padding:8px;">${s.customer}</td>
-        <td style="padding:8px;"><span class="cat-chip">${s.payMode}</span></td>
-        <td style="padding:8px; text-align:right;"><b style="color:#10b981;">₹${s.amount}</b></td>
-        <td style="padding:8px; text-align:right;">
-          <button class="btn btn-red" style="padding:3px 8px; font-size:10px;" onclick="deleteSeparateManualSale('${s.id}')">🗑️ Delete</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Koi manual bikri darj nahi hai.</td></tr>';
-  const totalEl = document.getElementById('totalSeparateManualAmt');
-  if (totalEl) totalEl.innerText = '₹' + totalAmt.toLocaleString('en-IN');
-}
-
-// 📋 Delete Separate Manual Sale (Ek click me turant delete)
-function deleteSeparateManualSale(saleId) {
-  if (confirm("Kya aap is manual bikri entry ko delete karna chahte hain?")) {
-    db.ref('separate_manual_sales/' + saleId).remove().then(() => {
-      alert("✓ Manual entry delete ho gayi!");
-      renderSeparateManualSalesTable();
-    }).catch(err => {
-      alert("Error: " + err.message);
-    });
-  }
-}
-
-// Page load hone par ise chalu karein
-setTimeout(() => {
-  initSeparateManualSalesSync();
-}, 500);
-    calculateSalesReport और renderRozanaRegister
     // initRozanaListeners();
     
   </script>
