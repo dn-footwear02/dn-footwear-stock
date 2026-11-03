@@ -2248,7 +2248,7 @@
       document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
-   // 🗑️ Super Simple & Direct Delete Sale Record
+   // 🗑️ Super Simple & Direct Delete Sale Record (Sabhi bills ke liye 100% working)
 function deleteSaleRecord(saleId) {
   if (!saleId) {
     alert("Error: Sale ID nahi mili!");
@@ -2256,11 +2256,9 @@ function deleteSaleRecord(saleId) {
   }
 
   if (confirm("Kya aap sach me is bikri record ko delete karna chahte hain?")) {
-    // Seedha Firebase se us ID ko hamesha ke liye uda do
     db.ref('footwear_sales/' + saleId).remove()
       .then(() => {
         alert("✓ Bikri entry safalta-purvak delete ho gayi!");
-        // Report ko turant refresh karo
         if (typeof calculateSalesReport === 'function') {
           calculateSalesReport();
         }
