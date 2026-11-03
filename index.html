@@ -2248,58 +2248,62 @@
       document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
-    // 🗑️ Galti se judi bikri entry ko delete karne aur stock wapas sudhaarne ka function
-    // 🗑️ Galti se judi bikri entry ko delete karne aur stock ko wapas item me add karne ka function
-    function deleteSaleRecord(saleId) {
-      if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Isse stock wapas usi item, size aur color me add ho jayega.)")) {
-        
-        // Pehle sales record ko dhoondo taaki pata chale kaunsa item wapas jodna hai
-        db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
-          const saleRec = snapshot.val();
+    // 🗑️ Galti se judi bikri entry ko delete karne aur stock sudhaarne ka updated function
+function deleteSaleRecord(saleId) {
+  if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Agar yeh stock ka item hoga, toh stock wapas jud jayega. Manual bill sidha delete ho jayega.)")) {
+    
+    // Pehle sales record ko dhoondo
+    db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
+      const saleRec = snapshot.val();
 
-          if (saleRec) {
-            // Agar multi-item bill hai ya single item bill hai
-            const itemsToRestore = saleRec.itemsList || [{
-              itemId: saleRec.itemId,
-              color: saleRec.color,
-              size: saleRec.size,
-              qty: 1
-            }];
+      if (saleRec) {
+        // Check karo ki yeh Direct Manual sale hai ya System Stock sale
+        const isManualBill = !saleRec.itemId || saleRec.itemId.startsWith('manual_sale_') || saleRec.itemId.startsWith('direct_manual_');
 
-            // Har item ke stock ko wapas database me update karo
-            itemsToRestore.forEach(ri => {
-              if (ri.itemId) {
-                db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
-                  const stockItem = stockSnap.val();
-                  if (stockItem) {
-                    const restoreQty = Number(ri.qty) || 1;
+        if (!isManualBill) {
+          // Agar normal stock item hai, tabhi stock wapas jodo
+          const itemsToRestore = saleRec.itemsList || [{
+            itemId: saleRec.itemId,
+            color: saleRec.color,
+            size: saleRec.size,
+            qty: 1
+          }];
 
-                    if (stockItem.itemType === 'general') {
-                      stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
-                    } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
-                      const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
-                      stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
-                    }
+          itemsToRestore.forEach(ri => {
+            if (ri.itemId) {
+              db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
+                const stockItem = stockSnap.val();
+                if (stockItem) {
+                  const restoreQty = Number(ri.qty) || 1;
 
-                    // Stock wapas save karo
-                    db.ref('footwear_stock/' + ri.itemId).set(stockItem);
+                  if (stockItem.itemType === 'general') {
+                    stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
+                  } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
+                    const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
+                    stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
                   }
-                });
-              }
-            });
-          }
 
-          // Ab sales record ko delete kar do
-          db.ref('footwear_sales/' + saleId).remove().then(() => {
-            alert("✓ Bikri entry delete ho gayi aur stock wapas apne item me jud gaya!");
-            calculateSalesReport();
+                  db.ref('footwear_stock/' + ri.itemId).set(stockItem);
+                }
+              });
+            }
           });
-
-        }).catch((err) => {
-          alert("Error: " + err.message);
-        });
+        }
       }
-    }
+
+      // Ab sales record ko bina kisi rukawat ke delete kar do
+      db.ref('footwear_sales/' + saleId).remove().then(() => {
+        alert("✓ Bikri entry safalta-purvak delete ho gayi hai!");
+        if (typeof calculateSalesReport === 'function') {
+          calculateSalesReport();
+        }
+      });
+
+    }).catch((err) => {
+      alert("Error: " + err.message);
+    });
+  }
+}
 
     function downloadSalesCSV(type) {
       let filtered = [];
