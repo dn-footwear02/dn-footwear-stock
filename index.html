@@ -1097,6 +1097,19 @@
           </div>
         </div>
 
+        <!-- 📷 SMART PHOTO AUTO-DETECT SECTION -->
+<div class="form-group" style="background:#faf5ff; padding:12px; border-radius:10px; border:2px dashed #9333ea; margin-bottom:12px;">
+  <label style="font-weight:800; color:#6b21a8; margin-bottom:4px; font-size:13px;">
+    📸 स्मार्ट फोटो अपलोड (Quick Auto-Fill):
+  </label>
+  <p style="font-size:11px; color:#64748b; margin-bottom:8px;">जूते या डिब्बे की फोटो चुनें, ऐप अपने आप नाम और ब्रांड सेट करने में मदद करेगा:</p>
+  
+  <input type="file" id="quickSmartPhotoInput" accept="image/*" style="display:none;" onchange="handleSmartPhotoAutoFill(event)">
+  <button type="button" class="btn btn-purple" onclick="document.getElementById('quickSmartPhotoInput').click()" style="font-size:12px; padding:7px 14px;">
+    📷 जूते की फोटो खींचें / चुनें
+  </button>
+</div>
+
         <!-- FLIPKART STYLE MRP FIELD -->
         <div class="form-group">
           <label>Original MRP ₹ (Cut-Price dikhane ke liye, e.g. 1499):</label>
@@ -5973,6 +5986,51 @@ function calculateProfitAndLoss() {
   }
 
   tbody.innerHTML = catHtml || '<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">Koi sales data uplabdh nahi hai.</td></tr>';
+}
+    // 📷 Smart Photo Quick Auto-Fill Function
+function handleSmartPhotoAutoFill(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64Img = e.target.result;
+
+    // 1. First color block ke media me photo automatically add kar do
+    const colorKeys = Object.keys(colorDataMap);
+    if (colorKeys.length > 0) {
+      const firstColor = colorKeys[0];
+      if (!colorDataMap[firstColor].media) {
+        colorDataMap[firstColor].media = [];
+      }
+      colorDataMap[firstColor].media.push({ type: 'image', url: base64Img });
+      renderColorBlocks();
+    }
+
+    // 2. Smart Guessing based on filename or default prompt
+    let fileName = file.name.toLowerCase();
+    let suggestedBrand = "Campus";
+    if (fileName.includes("sparx")) suggestedBrand = "Sparx";
+    else if (fileName.includes("bata")) suggestedBrand = "Bata";
+    else if (fileName.includes("relaxo")) suggestedBrand = "Relaxo";
+    else if (fileName.includes("action")) suggestedBrand = "Action";
+    else if (fileName.includes("addidas") || fileName.includes("adidas")) suggestedBrand = "Adidas";
+
+    // Auto-fill form fields if empty
+    const brandInput = document.getElementById('fBrand');
+    if (brandInput && !brandInput.value) {
+      brandInput.value = suggestedBrand;
+    }
+
+    const nameInput = document.getElementById('fName');
+    if (nameInput && !nameInput.value) {
+      nameInput.value = "New Sports Footwear";
+    }
+
+    alert("✓ फोटो सफलतापूर्वक जुड़ गई है! ब्रांड और नाम ऑटो-फिल हो गया है, आप चाहें तो इसे बदल सकते हैं।");
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
 }
     // initRozanaListeners();
     
