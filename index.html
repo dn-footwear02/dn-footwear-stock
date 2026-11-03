@@ -482,28 +482,33 @@
 
   <!-- ==================== MODALS ==================== -->
 
-<!-- ⚡ DIRECT MANUAL SALE MODAL (Multi-Item Support) -->
+<!-- ⚡ DIRECT MANUAL SALE MODAL (Multi-Item + Size & Colour Support) -->
 <div id="directManualSaleModal" class="modal">
-  <div class="modal-box" style="max-width:480px;">
+  <div class="modal-box" style="max-width:520px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
       <div>
         <h3 style="font-size:16px; font-weight:800; color:#b45309;">⚡ Direct Manual Sale Counter</h3>
-        <p style="font-size:11px; color:#64748b;">जो सामान स्टॉक में नहीं है, उसके एक से ज्यादा आइटम जोड़कर बिल बनाएं</p>
+        <p style="font-size:11px; color:#64748b;">बिना स्टॉक वाले सामान के साथ Size और Colour जोड़कर बिल बनाएं</p>
       </div>
       <button class="btn btn-slate" onclick="closeDirectManualSaleModal()">✕</button>
     </div>
 
-    <!-- Naya Item Jodne ke liye Input Fields -->
+    <!-- Naya Item, Size, Colour aur Rate jodne ke liye Fields -->
     <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
-      <b style="font-size:11px; color:#475569; display:block; margin-bottom:6px;">Ek-ek karke manual item jodein:</b>
+      <b style="font-size:11px; color:#475569; display:block; margin-bottom:6px;">Ek-ek karke item jodein:</b>
       
-      <div class="form-group" style="margin-bottom:8px;">
-        <input type="text" id="admManualItemName" placeholder="Item Ka Naam (जैसे: Old Chappal, Repair)..." class="form-control" style="font-size:12px;">
+      <div class="form-group" style="margin-bottom:6px;">
+        <input type="text" id="admManualItemName" placeholder="Item Ka Naam (जैसे: Old Shoes, Repair)..." class="form-control" style="font-size:12px;">
       </div>
 
-      <div style="display:flex; gap:6px; margin-bottom:6px;">
-        <input type="number" id="admManualItemPrice" min="1" placeholder="Rate / Price (₹)..." class="form-control" style="font-size:12px; font-weight:bold; color:#10b981;">
-        <button type="button" class="btn btn-indigo" style="font-size:11px; padding:6px 12px; white-space:nowrap;" onclick="addManualItemToList()">+ List Me Jodein</button>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:6px;">
+        <input type="text" id="admManualItemColor" placeholder="Colour (जैसे: Black)..." class="form-control" style="font-size:12px;">
+        <input type="text" id="admManualItemSize" placeholder="Size (जैसे: 8, 9)..." class="form-control" style="font-size:12px;">
+        <input type="number" id="admManualItemPrice" min="1" placeholder="Rate (₹)..." class="form-control" style="font-size:12px; font-weight:bold; color:#10b981;">
+      </div>
+
+      <div style="text-align:right;">
+        <button type="button" class="btn btn-indigo" style="font-size:11px; padding:6px 14px;" onclick="addManualItemToList()">+ List Me Jodein</button>
       </div>
     </div>
 
@@ -5060,10 +5065,14 @@ function openSupplierKhataDetail(supId) {
 }
     let activeManualBillItems = [];
 
+let activeManualBillItems = [];
+
 // ⚡ Open Direct Manual Sale Modal
 function openDirectManualSaleModal() {
   activeManualBillItems = [];
   document.getElementById('admManualItemName').value = '';
+  document.getElementById('admManualItemColor').value = '';
+  document.getElementById('admManualItemSize').value = '';
   document.getElementById('admManualItemPrice').value = '';
   document.getElementById('admManualCustName').value = '';
   renderManualBillItemsList();
@@ -5075,9 +5084,11 @@ function closeDirectManualSaleModal() {
   document.getElementById('directManualSaleModal').style.display = 'none';
 }
 
-// ⚡ Add item to manual bill list
+// ⚡ Add item with size and colour to manual bill list
 function addManualItemToList() {
   const name = document.getElementById('admManualItemName').value.trim();
+  const color = document.getElementById('admManualItemColor').value.trim() || '-';
+  const size = document.getElementById('admManualItemSize').value.trim() || '-';
   const price = Number(document.getElementById('admManualItemPrice').value) || 0;
 
   if (!name || price <= 0) {
@@ -5087,19 +5098,23 @@ function addManualItemToList() {
 
   activeManualBillItems.push({
     name: name,
+    color: color,
+    size: size,
     sellPrice: price,
     qty: 1
   });
 
   // Reset inputs
   document.getElementById('admManualItemName').value = '';
+  document.getElementById('admManualItemColor').value = '';
+  document.getElementById('admManualItemSize').value = '';
   document.getElementById('admManualItemPrice').value = '';
   document.getElementById('admManualItemName').focus();
 
   renderManualBillItemsList();
 }
 
-// ⚡ Render Manual Bill Items UI
+// ⚡ Render Manual Bill Items UI with Size & Colour
 function renderManualBillItemsList() {
   const container = document.getElementById('activeManualBillContainer');
   let totalAmount = 0;
@@ -5117,7 +5132,7 @@ function renderManualBillItemsList() {
     return `
       <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:12px;">
         <div>
-          <b>${bi.name}</b><br>
+          <b>${bi.name}</b> <small style="color:#4f46e5;">(Rang: ${bi.color} | Size: ${bi.size})</small><br>
           <span style="color:#10b981; font-weight:bold;">₹${bi.sellPrice}</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -5132,8 +5147,7 @@ function renderManualBillItemsList() {
   document.getElementById('manualModalTotalAmount').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
 }
 
-
-    // ⚡ Remove item from manual list
+// ⚡ Remove item from manual list
 function removeManualBillItem(index) {
   activeManualBillItems.splice(index, 1);
   renderManualBillItemsList();
@@ -5156,7 +5170,7 @@ function confirmDirectManualSale(e) {
 
   activeManualBillItems.forEach(bi => {
     totalBillAmt += (bi.qty * bi.sellPrice);
-    multiNamesDesc.push(`${bi.name} (₹${bi.sellPrice})`);
+    multiNamesDesc.push(`${bi.name} (Rang:${bi.color} Sz:${bi.size} - ₹${bi.sellPrice})`);
   });
 
   const billNo = 'DNM-' + Math.floor(1000 + Math.random() * 9000);
