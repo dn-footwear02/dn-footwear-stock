@@ -600,41 +600,6 @@
           </div>
         </div>
 
-        <!-- 💰 SPLIT PAYMENT MODE OPTIONS (HTML) -->
-<div class="form-group">
-  <label style="font-weight:800; color:#1e1b4b;">Payment Mode (भुगतान का तरीका):</label>
-  <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:4px; margin-bottom:8px;">
-    <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:11px; font-weight:bold; cursor:pointer;">
-      <input type="radio" name="salePayMode" value="Cash" checked onchange="toggleSplitPaymentInputs()"> 💵 Cash
-    </label>
-    <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:11px; font-weight:bold; cursor:pointer;">
-      <input type="radio" name="salePayMode" value="UPI" onchange="toggleSplitPaymentInputs()"> 📱 UPI
-    </label>
-    <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:11px; font-weight:bold; cursor:pointer;">
-      <input type="radio" name="salePayMode" value="Split" onchange="toggleSplitPaymentInputs()"> 🔀 Cash+UPI
-    </label>
-    <label style="border:1px solid #cbd5e1; padding:6px; border-radius:6px; text-align:center; font-size:11px; font-weight:bold; cursor:pointer;">
-      <input type="radio" name="salePayMode" value="Udhaar" onchange="toggleSplitPaymentInputs()"> 📋 Udhaar
-    </label>
-  </div>
-</div>
-
-<!-- 🔀 SPLIT PAYMENT INPUT BOX (Jab Cash + UPI dono chuna jaye) -->
-<div id="splitPaymentBox" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:12px;">
-  <b style="font-size:11px; color:#1e1b4b; display:block; margin-bottom:6px;">Split Payment Details (राशि बांटेिन):</b>
-  <div class="row">
-    <div class="form-group" style="margin-bottom:4px;">
-      <label style="font-size:10px;">Cash Kitna Mila (₹):</label>
-      <input type="number" id="splitCashAmount" placeholder="Cash ₹..." class="form-control" style="font-size:12px; font-weight:bold; color:#15803d;" oninput="calculateSplitBalance()">
-    </div>
-    <div class="form-group" style="margin-bottom:4px;">
-      <label style="font-size:10px;">UPI Kitna Aaya (₹):</label>
-      <input type="number" id="splitUpiAmount" placeholder="UPI ₹..." class="form-control" style="font-size:12px; font-weight:bold; color:#2563eb;" oninput="calculateSplitBalance()">
-    </div>
-  </div>
-  <small id="splitBalanceWarning" style="font-size:10px; font-weight:bold; color:#dc2626; display:block; margin-top:4px;"></small>
-</div>
-
         <!-- SMART DYNAMIC AMOUNT UPI QR CODE BOX -->
         <div id="saleQrCodeBox" style="display:none; background:#faf5ff; border:2px solid #9333ea; border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
           <b style="font-size:12px; color:#6b21a8; display:block; margin-bottom:4px;">📱 Scan & Pay (Exact Amount):</b>
@@ -6066,80 +6031,6 @@ function handleSmartPhotoAutoFill(event) {
   };
   reader.readAsDataURL(file);
   event.target.value = '';
-}
-        // Toggle Split Payment inputs visibility
-function toggleSplitPaymentInputs() {
-  const selectedMode = document.querySelector('input[name="salePayMode"]:checked').value;
-  const splitBox = document.getElementById('splitPaymentBox');
-  const qrBox = document.getElementById('saleQrCodeBox');
-
-  if (selectedMode === 'Split') {
-    if (splitBox) splitBox.style.display = 'block';
-    if (qrBox) qrBox.style.display = 'block'; // Split me bhi UPI ka QR dikhega
-    
-    // Auto-fill total amount into UPI by default
-    let totalAmt = 0;
-    if (typeof activeBillItems !== 'undefined' && activeBillItems.length > 0) {
-      activeBillItems.forEach(bi => totalAmt += (bi.qty * bi.sellPrice));
-    } else {
-      totalAmt = Number(document.getElementById('saleFinalPrice')?.value) || 0;
-    }
-    
-    const cashInp = document.getElementById('splitCashAmount');
-    const upiInp = document.getElementById('splitUpiAmount');
-    if (cashInp && !cashInp.value) cashInp.value = '';
-    if (upiInp && !upiInp.value) upiInp.value = totalAmt;
-    
-    updateDynamicUpiQrCodeForSplit();
-  } else {
-    if (splitBox) splitBox.style.display = 'none';
-    if (typeof updateDynamicUpiQrCode === 'function') updateDynamicUpiQrCode();
-  }
-}
-
-// Calculate split balance warning
-function calculateSplitBalance() {
-  let totalAmt = 0;
-  if (typeof activeBillItems !== 'undefined' && activeBillItems.length > 0) {
-    activeBillItems.forEach(bi => totalAmt += (bi.qty * bi.sellPrice));
-  } else {
-    totalAmt = Number(document.getElementById('saleFinalPrice')?.value) || 0;
-  }
-
-  const cashVal = Number(document.getElementById('splitCashAmount')?.value) || 0;
-  const upiVal = Number(document.getElementById('splitUpiAmount')?.value) || 0;
-  const sumVal = cashVal + upiVal;
-
-  const warnEl = document.getElementById('splitBalanceWarning');
-  if (sumVal !== totalAmt) {
-    warnEl.innerText = `⚠️ Total Bill ₹${totalAmt} hai, lekin Cash (₹${cashVal}) + UPI (₹${upiVal}) = ₹${sumVal} ho raha hai!`;
-  } else {
-    warnEl.innerText = `✓ Split Balance Perfect Match!`;
-    warnEl.style.color = '#15803d';
-  }
-
-  updateDynamicUpiQrCodeForSplit();
-}
-
-// Update QR Code specifically for Split UPI amount
-function updateDynamicUpiQrCodeForSplit() {
-  const upiInp = document.getElementById('splitUpiAmount');
-  const amount = upiInp ? (Number(upiInp.value) || 0) : 0;
-  
-  const amtText = document.getElementById('qrDisplayAmountText');
-  if (amtText) amtText.innerText = `₹${amount} (Split UPI Amount)`;
-
-  const upiId = "7014401309@ybl"; 
-  const merchantName = "DN%20Footwear%20and%20Sports";
-
-  let upiString = `upi://pay?pa=${upiId}&pn=${merchantName}`;
-  if (amount > 0) {
-    upiString += `&am=${amount}&cu=INR`;
-  }
-
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(upiString);
-  const qrImgElem = document.getElementById('storeDynamicQrImg');
-  if (qrImgElem) qrImgElem.src = qrImageUrl;
 }
     // initRozanaListeners();
     
