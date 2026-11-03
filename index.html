@@ -234,6 +234,7 @@
         <button class="btn btn-purple" onclick="openReturnExchangeModal()" title="Item Badalna ya Wapas Karna">🔄 Return/Exchange</button>
         <button class="btn btn-indigo" onclick="openSupplierModal()" title="Supplier aur Purchase Khata">📦 Supplier Khata</button>
         <button class="btn btn-amber" onclick="openDirectManualSaleModal()" title="Bina stock ke seedhe manual bill banayein">⚡ Direct Manual Sale</button>
+         <button class="btn btn-yellow" onclick="openExpenseModal()" title="दुकान के रोजमर्रा के खर्च दर्ज करें">📉 खर्च खाता</button>
       </span>
     </div>
   </header>
@@ -481,6 +482,69 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
+
+  <!-- 📉 DAILY EXPENSE / KHARCHA REGISTER MODAL -->
+<div id="expenseModal" class="modal">
+  <div class="modal-box" style="max-width:500px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+      <div>
+        <h3 style="font-size:17px; font-weight:900; color:#ef4444;">📉 दैनिक खर्च खाता (Daily Expense Register)</h3>
+        <p style="font-size:11px; color:#64748b;">चाय, बिजली बिल, पन्नी, भाड़ा आदि रोज के खर्च दर्ज करें</p>
+      </div>
+      <button class="btn btn-slate" onclick="closeExpenseModal()">✕</button>
+    </div>
+
+    <!-- Naya Kharcha Darj Karne ka Form -->
+    <form onsubmit="saveNewExpense(event)" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;">
+      <b style="font-size:12px; color:#1e1b4b; display:block; margin-bottom:8px;">+ Naya Kharcha Jodein:</b>
+      
+      <div class="form-group" style="margin-bottom:8px;">
+        <label style="font-size:11px; font-weight:bold; color:#475569;">Kharch Ka Karan (जैसे: Chai, Light Bill, Transport)... *</label>
+        <input type="text" id="expReason" required placeholder="Kharch ka naam..." class="form-control" style="font-size:12px;">
+      </div>
+
+      <div class="row" style="margin-bottom:8px;">
+        <div class="form-group">
+          <label style="font-size:11px; font-weight:bold; color:#475569;">Kitna Paisa Diya (Amount ₹) *</label>
+          <input type="number" id="expAmount" required min="1" placeholder="Amount ₹..." class="form-control" style="font-size:13px; font-weight:bold; color:#ef4444;">
+        </div>
+        <div class="form-group">
+          <label style="font-size:11px; font-weight:bold; color:#475569;">Tarikh (Date):</label>
+          <input type="date" id="expDate" class="form-control" style="font-size:12px;">
+        </div>
+      </div>
+
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-red" style="font-size:12px; padding:7px 16px;">✓ Kharcha Save Karein</button>
+      </div>
+    </form>
+
+    <!-- Kul Kharcha Summary Box -->
+    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:13px; font-weight:bold; color:#991b1b;">Is Mahine / Kul Kharcha:</span>
+      <b style="font-size:18px; color:#dc2626;" id="totalExpenseAmountText">₹0</b>
+    </div>
+
+    <!-- Kharcha History Table -->
+    <div style="max-height:35vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+      <table>
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th style="padding:8px;">Tarikh</th>
+            <th style="padding:8px;">Karan (Reason)</th>
+            <th style="padding:8px; text-align:right;">Amount</th>
+            <th style="padding:8px; text-align:right;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="expenseTableBody"></tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+      <button class="btn btn-slate" onclick="closeExpenseModal()">Band Karein</button>
+    </div>
+  </div>
+</div>
 
 <!-- ⚡ DIRECT MANUAL SALE MODAL (Multi-Item + Size & Colour Support) -->
 <div id="directManualSaleModal" class="modal">
@@ -5197,6 +5261,104 @@ function confirmDirectManualSale(e) {
   }).catch(err => {
     alert("Error: " + err.message);
   });
+}
+    let expensesHistory = [];
+
+// Firebase se Expense ka data sync karne ke liye
+function initExpenseListener() {
+  db.ref('store_expenses').on('value', (snap) => {
+    const val = snap.val() || {};
+    expensesHistory = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    
+    // Agar Expense modal khula hai toh table update karein
+    if (document.getElementById('expenseModal').style.display === 'flex') {
+      renderExpenseTable();
+    }
+  });
+}
+initExpenseListener();
+
+// Modal Open/Close Controls
+function openExpenseModal() {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('expDate').value = today;
+  document.getElementById('expReason').value = '';
+  document.getElementById('expAmount').value = '';
+  
+  renderExpenseTable();
+  document.getElementById('expenseModal').style.display = 'flex';
+}
+
+function closeExpenseModal() {
+  document.getElementById('expenseModal').style.display = 'none';
+}
+
+// Naya Kharcha Save Karna
+function saveNewExpense(e) {
+  e.preventDefault();
+  const reason = document.getElementById('expReason').value.trim();
+  const amount = Number(document.getElementById('expAmount').value) || 0;
+  const dateVal = document.getElementById('expDate').value || new Date().toISOString().slice(0, 10);
+
+  if (!reason || amount <= 0) {
+    alert("Kripya kharch ka karan aur sahi amount likhein!");
+    return;
+  }
+
+  const expenseRecord = {
+    id: 'exp_' + Date.now(),
+    reason: reason,
+    amount: amount,
+    date: dateVal,
+    timestamp: Date.now()
+  };
+
+  db.ref('store_expenses/' + expenseRecord.id).set(expenseRecord).then(() => {
+    alert("✓ Kharcha safalta-purvak darj ho gaya hai!");
+    document.getElementById('expReason').value = '';
+    document.getElementById('expAmount').value = '';
+    renderExpenseTable();
+  }).catch(err => {
+    alert("Error: " + err.message);
+  });
+}
+
+// Kharcha Table Render Karna
+function renderExpenseTable() {
+  const tbody = document.getElementById('expenseTableBody');
+  if (!tbody) return;
+
+  // Recent first sort
+  let sorted = [...expensesHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  let totalExpense = 0;
+  let html = sorted.map(ex => {
+    totalExpense += Number(ex.amount) || 0;
+    let formattedDate = ex.date ? new Date(ex.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+
+    return `
+      <tr style="border-bottom:1px solid #f1f5f9; vertical-align:middle;">
+        <td style="padding:8px; font-size:12px; color:#64748b;">${formattedDate}</td>
+        <td style="padding:8px; font-size:12px; font-weight:bold; color:#1e1b4b;">${ex.reason}</td>
+        <td style="padding:8px; font-size:13px; font-weight:bold; color:#dc2626; text-align:right;">₹${ex.amount}</td>
+        <td style="padding:8px; text-align:right;">
+          <button class="btn btn-red" style="padding:3px 6px; font-size:10px;" onclick="deleteExpenseRecord('${ex.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Abhi koi kharcha darj nahi hai.</td></tr>';
+  document.getElementById('totalExpenseAmountText').innerText = `₹${totalExpense.toLocaleString('en-IN')}`;
+}
+
+// Kharcha Delete Karna
+function deleteExpenseRecord(expId) {
+  if (confirm("Kya aap is kharch ki entry ko hatana chahte hain?")) {
+    db.ref('store_expenses/' + expId).remove().then(() => {
+      renderExpenseTable();
+    });
+  }
 }
     // Script ke sabse niche ise call kar dein
 initSupplierListeners();
