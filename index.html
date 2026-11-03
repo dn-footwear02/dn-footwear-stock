@@ -586,6 +586,20 @@
   </div>
 </div>
 
+      <!-- ⚡ DIRECT MANUAL BILLING BOX (Bina stock select kiye seedhe manual bill banane ke liye) -->
+<div style="background:#fef3c7; border:1px solid #f59e0b; padding:12px; border-radius:8px; margin-bottom:12px;">
+  <b style="font-size:12px; color:#b45309; display:block; margin-bottom:6px;">⚡ Direct Manual Item Bill (बिना स्टॉक के सीधा बिल बनाएं):</b>
+  <div style="display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
+    <input type="text" id="directManualName" placeholder="Item/Samaan ka naam (jaise: Belt, Socks, etc)..." class="form-control" style="font-size:12px; flex:2; padding:6px;">
+    <input type="number" id="directManualPrice" placeholder="Rate (₹)..." class="form-control" style="font-size:12px; flex:1; padding:6px;">
+  </div>
+  <div style="display:flex; justify-content:flex-end;">
+    <button type="button" class="btn btn-amber" style="font-size:11px; padding:6px 14px; cursor:pointer;" onclick="addDirectManualItemToBill()">
+      + Direct Bill Me Jodein
+    </button>
+  </div>
+</div>
+
       <!-- ADD ANOTHER ITEM BUTTON -->
       <div style="margin-bottom:14px; text-align:right;">
         <button type="button" class="btn btn-indigo" onclick="openScannerModal('sale')" style="font-size:11px; padding:6px 12px;">
@@ -6218,6 +6232,48 @@ function addManualItemToActiveBill() {
     itemId: 'manual_' + Date.now(),
     name: itemName,
     brand: 'Manual',
+    color: 'Custom',
+    size: '-',
+    costPrice: 0,
+    sellPrice: itemPrice,
+    qty: 1,
+    isManual: true,
+    itemObj: null
+  });
+
+  // Input fields clear karna
+  if (nameInput) nameInput.value = '';
+  if (priceInput) priceInput.value = '';
+
+  // Bill UI aur Total amount update karna
+  if (typeof renderActiveBillItemsList === 'function') {
+    renderActiveBillItemsList();
+  }
+}
+
+    // ⚡ Direct Manual Item ko Bill me jodne ka function (Bina stock search kiye)
+function addDirectManualItemToBill() {
+  const nameInput = document.getElementById('directManualName');
+  const priceInput = document.getElementById('directManualPrice');
+
+  const itemName = nameInput ? nameInput.value.trim() : '';
+  const itemPrice = Number(priceInput ? priceInput.value : 0) || 0;
+
+  if (!itemName || itemPrice <= 0) {
+    alert("Kripya samaan ka naam aur sahi rate (₹) likhein!");
+    return;
+  }
+
+  // Ensure activeBillItems array exists
+  if (typeof activeBillItems === 'undefined') {
+    window.activeBillItems = [];
+  }
+
+  // Bill list me manual item push karna
+  activeBillItems.push({
+    itemId: 'direct_manual_' + Date.now(),
+    name: itemName,
+    brand: 'Direct Manual',
     color: 'Custom',
     size: '-',
     costPrice: 0,
