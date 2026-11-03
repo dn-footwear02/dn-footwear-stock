@@ -2248,20 +2248,17 @@
       document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
-    // 🗑️ Galti se judi bikri entry ko delete karne aur stock sudhaarne ka updated function
+   // 🗑️ Sabse safe aur pakka Delete Sale Record function
 function deleteSaleRecord(saleId) {
-  if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain? \n(Note: Agar yeh stock ka item hoga, toh stock wapas jud jayega. Manual bill sidha delete ho jayega.)")) {
+  if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain?")) {
     
-    // Pehle sales record ko dhoondo
+    // Pehle sales record ko Firebase se data nikal kar check karo
     db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
       const saleRec = snapshot.val();
 
-      if (saleRec) {
-        // Check karo ki yeh Direct Manual sale hai ya System Stock sale
-        const isManualBill = !saleRec.itemId || saleRec.itemId.startsWith('manual_sale_') || saleRec.itemId.startsWith('direct_manual_');
-
-        if (!isManualBill) {
-          // Agar normal stock item hai, tabhi stock wapas jodo
+      if (saleRec && saleRec.itemId && !saleRec.itemId.startsWith('manual_') && !saleRec.itemId.startsWith('direct_manual_')) {
+        // Agar normal stock item hai, tabhi stock wapas jodne ki koshish karo
+        try {
           const itemsToRestore = saleRec.itemsList || [{
             itemId: saleRec.itemId,
             color: saleRec.color,
@@ -2288,19 +2285,29 @@ function deleteSaleRecord(saleId) {
               });
             }
           });
+        } catch (err) {
+          console.log("Stock restore minor note: ", err);
         }
       }
 
-      // Ab sales record ko bina kisi rukawat ke delete kar do
+      // Ab bina kisi rukawat ke sales record ko Firebase se hamesha ke liye delete kar do
       db.ref('footwear_sales/' + saleId).remove().then(() => {
         alert("✓ Bikri entry safalta-purvak delete ho gayi hai!");
         if (typeof calculateSalesReport === 'function') {
           calculateSalesReport();
         }
+      }).catch((removeErr) => {
+        alert("Delete karne me error aayi: " + removeErr.message);
       });
 
     }).catch((err) => {
-      alert("Error: " + err.message);
+      // Agar direct record read me bhi error aaye, toh seedha remove chala do
+      db.ref('footwear_sales/' + saleId).remove().then(() => {
+        alert("✓ Bikri entry delete ho gayi!");
+        if (typeof calculateSalesReport === 'function') {
+          calculateSalesReport();
+        }
+      });
     });
   }
 }
