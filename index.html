@@ -2248,67 +2248,26 @@
       document.getElementById('reportTableBody').innerHTML = tableHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Is dauraan koi bikri nahi hui.</td></tr>';
     }
 
-   // 🗑️ Sabse safe aur pakka Delete Sale Record function
+   // 🗑️ Super Simple & Direct Delete Sale Record
 function deleteSaleRecord(saleId) {
-  if (confirm("Kya aap is bikri (sales) entry ko delete karna chahte hain?")) {
-    
-    // Pehle sales record ko Firebase se data nikal kar check karo
-    db.ref('footwear_sales/' + saleId).once('value').then((snapshot) => {
-      const saleRec = snapshot.val();
+  if (!saleId) {
+    alert("Error: Sale ID nahi mili!");
+    return;
+  }
 
-      if (saleRec && saleRec.itemId && !saleRec.itemId.startsWith('manual_') && !saleRec.itemId.startsWith('direct_manual_')) {
-        // Agar normal stock item hai, tabhi stock wapas jodne ki koshish karo
-        try {
-          const itemsToRestore = saleRec.itemsList || [{
-            itemId: saleRec.itemId,
-            color: saleRec.color,
-            size: saleRec.size,
-            qty: 1
-          }];
-
-          itemsToRestore.forEach(ri => {
-            if (ri.itemId) {
-              db.ref('footwear_stock/' + ri.itemId).once('value').then((stockSnap) => {
-                const stockItem = stockSnap.val();
-                if (stockItem) {
-                  const restoreQty = Number(ri.qty) || 1;
-
-                  if (stockItem.itemType === 'general') {
-                    stockItem.generalQty = (Number(stockItem.generalQty) || 0) + restoreQty;
-                  } else if (stockItem.colorData && stockItem.colorData[ri.color] && stockItem.colorData[ri.color].sizes) {
-                    const currentSzQty = Number(stockItem.colorData[ri.color].sizes[ri.size]) || 0;
-                    stockItem.colorData[ri.color].sizes[ri.size] = currentSzQty + restoreQty;
-                  }
-
-                  db.ref('footwear_stock/' + ri.itemId).set(stockItem);
-                }
-              });
-            }
-          });
-        } catch (err) {
-          console.log("Stock restore minor note: ", err);
-        }
-      }
-
-      // Ab bina kisi rukawat ke sales record ko Firebase se hamesha ke liye delete kar do
-      db.ref('footwear_sales/' + saleId).remove().then(() => {
-        alert("✓ Bikri entry safalta-purvak delete ho gayi hai!");
+  if (confirm("Kya aap sach me is bikri record ko delete karna chahte hain?")) {
+    // Seedha Firebase se us ID ko hamesha ke liye uda do
+    db.ref('footwear_sales/' + saleId).remove()
+      .then(() => {
+        alert("✓ Bikri entry safalta-purvak delete ho gayi!");
+        // Report ko turant refresh karo
         if (typeof calculateSalesReport === 'function') {
           calculateSalesReport();
         }
-      }).catch((removeErr) => {
-        alert("Delete karne me error aayi: " + removeErr.message);
+      })
+      .catch((error) => {
+        alert("Delete nahi ho paya: " + error.message);
       });
-
-    }).catch((err) => {
-      // Agar direct record read me bhi error aaye, toh seedha remove chala do
-      db.ref('footwear_sales/' + saleId).remove().then(() => {
-        alert("✓ Bikri entry delete ho gayi!");
-        if (typeof calculateSalesReport === 'function') {
-          calculateSalesReport();
-        }
-      });
-    });
   }
 }
 
