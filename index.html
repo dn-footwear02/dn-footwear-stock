@@ -572,6 +572,20 @@
         <div id="activeBillItemsContainer" style="max-height:35vh; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;"></div>
       </div>
 
+      <!-- ➕ MANUAL ITEM ADD BOX (Billing Counter me bina stock ke saman jodne ke liye) -->
+<div style="background:#faf5ff; border:1px dashed #9333ea; padding:10px; border-radius:8px; margin-bottom:12px;">
+  <b style="font-size:11px; color:#6b21a8; display:block; margin-bottom:4px;">+ Manual Item Jodein (जो स्टॉक में नहीं है):</b>
+  <div style="display:flex; gap:6px; margin-bottom:6px;">
+    <input type="text" id="manualBillItemName" placeholder="Item ka naam (jaise: Chappal Repair)..." class="form-control" style="font-size:11px; flex:2; padding:5px;">
+    <input type="number" id="manualBillItemPrice" placeholder="Rate (₹)..." class="form-control" style="font-size:11px; flex:1; padding:5px;">
+  </div>
+  <div style="display:flex; justify-content:flex-end;">
+    <button type="button" class="btn btn-purple" style="font-size:10px; padding:4px 12px; cursor:pointer;" onclick="addManualItemToActiveBill()">
+      + Bill Me Jodein
+    </button>
+  </div>
+</div>
+
       <!-- ADD ANOTHER ITEM BUTTON -->
       <div style="margin-bottom:14px; text-align:right;">
         <button type="button" class="btn btn-indigo" onclick="openScannerModal('sale')" style="font-size:11px; padding:6px 12px;">
@@ -6140,6 +6154,87 @@ function updateDynamicUpiQrCodeForSplit() {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=` + encodeURIComponent(upiString);
   const qrImgElem = document.getElementById('storeDynamicQrImg');
   if (qrImgElem) qrImgElem.src = qrImageUrl;
+}
+
+        // ➕ Manual Item ko Active Bill me jodne ka function
+function addManualItemToActiveBill() {
+  const nameInput = document.getElementById('manualBillItemName');
+  const priceInput = document.getElementById('manualBillItemPrice');
+
+  const itemName = nameInput ? nameInput.value.trim() : '';
+  const itemPrice = Number(priceInput ? priceInput.value : 0) || 0;
+
+  if (!itemName || itemPrice <= 0) {
+    alert("Kripya item ka naam aur sahi rate (₹) likhein!");
+    return;
+  }
+
+  // Active Bill Items list me manual item push karna
+  if (typeof activeBillItems === 'undefined') {
+    window.activeBillItems = [];
+  }
+
+  activeBillItems.push({
+    itemId: 'manual_' + Date.now(),
+    name: itemName,
+    brand: 'Manual',
+    color: 'Custom',
+    size: '-',
+    costPrice: 0,
+    sellPrice: itemPrice,
+    qty: 1,
+    isManual: true,
+    itemObj: null
+  });
+
+  // Input fields clear karna
+  if (nameInput) nameInput.value = '';
+  if (priceInput) priceInput.value = '';
+
+  // Bill UI aur Total amount update karna
+  if (typeof renderActiveBillItemsList === 'function') {
+    renderActiveBillItemsList();
+  }
+}
+    // ➕ Manual Item ko Active Bill me jodne ka function
+function addManualItemToActiveBill() {
+  const nameInput = document.getElementById('manualBillItemName');
+  const priceInput = document.getElementById('manualBillItemPrice');
+
+  const itemName = nameInput ? nameInput.value.trim() : '';
+  const itemPrice = Number(priceInput ? priceInput.value : 0) || 0;
+
+  if (!itemName || itemPrice <= 0) {
+    alert("Kripya item ka naam aur sahi rate (₹) likhein!");
+    return;
+  }
+
+  // Active Bill Items list me manual item push karna
+  if (typeof activeBillItems === 'undefined') {
+    window.activeBillItems = [];
+  }
+
+  activeBillItems.push({
+    itemId: 'manual_' + Date.now(),
+    name: itemName,
+    brand: 'Manual',
+    color: 'Custom',
+    size: '-',
+    costPrice: 0,
+    sellPrice: itemPrice,
+    qty: 1,
+    isManual: true,
+    itemObj: null
+  });
+
+  // Input fields clear karna
+  if (nameInput) nameInput.value = '';
+  if (priceInput) priceInput.value = '';
+
+  // Bill UI aur Total amount update karna
+  if (typeof renderActiveBillItemsList === 'function') {
+    renderActiveBillItemsList();
+  }
 }
     // initRozanaListeners();
     
