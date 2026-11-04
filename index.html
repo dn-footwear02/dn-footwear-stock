@@ -234,7 +234,8 @@
         <button class="btn btn-purple" onclick="openReturnExchangeModal()" title="Item Badalna ya Wapas Karna">🔄 Return/Exchange</button>
         <button class="btn btn-indigo" onclick="openSupplierModal()" title="Supplier aur Purchase Khata">📦 Supplier Khata</button>
         <button class="btn btn-amber" onclick="openDirectManualSaleModal()" title="Bina stock ke seedhe manual bill banayein">⚡ Direct Manual Sale</button>
-         <button class="btn btn-yellow" onclick="openExpenseModal()" title="दुकान के रोजमर्रा के खर्च दर्ज करें">📉 खर्च खाता</button>
+        <button class="btn btn-purple" onclick="openBarcodePrinterModal()" title="डब्बों के लिए बारकोड स्टीकर प्रिंट करें">🏷️ Barcode Print</button> 
+        <button class="btn btn-yellow" onclick="openExpenseModal()" title="दुकान के रोजमर्रा के खर्च दर्ज करें">📉 खर्च खाता</button>
       </span>
     </div>
   </header>
@@ -482,6 +483,49 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
+
+  <!-- 🏷️ BARCODE LABEL PRINTER MODAL (Auto-Save & Multi-Item Bulk Generator) -->
+<div id="barcodePrinterModal" class="modal">
+  <div class="modal-box" style="max-width:700px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
+      <div>
+        <h3 style="font-size:17px; font-weight:900; color:#9333ea;">🏷️ Bulk Barcode Generator & Print</h3>
+        <p style="font-size:11px; color:#64748b;">एक क्लिक में आइटम के सभी Sizes/Colors के बारकोड बनाएं और डब्बे के बॉक्स में सेव करें</p>
+      </div>
+      <button class="btn btn-slate" onclick="closeBarcodePrinterModal()">✕</button>
+    </div>
+
+    <!-- Selection & Bulk Generate Area -->
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;" class="no-print">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+        <div style="flex:1; min-width:240px;">
+          <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Item Chunein (Multi-item add kar sakte hain):</label>
+          <select id="bcPrintItemSelect" class="form-control" style="font-size:12px;">
+            <option value="">-- Dukan ka Item Chunein --</option>
+          </select>
+        </div>
+        <div style="margin-top:16px;">
+          <button type="button" class="btn btn-purple" style="font-size:12px; padding:8px 16px; white-space:nowrap;" onclick="generateAllBarcodesForItem()">+ Is Item ke Sabhi Sizes ke Barcode Banao</button>
+        </div>
+      </div>
+      <small style="font-size:11px; color:#64748b;">💡 <i>यह बटन दबाते ही उस आइटम के सभी रंगों और साइज़ के बारकोड आटोमेटिक बन जाएंगे, डेटाबेस में सेव हो जाएंगे और नीचे प्रिंट लिस्ट में जुड़ जाएंगे। आप इसके बाद दूसरा आइटम भी चुनकर जोड़ सकते हैं।</i></small>
+    </div>
+
+    <!-- Print Preview Sheet Area -->
+    <h4 style="font-size:13px; font-weight:bold; color:#334155; margin-bottom:8px;" class="no-print">Print Hone Wale Barcode Labels Ka Preview:</h4>
+    <div id="barcodeStickersPreviewArea" style="background:#fff; border:1px dashed #9333ea; border-radius:8px; padding:12px; max-height:42vh; overflow-y:auto; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:14px;">
+      <i style="font-size:12px; color:#94a3b8;">Abhi koi label nahi banaya gaya hai. Upar se item chunkar button dabayein.</i>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center;" class="no-print">
+      <button class="btn btn-red" style="font-size:11px;" onclick="clearBarcodeList()">List Khali Karein</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-green" style="font-size:12px; padding:8px 18px;" onclick="printBarcodeLabels()">🖨️ Sabhi Barcode Labels Print Karein</button>
+        <button class="btn btn-slate" style="font-size:12px;" onclick="closeBarcodePrinterModal()">Band Karein</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <!-- 📉 DAILY EXPENSE / KHARCHA REGISTER MODAL -->
 <div id="expenseModal" class="modal">
@@ -5359,6 +5403,142 @@ function deleteExpenseRecord(expId) {
       renderExpenseTable();
     });
   }
+}
+    let printStickersQueue = [];
+
+// Modal Open/Close Controls
+function openBarcodePrinterModal() {
+  printStickersQueue = [];
+  populateBarcodeItemDropdown();
+  renderStickersPreview();
+  document.getElementById('barcodePrinterModal').style.display = 'flex';
+}
+
+function closeBarcodePrinterModal() {
+  document.getElementById('barcodePrinterModal').style.display = 'none';
+}
+
+// Items ka dropdown bharna
+function populateBarcodeItemDropdown() {
+  const select = document.getElementById('bcPrintItemSelect');
+  if (!select) return;
+
+  let options = '<option value="">-- Dukan ka Item Chunein --</option>';
+  items.forEach(it => {
+    options += `<option value="${it.id}">${it.name} (${it.brand || 'General'}) - ₹${it.price}</option>`;
+  });
+  select.innerHTML = options;
+}
+
+// 🏷️ Ek hi click me item ke sabhi colors aur sizes ke barcode generate aur auto-save karna
+function generateAllBarcodesForItem() {
+  const itemId = document.getElementById('bcPrintItemSelect').value;
+  if (!itemId) {
+    alert("Kripya pehle upar se ek Item chunein!");
+    return;
+  }
+
+  const it = items.find(x => x.id === itemId);
+  if (!it || !it.colorData) {
+    alert("Is item me koi color ya size stock uplabdh nahi hai!");
+    return;
+  }
+
+  let isDatabaseUpdated = false;
+  let addedCount = 0;
+
+  // Har ek Color aur uske andhar ke har ek Size ke liye loop chalana
+  for (let col in it.colorData) {
+    if (!it.colorData[col].barcodes) {
+      it.colorData[col].barcodes = {};
+    }
+    const sizesMap = it.colorData[col].sizes || {};
+
+    for (let sz in sizesMap) {
+      // Check karo ki is size ke liye pehle se barcode hai ya nahi
+      let existingBarcode = it.colorData[col].barcodes[sz];
+
+      if (!existingBarcode || String(existingBarcode).trim() === '') {
+        // Agar nahi hai, toh naya auto barcode generate karo
+        let cleanName = it.name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase();
+        let cleanCol = col.replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase();
+        let autoCode = `DN-${cleanName}-${cleanCol}-${sz}-${Math.floor(100 + Math.random() * 900)}`;
+        
+        it.colorData[col].barcodes[sz] = autoCode;
+        existingBarcode = autoCode;
+        isDatabaseUpdated = true;
+      }
+
+      // Print Queue me jodo
+      printStickersQueue.push({
+        name: it.name,
+        brand: it.brand,
+        price: it.price,
+        color: col,
+        size: sz,
+        barcode: existingBarcode
+      });
+      addedCount++;
+    }
+  }
+
+  // Agar naye barcodes bane hain, toh unhe Firebase database me automatic save kar do
+  if (isDatabaseUpdated) {
+    db.ref('footwear_stock/' + it.id).set(it).then(() => {
+      console.log("Auto-generated barcodes saved to database for:", it.name);
+    });
+  }
+
+  renderStickersPreview();
+  alert(`✓ [${it.name}] ke ${addedCount} Sizes/Colors ke barcodes taiyar ho gaye hain!\n(Yeh sabhi barthcodes database me automatic save bhi ho gaye hain).\n\nAb aap chahein toh dusra item chunakar aur jodh sakte hain.`);
+}
+
+// Preview Area me Stickers dikhana
+function renderStickersPreview() {
+  const area = document.getElementById('barcodeStickersPreviewArea');
+  if (!area) return;
+
+  if (printStickersQueue.length === 0) {
+    area.innerHTML = '<i style="font-size:12px; color:#94a3b8;">Abhi koi label nahi banaya gaya hai. Upar se item chunkar button dabayein.</i>';
+    return;
+  }
+
+  area.innerHTML = printStickersQueue.map((st, idx) => {
+    const barcodeImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=130x40&data=` + encodeURIComponent(st.barcode);
+
+    return `
+      <div class="barcode-sticker-box">
+        <div style="font-size:9px; font-weight:bold; color:#1e1b4b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">DN FOOTWEAR & SPORTS</div>
+        <div style="font-size:11px; font-weight:900; color:#0f172a; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${st.name}</div>
+        <div style="font-size:10px; color:#475569; margin-bottom:2px;">Rang: <b>${st.color}</b> | Sz: <b>${st.size}</b></div>
+        <img src="${barcodeImgUrl}" style="width:130px; height:32px; object-fit:contain; background:#fff; margin:2px auto;" alt="Barcode">
+        <div style="font-size:9px; font-weight:bold; font-family:monospace; color:#334155;">${st.barcode}</div>
+        <div style="font-size:12px; font-weight:900; color:#10b981; margin-top:2px;">MRP: ₹${st.price}</div>
+        <button class="no-print" style="background:#ef4444; color:#fff; border:none; font-size:9px; padding:1px 4px; border-radius:3px; margin-top:4px; cursor:pointer;" onclick="removeStickerFromQueue(${idx})">Hatao</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function removeStickerFromQueue(index) {
+  printStickersQueue.splice(index, 1);
+  renderStickersPreview();
+}
+
+function clearBarcodeList() {
+  if (confirm("Kya aap saare print queue clear karna chahte hain?")) {
+    printStickersQueue = [];
+    renderStickersPreview();
+  }
+}
+
+// Print Command
+function printBarcodeLabels() {
+  if (printStickersQueue.length === 0) {
+    alert("Print karne ke liye pehle list me labels jodein!");
+    return;
+  }
+  window.print();
 }
     // Script ke sabse niche ise call kar dein
 initSupplierListeners();
