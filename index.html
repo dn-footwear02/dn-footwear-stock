@@ -484,22 +484,43 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- 🏷️ BARCODE LABEL PRINTER MODAL (Auto-Save & Multi-Item Bulk Generator) -->
+  <!-- 🏷️ BARCODE LABEL PRINTER MODAL (Manual Size Customization Support) -->
 <div id="barcodePrinterModal" class="modal">
-  <div class="modal-box" style="max-width:700px;">
+  <div class="modal-box" style="max-width:720px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;" class="no-print">
       <div>
-        <h3 style="font-size:17px; font-weight:900; color:#9333ea;">🏷️ Bulk Barcode Generator & Print</h3>
-        <p style="font-size:11px; color:#64748b;">एक क्लिक में आइटम के सभी Sizes/Colors के बारकोड बनाएं और डब्बे के बॉक्स में सेव करें</p>
+        <h3 style="font-size:17px; font-weight:900; color:#9333ea;">🏷️ Custom Size Barcode Label Maker & Print</h3>
+        <p style="font-size:11px; color:#64748b;">अपने स्टीकर / रोल के हिसाब से बारकोड का साइज (Width x Height) सेट करें</p>
       </div>
       <button class="btn btn-slate" onclick="closeBarcodePrinterModal()">✕</button>
     </div>
 
-    <!-- Selection & Bulk Generate Area -->
+    <!-- Size & Selection Control Area -->
     <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px;" class="no-print">
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+      
+      <!-- 📏 MANUAL SIZE SETTING INPUTS -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px; background:#fff; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
+        <div>
+          <label style="font-size:10px; font-weight:bold; color:#475569; display:block;">Width (चौड़ाई mm):</label>
+          <input type="number" id="labelWidthInput" value="50" min="20" max="150" class="form-control" style="font-size:11px; padding:4px;" oninput="updateLabelCustomStyles()">
+        </div>
+        <div>
+          <label style="font-size:10px; font-weight:bold; color:#475569; display:block;">Height (ऊंचाई mm):</label>
+          <input type="number" id="labelHeightInput" value="30" min="15" max="100" class="form-control" style="font-size:11px; padding:4px;" oninput="updateLabelCustomStyles()">
+        </div>
+        <div>
+          <label style="font-size:10px; font-weight:bold; color:#475569; display:block;">Font Size (अक्षर Size):</label>
+          <select id="labelFontSelect" class="form-control" style="font-size:11px; padding:4px;" onchange="updateLabelCustomStyles()">
+            <option value="11px">Normal (Standard)</option>
+            <option value="9px">Small (छोटा स्टीकर)</option>
+            <option value="13px">Large (बड़ा)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <div style="flex:1; min-width:240px;">
-          <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Item Chunein (Multi-item add kar sakte hain):</label>
+          <label style="font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Item Chunein:</label>
           <select id="bcPrintItemSelect" class="form-control" style="font-size:12px;">
             <option value="">-- Dukan ka Item Chunein --</option>
           </select>
@@ -508,13 +529,12 @@
           <button type="button" class="btn btn-purple" style="font-size:12px; padding:8px 16px; white-space:nowrap;" onclick="generateAllBarcodesForItem()">+ Is Item ke Sabhi Sizes ke Barcode Banao</button>
         </div>
       </div>
-      <small style="font-size:11px; color:#64748b;">💡 <i>यह बटन दबाते ही उस आइटम के सभी रंगों और साइज़ के बारकोड आटोमेटिक बन जाएंगे, डेटाबेस में सेव हो जाएंगे और नीचे प्रिंट लिस्ट में जुड़ जाएंगे। आप इसके बाद दूसरा आइटम भी चुनकर जोड़ सकते हैं।</i></small>
     </div>
 
     <!-- Print Preview Sheet Area -->
-    <h4 style="font-size:13px; font-weight:bold; color:#334155; margin-bottom:8px;" class="no-print">Print Hone Wale Barcode Labels Ka Preview:</h4>
+    <h4 style="font-size:13px; font-weight:bold; color:#334155; margin-bottom:8px;" class="no-print">Print Hone Wale Barcode Labels Ka Preview (Real Size):</h4>
     <div id="barcodeStickersPreviewArea" style="background:#fff; border:1px dashed #9333ea; border-radius:8px; padding:12px; max-height:42vh; overflow-y:auto; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:14px;">
-      <i style="font-size:12px; color:#94a3b8;">Abhi koi label nahi banaya gaya hai. Upar se item chunkar button dabayein.</i>
+      <i style="font-size:12px; color:#94a3b8;">Abhi koi label nahi banaya gaya hai.</i>
     </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center;" class="no-print">
@@ -5539,6 +5559,47 @@ function printBarcodeLabels() {
     return;
   }
   window.print();
+}
+
+    @media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #barcodePrinterModal, #barcodePrinterModal * {
+    visibility: visible !important;
+  }
+  #barcodePrinterModal {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: white !important;
+    display: block !important;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .barcode-sticker-box {
+    border: none !important;
+    page-break-inside: avoid;
+    margin: 0 !important;
+  }
+}
+
+.barcode-sticker-box {
+  background: #fff;
+  border: 1px dashed #4f46e5;
+  border-radius: 4px;
+  padding: 4px;
+  text-align: center;
+  font-family: monospace;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
 }
     // Script ke sabse niche ise call kar dein
 initSupplierListeners();
